@@ -14,7 +14,7 @@ class TvetStudentFeeController extends Controller
      */
     public function index()
     {
-        //
+        return TvetStudentFee::all();
     }
 
     /**
@@ -25,7 +25,18 @@ class TvetStudentFeeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'tvet_student_id'=>'required',
+            'academic_fee_id'=>'required',
+            'academic_year_id'=>'required',
+             'month_id'=>'required',
+             'paid_amount'=>'required',
+             'paid_date'=>'required',
+             'receipt_no'=>'required',
+             'is_paid'=>'required',
+
+        ]);
+      return TvetStudentFee::create($request->all());
     }
 
     /**
@@ -36,7 +47,7 @@ class TvetStudentFeeController extends Controller
      */
     public function show(TvetStudentFee $tvetStudentFee)
     {
-        //
+        return $tvetStudentFee;
     }
 
     /**
@@ -48,7 +59,19 @@ class TvetStudentFeeController extends Controller
      */
     public function update(Request $request, TvetStudentFee $tvetStudentFee)
     {
-        //
+        $request->validate([
+            'tvet_student_id'=>'required',
+            'academic_fee_id'=>'required',
+            'academic_year_id'=>'required',
+             'month_id'=>'required',
+             'paid_amount'=>'required',
+             'paid_date'=>'required',
+             'receipt_no'=>'required',
+             'is_paid'=>'required',
+
+        ]);
+       $tvetStudentFee->update($request->all());
+       return $tvetStudentFee;
     }
 
     /**
@@ -59,6 +82,6 @@ class TvetStudentFeeController extends Controller
      */
     public function destroy(TvetStudentFee $tvetStudentFee)
     {
-        //
+        $tvetStudentFee->delete();
     }
 }

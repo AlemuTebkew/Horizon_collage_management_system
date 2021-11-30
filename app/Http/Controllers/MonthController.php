@@ -14,7 +14,7 @@ class MonthController extends Controller
      */
     public function index()
     {
-        //
+        return Month::all();
     }
 
     /**
@@ -25,7 +25,11 @@ class MonthController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'=>'required',
+
+        ]);
+      return Month::create($request->all());
     }
 
     /**
@@ -36,7 +40,7 @@ class MonthController extends Controller
      */
     public function show(Month $month)
     {
-        //
+        return $month;
     }
 
     /**
@@ -48,7 +52,12 @@ class MonthController extends Controller
      */
     public function update(Request $request, Month $month)
     {
-        //
+        $request->validate([
+            'name'=>'required',
+
+
+        ]);
+      return $month->update($request->all());
     }
 
     /**
@@ -59,6 +68,6 @@ class MonthController extends Controller
      */
     public function destroy(Month $month)
     {
-        //
+        $month->delete();
     }
 }

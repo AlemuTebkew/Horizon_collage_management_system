@@ -21,7 +21,8 @@ class CreateDegreeStudentsTable extends Migration
             $table->string('sex');
             $table->date('dob');
             $table->string('phone_no');
-            $table->string('marital_status');
+            $table->string('password');
+            $table->string('martial_status');
             $table->string('emergency_contact_name');
             $table->string('emergency_contact_relationShip');
             $table->string('emergency_contact_phone_no');
@@ -38,7 +39,7 @@ class CreateDegreeStudentsTable extends Migration
             $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('degree_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             //
-            $table->string('financialSource');
+            $table->string('financial_source');
             $table->string('current_semester_no');
             $table->string('current_year_no');
             $table->string('batch');

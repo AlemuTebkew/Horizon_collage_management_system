@@ -14,7 +14,7 @@ class DegreeStudentSemesterController extends Controller
      */
     public function index()
     {
-        //
+        return DegreeStudentSemester::all();
     }
 
     /**
@@ -25,7 +25,16 @@ class DegreeStudentSemesterController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'number'=>'required',
+            'degree_student_id'=>'required',
+            'semester_id'=>'required',
+            'semester_GPA'=>'required',
+            'tution_type'=>'required',
+
+
+        ]);
+      return DegreeStudentSemester::create($request->all());
     }
 
     /**
@@ -36,7 +45,7 @@ class DegreeStudentSemesterController extends Controller
      */
     public function show(DegreeStudentSemester $degreeStudentSemester)
     {
-        //
+        return $degreeStudentSemester;
     }
 
     /**
@@ -48,7 +57,16 @@ class DegreeStudentSemesterController extends Controller
      */
     public function update(Request $request, DegreeStudentSemester $degreeStudentSemester)
     {
-        //
+        $request->validate([
+            'number'=>'required',
+            'degree_student_id'=>'required',
+            'semester_id'=>'required',
+            'semester_GPA'=>'required',
+            'tution_type'=>'required',
+
+
+        ]);
+      return $degreeStudentSemester->update($request->all());
     }
 
     /**

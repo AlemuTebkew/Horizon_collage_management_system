@@ -14,7 +14,7 @@ class TvetStudentController extends Controller
      */
     public function index()
     {
-        //
+        return TvetStudent::all();
     }
 
     /**
@@ -25,7 +25,18 @@ class TvetStudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'student_id'=>'required',
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'sex'=>'required',
+            'dob'=>'required',
+            'phone_no'=>'required',
+            'martial_status'=>'required',
+            'emergency_contact_name'=>'required',
+
+        ]);
+      return TvetStudent::create($request->all());
     }
 
     /**
@@ -36,7 +47,7 @@ class TvetStudentController extends Controller
      */
     public function show(TvetStudent $tvetStudent)
     {
-        //
+       return $tvetStudent;
     }
 
     /**
@@ -48,7 +59,19 @@ class TvetStudentController extends Controller
      */
     public function update(Request $request, TvetStudent $tvetStudent)
     {
-        //
+        $request->validate([
+            'student_id'=>'required',
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'sex'=>'required',
+            'dob'=>'required',
+            'phone_no'=>'required',
+            'martial_status'=>'required',
+            'emergency_contact_name'=>'required',
+
+        ]);
+       $tvetStudent->update($request->all());
+       return $tvetStudent;
     }
 
     /**
@@ -59,6 +82,6 @@ class TvetStudentController extends Controller
      */
     public function destroy(TvetStudent $tvetStudent)
     {
-        //
+        $tvetStudent->delete();
     }
 }

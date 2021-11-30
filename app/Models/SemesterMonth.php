@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class SemesterMonth extends Model
 {
     use HasFactory;
+    public $fillable=['degree_semester_id','month_id',];
+
 }

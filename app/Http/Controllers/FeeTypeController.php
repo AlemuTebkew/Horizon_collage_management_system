@@ -14,7 +14,7 @@ class FeeTypeController extends Controller
      */
     public function index()
     {
-        //
+        return FeeType::all();
     }
 
     /**
@@ -25,7 +25,11 @@ class FeeTypeController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'=>'required',
+
+        ]);
+     return FeeType::create($request->all());
     }
 
     /**
@@ -36,7 +40,7 @@ class FeeTypeController extends Controller
      */
     public function show(FeeType $feeType)
     {
-        //
+        return $feeType;
     }
 
     /**
@@ -48,7 +52,11 @@ class FeeTypeController extends Controller
      */
     public function update(Request $request, FeeType $feeType)
     {
-        //
+        $request->validate([
+            'name'=>'required',
+
+        ]);
+     return $feeType->update($request->all());
     }
 
     /**
@@ -59,6 +67,6 @@ class FeeTypeController extends Controller
      */
     public function destroy(FeeType $feeType)
     {
-        //
+        $feeType->delete();
     }
 }

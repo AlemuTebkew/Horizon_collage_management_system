@@ -14,7 +14,7 @@ class SemesterController extends Controller
      */
     public function index()
     {
-        //
+        return Semester::all();
     }
 
     /**
@@ -25,7 +25,17 @@ class SemesterController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'number'=>'required',
+            'academic_year_id'=>'required',
+            'program_id'=>'required',
+            'start_date'=>'required',
+            'end_date'=>'required',
+            'status'=>'required',
+            'is_current'=>'required',
+        ]);
+        return Semester::create($request->all());
+
     }
 
     /**
@@ -36,7 +46,7 @@ class SemesterController extends Controller
      */
     public function show(Semester $semester)
     {
-        //
+        return $semester;
     }
 
     /**
@@ -48,7 +58,17 @@ class SemesterController extends Controller
      */
     public function update(Request $request, Semester $semester)
     {
-        //
+        $request->validate([
+            'number'=>'required',
+            'academic_year_id'=>'required',
+            'program_id'=>'required',
+            'start_date'=>'required',
+            'end_date'=>'required',
+            'status'=>'required',
+            'is_current'=>'required',
+        ]);
+         $semester->update($request->all());
+         return $semester;
     }
 
     /**
@@ -59,6 +79,6 @@ class SemesterController extends Controller
      */
     public function destroy(Semester $semester)
     {
-        //
+        $semester->delete();
     }
 }

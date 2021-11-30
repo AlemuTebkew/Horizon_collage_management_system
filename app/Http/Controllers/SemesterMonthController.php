@@ -14,7 +14,7 @@ class SemesterMonthController extends Controller
      */
     public function index()
     {
-        //
+        return SemesterMonth::all();
     }
 
     /**
@@ -25,7 +25,13 @@ class SemesterMonthController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'degree_semester_id'=>'required',
+            'month_id'=>'required',
+
+        ]);
+
+        return SemesterMonth::create($request->all());
     }
 
     /**
@@ -36,7 +42,7 @@ class SemesterMonthController extends Controller
      */
     public function show(SemesterMonth $semesterMonth)
     {
-        //
+        return $semesterMonth;
     }
 
     /**
@@ -48,7 +54,13 @@ class SemesterMonthController extends Controller
      */
     public function update(Request $request, SemesterMonth $semesterMonth)
     {
-        //
+        $request->validate([
+            'degree_semester_id'=>'required',
+            'month_id'=>'required',
+
+        ]);
+         $semesterMonth->update($request->all());
+         return $semesterMonth;
     }
 
     /**
@@ -59,6 +71,6 @@ class SemesterMonthController extends Controller
      */
     public function destroy(SemesterMonth $semesterMonth)
     {
-        //
+        $semesterMonth->delete();
     }
 }

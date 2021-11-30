@@ -8,4 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class TvetStudent extends Model
 {
     use HasFactory;
+    public $fillable=['student_id','first_name',
+    'last_name','password','sex','dob',
+    'phone_no','martial_status', 'emergency_contact_name','emergency_contact_relationShip',
+    'emergency_contact_phone_no','EGSSE_result','EHEEE_result',
+    'birth_address_id','residential_address_id','contact_address_id',
+    'program_id','tvet_department_id','financial_source',
+    'level_no','current_level_no',
+    'employment_profile','isGraduated',
+];
 }

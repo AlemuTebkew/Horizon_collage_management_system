@@ -14,7 +14,7 @@ class TvetSectionController extends Controller
      */
     public function index()
     {
-        //
+        return TvetSection::all();
     }
 
     /**
@@ -25,7 +25,14 @@ class TvetSectionController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'tvet_department_id'=>'required',
+            'academic_year_id'=>'required',
+            'program_id'=>'required',
+             'level_id'=>'required',
+
+        ]);
+      return TvetSection::create($request->all());
     }
 
     /**
@@ -36,7 +43,7 @@ class TvetSectionController extends Controller
      */
     public function show(TvetSection $tvetSection)
     {
-        //
+        return $tvetSection;
     }
 
     /**
@@ -48,7 +55,15 @@ class TvetSectionController extends Controller
      */
     public function update(Request $request, TvetSection $tvetSection)
     {
-        //
+        $request->validate([
+            'tvet_department_id'=>'required',
+            'academic_year_id'=>'required',
+            'program_id'=>'required',
+             'level_id'=>'required',
+
+        ]);
+       $tvetSection->update($request->all());
+       return $tvetSection;
     }
 
     /**
@@ -59,6 +74,6 @@ class TvetSectionController extends Controller
      */
     public function destroy(TvetSection $tvetSection)
     {
-        //
+        $tvetSection->delete();
     }
 }

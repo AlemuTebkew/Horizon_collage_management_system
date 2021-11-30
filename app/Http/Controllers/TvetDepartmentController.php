@@ -14,7 +14,7 @@ class TvetDepartmentController extends Controller
      */
     public function index()
     {
-        //
+        return TvetDepartment::all();
     }
 
     /**
@@ -25,7 +25,12 @@ class TvetDepartmentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'=>'required',
+            'sector'=>'required',
+
+        ]);
+      return TvetDepartment::create($request->all());
     }
 
     /**
@@ -36,7 +41,7 @@ class TvetDepartmentController extends Controller
      */
     public function show(TvetDepartment $tvetDepartment)
     {
-        //
+        return $tvetDepartment;
     }
 
     /**
@@ -48,7 +53,13 @@ class TvetDepartmentController extends Controller
      */
     public function update(Request $request, TvetDepartment $tvetDepartment)
     {
-        //
+        $request->validate([
+            'name'=>'required',
+            'sector'=>'required',
+
+        ]);
+       $tvetDepartment->update($request->all());
+      return $tvetDepartment;
     }
 
     /**
@@ -59,6 +70,6 @@ class TvetDepartmentController extends Controller
      */
     public function destroy(TvetDepartment $tvetDepartment)
     {
-        //
+        $tvetDepartment->delete();
     }
 }

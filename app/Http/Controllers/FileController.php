@@ -14,7 +14,7 @@ class FileController extends Controller
      */
     public function index()
     {
-        //
+        return File::all();
     }
 
     /**
@@ -25,7 +25,13 @@ class FileController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title'=>'required',
+            'path'=>'required',
+            'course_id'=>'required',
+
+        ]);
+     return File::create($request->all());
     }
 
     /**
@@ -36,7 +42,7 @@ class FileController extends Controller
      */
     public function show(File $file)
     {
-        //
+        return $file;
     }
 
     /**
@@ -48,7 +54,13 @@ class FileController extends Controller
      */
     public function update(Request $request, File $file)
     {
-        //
+        $request->validate([
+            'title'=>'required',
+            'path'=>'required',
+            'course_id'=>'required',
+
+        ]);
+     return $file->update($request->all());
     }
 
     /**
@@ -59,6 +71,6 @@ class FileController extends Controller
      */
     public function destroy(File $file)
     {
-        //
+        $file->delete();
     }
 }

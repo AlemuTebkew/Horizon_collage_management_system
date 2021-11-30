@@ -14,7 +14,7 @@ class LevelController extends Controller
      */
     public function index()
     {
-        //
+        return Level::all();
     }
 
     /**
@@ -25,7 +25,13 @@ class LevelController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'level_no'=>'required',
+            'occupation_name'=>'required',
+            'tvet_department_id'=>'required',
+
+        ]);
+     return Level::create($request->all());
     }
 
     /**
@@ -36,7 +42,7 @@ class LevelController extends Controller
      */
     public function show(Level $level)
     {
-        //
+        return $level;
     }
 
     /**
@@ -48,7 +54,13 @@ class LevelController extends Controller
      */
     public function update(Request $request, Level $level)
     {
-        //
+        $request->validate([
+            'level_no'=>'required',
+            'occupation_name'=>'required',
+            'tvet_department_id'=>'required',
+
+        ]);
+     return $level->update($request->all());
     }
 
     /**
@@ -59,6 +71,6 @@ class LevelController extends Controller
      */
     public function destroy(Level $level)
     {
-        //
+        $level->delete();
     }
 }

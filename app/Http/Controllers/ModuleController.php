@@ -14,7 +14,7 @@ class ModuleController extends Controller
      */
     public function index()
     {
-        //
+        return Module::all();
     }
 
     /**
@@ -25,7 +25,16 @@ class ModuleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'code'=>'required',
+            'title'=>'required',
+            'type'=>'required',
+             'training_hour'=>'required',
+            'level_id'=>'required',
+            'department_id'=>'required',
+
+        ]);
+      return Module::create($request->all());
     }
 
     /**
@@ -36,7 +45,7 @@ class ModuleController extends Controller
      */
     public function show(Module $module)
     {
-        //
+        return $module;
     }
 
     /**
@@ -48,7 +57,17 @@ class ModuleController extends Controller
      */
     public function update(Request $request, Module $module)
     {
-        //
+        $request->validate([
+            'code'=>'required',
+            'title'=>'required',
+            'type'=>'required',
+             'training_hour'=>'required',
+            'level_id'=>'required',
+            'department_id'=>'required',
+
+        ]);
+       $module->update($request->all());
+       return $module;
     }
 
     /**
@@ -59,6 +78,6 @@ class ModuleController extends Controller
      */
     public function destroy(Module $module)
     {
-        //
+        $module->delete();
     }
 }

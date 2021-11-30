@@ -36,7 +36,7 @@ class CreateTvetStudentsTable extends Migration
             $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('tvet_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
-            $table->string('financialSource');
+            $table->string('financial_source');
             $table->string('level_no');
             $table->string('current_level_no');
             $table->string('employment_profile');

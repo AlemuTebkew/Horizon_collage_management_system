@@ -14,7 +14,7 @@ class DegreeStudentController extends Controller
      */
     public function index()
     {
-        //
+        return DegreeStudent::all();
     }
 
     /**
@@ -25,7 +25,18 @@ class DegreeStudentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'student_id'=>'required',
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'sex'=>'required',
+            'dob'=>'required',
+            'phone_no'=>'required',
+            'martial_status'=>'required',
+            'emergency_contact_name'=>'required',
+
+        ]);
+      return DegreeStudent::create($request->all());
     }
 
     /**
@@ -36,7 +47,7 @@ class DegreeStudentController extends Controller
      */
     public function show(DegreeStudent $degreeStudent)
     {
-        //
+        return $degreeStudent;
     }
 
     /**
@@ -48,7 +59,19 @@ class DegreeStudentController extends Controller
      */
     public function update(Request $request, DegreeStudent $degreeStudent)
     {
-        //
+        $request->validate([
+            'student_id'=>'required',
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'sex'=>'required',
+            'dob'=>'required',
+            'phone_no'=>'required',
+            'martial_status'=>'required',
+            'emergency_contact_name'=>'required',
+
+        ]);
+       $degreeStudent->update($request->all());
+       return $degreeStudent;
     }
 
     /**
@@ -59,6 +82,6 @@ class DegreeStudentController extends Controller
      */
     public function destroy(DegreeStudent $degreeStudent)
     {
-        //
+        $degreeStudent->delete();
     }
 }

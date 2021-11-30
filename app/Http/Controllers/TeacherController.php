@@ -14,7 +14,7 @@ class TeacherController extends Controller
      */
     public function index()
     {
-        //
+        return Teacher::all();
     }
 
     /**
@@ -25,7 +25,19 @@ class TeacherController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'email'=>'required',
+            'password'=>'required',
+            'phone_no'=>'required',
+            'type'=>'required',
+            'department_name'=>'required',
+            'status'=>'required',
+
+
+        ]);
+        Teacher::create($request->all());
     }
 
     /**
@@ -36,7 +48,7 @@ class TeacherController extends Controller
      */
     public function show(Teacher $teacher)
     {
-        //
+        return $teacher;
     }
 
     /**
@@ -48,7 +60,20 @@ class TeacherController extends Controller
      */
     public function update(Request $request, Teacher $teacher)
     {
-        //
+        $request->validate([
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'email'=>'required',
+            'password'=>'required',
+            'phone_no'=>'required',
+            'type'=>'required',
+            'department_name'=>'required',
+            'status'=>'required',
+
+
+        ]);
+       $teacher->update($request->all());
+       return $teacher;
     }
 
     /**
@@ -59,6 +84,6 @@ class TeacherController extends Controller
      */
     public function destroy(Teacher $teacher)
     {
-        //
+        $teacher->delete();
     }
 }

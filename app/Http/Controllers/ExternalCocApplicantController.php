@@ -14,7 +14,7 @@ class ExternalCocApplicantController extends Controller
      */
     public function index()
     {
-        //
+        return ExternalCocApplicant::all();
     }
 
     /**
@@ -25,7 +25,23 @@ class ExternalCocApplicantController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'sex'=>'required',
+            'dob'=>'required',
+            'phone_no'=>'required',
+            'marital_status'=>'required',
+            'coc_id'=>'required',
+            'level_id'=>'required',
+            'application_date'=>'required',
+            'result'=>'required',
+            'nature_of_assesment'=>'required',
+
+
+        ]);
+     return ExternalCocApplicant::create($request->all());
+
     }
 
     /**
@@ -36,7 +52,7 @@ class ExternalCocApplicantController extends Controller
      */
     public function show(ExternalCocApplicant $externalCocApplicant)
     {
-        //
+       return $externalCocApplicant;
     }
 
     /**
@@ -48,7 +64,23 @@ class ExternalCocApplicantController extends Controller
      */
     public function update(Request $request, ExternalCocApplicant $externalCocApplicant)
     {
-        //
+        $request->validate([
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'sex'=>'required',
+            'dob'=>'required',
+            'phone_no'=>'required',
+            'marital_status'=>'required',
+            'coc_id'=>'required',
+            'level_id'=>'required',
+            'application_date'=>'required',
+            'result'=>'required',
+            'nature_of_assesment'=>'required',
+
+
+        ]);
+       $externalCocApplicant->update($request->all());
+      return $externalCocApplicant;
     }
 
     /**
@@ -59,6 +91,6 @@ class ExternalCocApplicantController extends Controller
      */
     public function destroy(ExternalCocApplicant $externalCocApplicant)
     {
-        //
+        $externalCocApplicant->delete();
     }
 }

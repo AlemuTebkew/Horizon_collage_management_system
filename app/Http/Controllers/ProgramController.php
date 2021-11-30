@@ -58,7 +58,8 @@ class ProgramController extends Controller
             'name'=>'required',
             'type'=>'required',
         ]);
-      return $program->update($request->all());
+       $program->update($request->all());
+       return $program;
     }
 
     /**
