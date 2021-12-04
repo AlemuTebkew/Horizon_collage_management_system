@@ -15,7 +15,7 @@ class CreateSemesterMonthsTable extends Migration
     {
         Schema::create('semester_months', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('degree_semester_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('semester_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('month_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });

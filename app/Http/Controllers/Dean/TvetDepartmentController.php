@@ -1,7 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dean;
+use App\Http\Controllers\Controller;
 
+use App\Models\Level;
 use App\Models\TvetDepartment;
 use Illuminate\Http\Request;
 
@@ -30,7 +32,16 @@ class TvetDepartmentController extends Controller
             'sector'=>'required',
 
         ]);
-      return TvetDepartment::create($request->all());
+      $td= TvetDepartment::create(['name'=>$request->name,'sector'=>$request->sector]);
+
+       foreach ($request->levels as $level) {
+           $l=new Level();
+           $l->level_no=$level['level_no'];
+           $l->occupation_name=$level['occupation_name'];
+           $l->tvet_department_id=$td->id;
+           $l->save();
+       }
+       return $td->load('levels');
     }
 
     /**
@@ -72,4 +83,11 @@ class TvetDepartmentController extends Controller
     {
         $tvetDepartment->delete();
     }
+
+
+    public function assignDepartmentHead(Request $request){
+        $department=TvetDepartment::find($request->department_id);
+        $department->update(['department_head_id'=>$request->employee_id]);
+        return $department;
+      }
 }

@@ -14,7 +14,7 @@ class SemesterPaymentController extends Controller
      */
     public function index()
     {
-        //
+        return SemesterPayment::all();
     }
 
     /**
@@ -25,7 +25,18 @@ class SemesterPaymentController extends Controller
      */
     public function store(Request $request)
     {
-        //
+          $request->validate([
+            'degree_semester_id'=>'required',
+            'degree_student_id'=>'required',
+            'academic_fee_id'=>'required',
+            'receipt_no'=>'required',
+            'amount'=>'required',
+
+
+
+        ]);
+
+        return SemesterPayment::create($request->all());
     }
 
     /**
@@ -36,7 +47,7 @@ class SemesterPaymentController extends Controller
      */
     public function show(SemesterPayment $semesterPayment)
     {
-        //
+        return $semesterPayment;
     }
 
     /**
@@ -48,7 +59,18 @@ class SemesterPaymentController extends Controller
      */
     public function update(Request $request, SemesterPayment $semesterPayment)
     {
-        //
+        $request->validate([
+            'degree_semester_id'=>'required',
+            'degree_student_id'=>'required',
+            'academic_fee_id'=>'required',
+            'receipt_no'=>'required',
+            'amount'=>'required',
+
+
+
+        ]);
+
+        return $semesterPayment->update($request->all());
     }
 
     /**
@@ -59,6 +81,6 @@ class SemesterPaymentController extends Controller
      */
     public function destroy(SemesterPayment $semesterPayment)
     {
-        //
+        $semesterPayment->delete();
     }
 }

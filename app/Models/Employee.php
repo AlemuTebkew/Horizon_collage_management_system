@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Module extends Model
+class Employee extends Model
 {
     use HasFactory;
-    public $fillable=['code','title','training_hour','tvet_department_id','level_id'];
+
+    public $fillable=['first_name',
+    'last_name','password','email','role_id','phone_no','status'];
 
 }

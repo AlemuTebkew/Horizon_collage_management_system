@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAcademicFeesTable extends Migration
+class CreateUserLoginsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateAcademicFeesTable extends Migration
      */
     public function up()
     {
-        Schema::create('academic_fees', function (Blueprint $table) {
+        Schema::create('user_logins', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('fee_type_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->double('amount');
+            $table->string('user_name')->unique();
+            $table->string('password');
+            $table->string('user_type');
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ class CreateAcademicFeesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('academic_fees');
+        Schema::dropIfExists('user_logins');
     }
 }

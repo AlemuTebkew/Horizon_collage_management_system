@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\FeeType;
+use App\Models\DegreeDepartmentProgram;
 use Illuminate\Http\Request;
 
-class FeeTypeController extends Controller
+class DegreeDepartmentProgramController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +14,7 @@ class FeeTypeController extends Controller
      */
     public function index()
     {
-        return FeeType::all();
+        //
     }
 
     /**
@@ -25,48 +25,40 @@ class FeeTypeController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name'=>'required',
-
-        ]);
-     return FeeType::create($request->all());
+        //
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\FeeType  $feeType
+     * @param  \App\Models\DegreeDepartmentProgram  $degreeDepartmentProgram
      * @return \Illuminate\Http\Response
      */
-    public function show(FeeType $feeType)
+    public function show(DegreeDepartmentProgram $degreeDepartmentProgram)
     {
-        return $feeType;
+        //
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\FeeType  $feeType
+     * @param  \App\Models\DegreeDepartmentProgram  $degreeDepartmentProgram
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, FeeType $feeType)
+    public function update(Request $request, DegreeDepartmentProgram $degreeDepartmentProgram)
     {
-        $request->validate([
-            'name'=>'required',
-
-        ]);
-     return $feeType->update($request->all());
+        //
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\FeeType  $feeType
+     * @param  \App\Models\DegreeDepartmentProgram  $degreeDepartmentProgram
      * @return \Illuminate\Http\Response
      */
-    public function destroy(FeeType $feeType)
+    public function destroy(DegreeDepartmentProgram $degreeDepartmentProgram)
     {
-        $feeType->delete();
+        //
     }
 }

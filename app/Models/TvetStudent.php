@@ -17,4 +17,10 @@ class TvetStudent extends Model
     'level_no','current_level_no',
     'employment_profile','isGraduated',
 ];
+
+public function cocs(){
+    return $this->belongsToMany(TvetStudent::class)
+    ->withPivot(['application_date','result','nature_of_assesment']);
+    //return $this->morphMany(Coc::class,'cocable');
+}
 }

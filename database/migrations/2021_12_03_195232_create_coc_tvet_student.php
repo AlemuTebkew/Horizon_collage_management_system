@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateModulesTable extends Migration
+class CreateCocTvetStudent extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,15 @@ class CreateModulesTable extends Migration
      */
     public function up()
     {
-        Schema::create('modules', function (Blueprint $table) {
+        Schema::create('coc_tvet_student', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique();
-            $table->string('title')->unique();
-            // $table->string('type'); //we thought not in module
-            $table->integer('training_hour');
-            $table->foreignId('tvet_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('tvet_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('coc_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('level_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+
+            $table->date('application_date');
+            $table->double('result');
+            $table->string('nature_of_assesment');
             $table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ class CreateModulesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('modules');
+        Schema::dropIfExists('coc_tvet_student');
     }
 }

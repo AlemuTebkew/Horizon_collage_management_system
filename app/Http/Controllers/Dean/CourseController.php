@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dean;
+use App\Http\Controllers\Controller;
 
 use App\Models\Course;
 use Illuminate\Http\Request;
@@ -31,9 +32,8 @@ class CourseController extends Controller
             'type'=>'required',
              'year_no'=>'required',
             'semester_no'=>'required',
-            'department_id'=>'required',
-
-
+            'degree_department_id'=>'required',
+            'program_id'=>'required',
 
         ]);
       return Course::create($request->all());
@@ -66,9 +66,8 @@ class CourseController extends Controller
             'type'=>'required',
              'year_no'=>'required',
             'semester_no'=>'required',
-            'department_id'=>'required',
-
-
+            'degree_department_id'=>'required',
+            'program_id'=>'required',
 
         ]);
        $course->update($request->all());

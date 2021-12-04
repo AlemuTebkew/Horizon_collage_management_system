@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dean;
 
+use App\Http\Controllers\Controller;
 use App\Models\Program;
 use Illuminate\Http\Request;
 
@@ -27,11 +28,24 @@ class ProgramController extends Controller
     {
         $request->validate([
             'name'=>'required',
-            'type'=>'required',
-
+          //  'types.type'=>'required',
 
         ]);
-      return Program::create($request->all());
+
+      $name=$request->name;
+        foreach ($request->types as $type) {
+           // return $a=$type['type'];
+        //    return $type['semisters_in_year'];
+             $program=new Program();
+             $program->name=$name;
+             $program->type=$type['type'];
+             if ( array_key_exists('semesters_in_year',$type)) {
+               $program->semisters_in_year=$type['semesters_in_year'];
+
+             }
+             $program->save();
+        }
+
     }
 
     /**
@@ -60,6 +74,7 @@ class ProgramController extends Controller
         ]);
        $program->update($request->all());
        return $program;
+
     }
 
     /**

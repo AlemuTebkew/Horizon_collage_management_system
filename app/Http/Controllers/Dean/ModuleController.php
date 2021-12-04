@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Dean;
+use App\Http\Controllers\Controller;
 use App\Models\Module;
 use Illuminate\Http\Request;
 
@@ -28,10 +28,9 @@ class ModuleController extends Controller
         $request->validate([
             'code'=>'required',
             'title'=>'required',
-            'type'=>'required',
-             'training_hour'=>'required',
+            'training_hour'=>'required',
             'level_id'=>'required',
-            'department_id'=>'required',
+            'tvet_department_id'=>'required',
 
         ]);
       return Module::create($request->all());
@@ -60,10 +59,9 @@ class ModuleController extends Controller
         $request->validate([
             'code'=>'required',
             'title'=>'required',
-            'type'=>'required',
-             'training_hour'=>'required',
+            'training_hour'=>'required',
             'level_id'=>'required',
-            'department_id'=>'required',
+            'tvet_department_id'=>'required',
 
         ]);
        $module->update($request->all());

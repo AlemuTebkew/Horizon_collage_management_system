@@ -13,7 +13,7 @@ class CreateBranchOfficeFilesTable extends Migration
      */
     public function up()
     {
-        Schema::create('branch_office_files', function (Blueprint $table) {
+        Schema::create('branch_office_file', function (Blueprint $table) {
             $table->id();
             $table->foreignId('branch_office_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('file_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();

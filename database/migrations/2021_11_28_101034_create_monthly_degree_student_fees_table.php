@@ -18,8 +18,12 @@ class CreateMonthlyDegreeStudentFeesTable extends Migration
             $table->foreignId('semester_month_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('degree_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('academic_fee_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string('receipt_no');
-            $table->timestamps();
+            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->double('paid_amount');
+            $table->dateTime('paid_date');
+            $table->double('receipt_no');
+            $table->boolean('is_paid');
+             $table->timestamps();
         });
     }
 

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dean;
 
+use App\Http\Controllers\Controller;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
 
@@ -29,15 +30,13 @@ class TeacherController extends Controller
             'first_name'=>'required',
             'last_name'=>'required',
             'email'=>'required',
-            'password'=>'required',
             'phone_no'=>'required',
             'type'=>'required',
-            'department_name'=>'required',
-            'status'=>'required',
+            'profession'=>'required',
 
 
         ]);
-        Teacher::create($request->all());
+      return Teacher::create($request->all());
     }
 
     /**
@@ -64,11 +63,9 @@ class TeacherController extends Controller
             'first_name'=>'required',
             'last_name'=>'required',
             'email'=>'required',
-            'password'=>'required',
             'phone_no'=>'required',
             'type'=>'required',
-            'department_name'=>'required',
-            'status'=>'required',
+            'profession'=>'required',
 
 
         ]);

@@ -13,10 +13,10 @@ class CreateStudentSectionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('student_sections', function (Blueprint $table) {
+        Schema::create('degree_sections_students', function (Blueprint $table) {
             $table->id();
             $table->foreignId('degree_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('section_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('degree_section_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }

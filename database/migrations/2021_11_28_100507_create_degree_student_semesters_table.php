@@ -18,6 +18,8 @@ class CreateDegreeStudentSemestersTable extends Migration
             $table->integer('number');
             $table->foreignId('degree_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('semester_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('year_no');
+            $table->string('semester_no');
             $table->double('semester_GPA');
             $table->string('tution_type');
             $table->timestamps();

@@ -40,7 +40,9 @@ class CreateTvetStudentsTable extends Migration
             $table->string('level_no');
             $table->string('current_level_no');
             $table->string('employment_profile');
-            $table->boolean('isGraduated');
+            $table->boolean('is_graduated')->default(0);
+            $table->date('graduated_date')->nullable();
+
 
             $table->timestamps();
         });

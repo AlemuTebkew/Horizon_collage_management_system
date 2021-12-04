@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dean;
 
-use App\Models\Account;
+use App\Http\Controllers\Controller;
+use App\Models\FeeType;
 use Illuminate\Http\Request;
 
-class AccountController extends Controller
+class FeeTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +15,7 @@ class AccountController extends Controller
      */
     public function index()
     {
-        //
+        return FeeType::all();
     }
 
     /**
@@ -25,40 +26,49 @@ class AccountController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'=>'required',
+
+        ]);
+     return FeeType::create($request->all());
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Account  $account
+     * @param  \App\Models\FeeType  $feeType
      * @return \Illuminate\Http\Response
      */
-    public function show(Account $account)
+    public function show(FeeType $feeType)
     {
-        //
+        return $feeType;
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Account  $account
+     * @param  \App\Models\FeeType  $feeType
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Account $account)
+    public function update(Request $request, FeeType $feeType)
     {
-        //
+        $request->validate([
+            'name'=>'required',
+
+        ]);
+      $feeType->update($request->all());
+      return $feeType;
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Account  $account
+     * @param  \App\Models\FeeType  $feeType
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Account $account)
+    public function destroy(FeeType $feeType)
     {
-        //
+        $feeType->delete();
     }
 }

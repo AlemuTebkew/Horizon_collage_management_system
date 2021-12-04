@@ -17,6 +17,7 @@ class CreateProgramsTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('type');//tvet or degree
+            $table->integer('semesters_in_year')->nullable();
             $table->timestamps();
         });
     }

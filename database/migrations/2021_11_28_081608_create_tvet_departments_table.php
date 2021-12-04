@@ -17,6 +17,11 @@ class CreateTvetDepartmentsTable extends Migration
             $table->id();
             $table->string('name');
             $table->string('sector');
+            //Any additional column modifiers must be called before the constrained method:
+            $table->foreignId('department_head_id')->nullable()
+                   ->constrained('employees','id')
+                   ->cascadeOnDelete()
+                   ->cascadeOnUpdate();
             $table->timestamps();
         });
     }

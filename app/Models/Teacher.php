@@ -9,6 +9,7 @@ class Teacher extends Model
 {
     use HasFactory;
     public $fillable=['first_name',
-    'last_name','password','email','type','phone_no','department_name','status'];
+    'last_name','password','email','type','phone_no','profession','status'];
 
+    protected $hidden=['password'];
 }

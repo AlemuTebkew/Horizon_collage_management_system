@@ -10,4 +10,18 @@ class Coc extends Model
     use HasFactory;
     public $fillable=['start_date','end_date','exam_week','academic_year_id'];
 
+    public function degree_students()
+    {
+        return $this->belongsToMany(DegreeStudent::class)
+        ->withPivot(['application_date','result','nature_of_assesment']);
+        //return $this->morphedByMany(DegreeStudent::class, 'cocable');
+    }
+
+    public function tvet_students()
+    {
+        return $this->belongsToMany(TvetStudent::class)
+        ->withPivot(['application_date','result','nature_of_assesment']);
+        // return $this->morphedByMany(TvetStudent::class, 'cocable')
+        // ->withPivot(['application_date','result','nature_of_assesment']);
+    }
 }

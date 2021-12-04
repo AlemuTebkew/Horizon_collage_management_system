@@ -44,7 +44,10 @@ class CreateDegreeStudentsTable extends Migration
             $table->string('current_year_no');
             $table->string('batch');
             $table->string('employment_profile');
-            $table->boolean('isGraduated');
+            $table->boolean('is_graduated')->default(0);
+            $table->date('graduated_date')->nullable();
+
+
             $table->timestamps();
         });
     }

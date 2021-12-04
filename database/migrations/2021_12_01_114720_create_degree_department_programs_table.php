@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateDepartmentProgramsTable extends Migration
+class CreateDegreeDepartmentProgramsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,12 @@ class CreateDepartmentProgramsTable extends Migration
      */
     public function up()
     {
-        Schema::create('degree_department_programs', function (Blueprint $table) {
+        Schema::create('degree_department_program', function (Blueprint $table) {
             $table->id();
             $table->foreignId('degree_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('no_of_semester');
+            $table->string('no_of_year');
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ class CreateDepartmentProgramsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('department_programs');
+        Schema::dropIfExists('degree_department_program');
     }
 }
