@@ -15,7 +15,11 @@ class CreateCocablesTable extends Migration
     {
         Schema::create('cocables', function (Blueprint $table) {
             $table->id();
-            
+            $table->integer("coc_id");
+
+            $table->integer("cocable_id");
+
+            $table->string("cocable_type");
             $table->timestamps();
         });
     }

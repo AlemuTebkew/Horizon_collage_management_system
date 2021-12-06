@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Dean;
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
 use Illuminate\Http\Request;
-
+use App\Traits\ApiResponser;
 class EmployeeController extends Controller
 {
+
+    use ApiResponser;
     /**
      * Display a listing of the resource.
      *
@@ -77,9 +79,17 @@ class EmployeeController extends Controller
      */
     public function destroy(Employee $employee)
     {
-        $employee->delete();
+
+        if( $employee->delete()) {
+            return $this->successResponse('successfully Deleted ',200);
+        }
+        else{
+            return $this->errorResponse('fail to Delete',501);
+        }
+         
+
     }
 
 
-    
+
 }

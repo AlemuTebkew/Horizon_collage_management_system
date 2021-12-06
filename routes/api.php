@@ -37,3 +37,8 @@ Route::apiResource('/modules',ModuleController::class);
 Route::apiResource('/fee_types',FeeTypeController::class);
 Route::post('/assign_degree_department_head', [DegreeDepartmentController::class,'assignDepartmentHead']);
 Route::post('/assign_tvet_department_head', [TvetDepartmentController::class,'assignDepartmentHead']);
+
+Route::fallback(function(){
+    return response()->json([
+        'message' => 'Page Not Found. If error persists, contact info@website.com'], 404);
+});
