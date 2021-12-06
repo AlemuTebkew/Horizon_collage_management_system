@@ -9,5 +9,8 @@ class AcademicFee extends Model
 {
     use HasFactory;
     public $fillable=['academic_type_id','academic_year_id','amount'];
+    public function academic_year(){
+        return $this->belongsTo(AcademicYear::class);
+    }
 
 }

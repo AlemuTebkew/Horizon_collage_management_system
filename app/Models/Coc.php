@@ -24,4 +24,7 @@ class Coc extends Model
         // return $this->morphedByMany(TvetStudent::class, 'cocable')
         // ->withPivot(['application_date','result','nature_of_assesment']);
     }
+    public function academic_year(){
+        return $this->belongsTo(AcademicYear::class);
+    }
 }

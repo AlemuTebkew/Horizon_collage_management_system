@@ -10,9 +10,17 @@ class Program extends Model
     use HasFactory;
     public $fillable=['name','type','semesters_in_year'];
 
-
+    public function tvet_student(){
+        return $this->hasMany(TvetStudent::class);
+    }
     public function degree_departments(){
         return $this->belongsToMany(DegreeDepartment::class)->withPivot(['no_of_semester','no_of_year']);
+    }
+    public function tvet_sections(){
+        return $this->hasMany(TvetSection::class);
+    }
+    public function degree_students(){
+        return $this->hasMany(DegreeStudent::class);
     }
 
 }

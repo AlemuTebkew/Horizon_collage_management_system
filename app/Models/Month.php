@@ -9,4 +9,7 @@ class Month extends Model
 {
     use HasFactory;
     public $fillable=['code',];
+    public function semesters(){
+        return $this->belongsToMany(Month::class);
+    }
 }

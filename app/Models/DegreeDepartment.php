@@ -14,4 +14,9 @@ class DegreeDepartment extends Model
     public function programs(){
         return $this->belongsToMany(Program::class)->withPivot(['no_of_semester','no_of_year']);
     }
+    public function degree_sections(){
+        return $this->hasMany(DegreeSection::class);
+    }
+    
+   
 }
