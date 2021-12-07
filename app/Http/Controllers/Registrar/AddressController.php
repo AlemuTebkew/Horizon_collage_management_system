@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Registrar;
+use App\Http\Controllers\Controller;
 
 use App\Models\Address;
 use Illuminate\Http\Request;
