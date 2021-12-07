@@ -24,4 +24,14 @@ public function cocs(){
     // ->withPivot(['application_date','result','nature_of_assesment']);
     return $this->morphToMany(Coc::class,'cocable');
 }
+public function program(){
+     return $this->belongsTo(Program::class);
+}
+public function semesters(){
+    return $this->belongsToMany(semester::class)->withPivot(['number',
+    'semester_GPA','tution_type']);
+}
+public function semester_payment(){
+    return $this->hasOne(SemesterPayment::class);
+}
 }

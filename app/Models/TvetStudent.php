@@ -23,4 +23,7 @@ public function cocs(){
     // ->withPivot(['application_date','result','nature_of_assesment']);
     return $this->morphToMany(Coc::class,'cocable');
 }
+public function program(){
+    return $this->belongsTo(Program::class);
+}
 }

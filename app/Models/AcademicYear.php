@@ -10,5 +10,16 @@ class AcademicYear extends Model
     use HasFactory;
 
     public $fillable=['year','start_date','end_date','status','is_current'];
-
+    public function tvet_section(){
+        return $this->hasMany(TvetSection::class);
+    }
+    public function academic_fee(){
+        return $this->hasMany(AcademicFee::class);
+    }
+    public function degree_sections(){
+        return $this->hasMany(DegreeSection::class);
+    }
+    public function cocs(){
+        return $this->hasMany(Coc::class);
+    }
 }

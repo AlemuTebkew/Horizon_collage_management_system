@@ -10,5 +10,11 @@ class SemesterPayment extends Model
     use HasFactory;
     public $fillable=['degree_semester_id','degree_student_id',
     'academic_fee_id','receipt_no','amount'];
+    public function degree_student(){
+        return $this->belongsToMany(DegreeStudent::class);
+   }
+   public function semester(){
+    return $this->belongsTo(Semester::class);
+}
 
 }

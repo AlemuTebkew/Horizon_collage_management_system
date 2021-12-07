@@ -13,4 +13,14 @@ class TvetDepartment extends Model
     public function levels(){
         return $this->hasMany(Level::class);
     }
+    public function modules(){
+        return $this->hasMany(Module::class);
+    }
+    public function tvet_sections(){
+        return $this->hasMany(TvetSection::class);
+    }
+   
+    // public function department_head(){
+    //     return $this->belongsTo(Dep)
+    // }
 }

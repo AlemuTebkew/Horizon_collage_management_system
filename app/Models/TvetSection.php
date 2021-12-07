@@ -10,5 +10,16 @@ class TvetSection extends Model
     use HasFactory;
     public $fillable=['tvet_department_id','academic_year_id',
     'program_id','level_id'];
-
+    public function tvet_department(){
+        return $this->belongsTo(TvetDepartment::class);
+    }
+    public function academic_year(){
+        return $this->belongsTo(AcademicYear::class);
+    }
+    public function program(){
+        return $this->belongsTo(Program::class);
+    }
+    public function level(){
+        return $this->belongsTo(Program::class);
+    }
 }
