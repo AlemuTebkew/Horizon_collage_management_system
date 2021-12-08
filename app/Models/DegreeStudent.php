@@ -10,9 +10,9 @@ class DegreeStudent extends Model
     use HasFactory;
     public $fillable=['student_id','first_name',
     'last_name','password','sex','dob',
-    'phone_no','martial_status', 'emergency_contact_name','emergency_contact_relationShip',
+    'phone_no','martial_status', 'emergency_contact_name','emergency_contact_relationship',
     'emergency_contact_phone_no','EGSSE_result','EHEEE_result',
-    'birth_address_id','residential_address_id','contact_address_id',
+    'birth_address_id','residential_address_id','emergency_address_id',
     'program_id','degree_department_id','financial_source',
     'current_semester_no','current_year_no','batch',
     'employment_profile','isGraduated',
@@ -28,10 +28,31 @@ public function program(){
      return $this->belongsTo(Program::class);
 }
 public function semesters(){
-    return $this->belongsToMany(semester::class)->withPivot(['number',
+    return $this->belongsToMany(Semester::class)->withPivot(['semester_no','year_no',
     'semester_GPA','tution_type']);
 }
-public function semester_payment(){
-    return $this->hasOne(SemesterPayment::class);
+// public function semester_payment(){
+//     return $this->hasOne(SemesterPayment::class);
+// }
+
+public function semester_payments(){
+    return $this->belongsToMany(Semester::class,'student_semester_payment');
 }
+
+/*
+ *this mothode is for monthly payment not for month
+*/
+public function month_payments(){
+    return $this->belongsToMany(Month::class);
+}
+public function birth_address(){
+    return $this->belongsTo(Address::class,'birth_address_id');
+}
+public function residential_address(){
+    return $this->belongsTo(Address::class,'residential_address_id');
+}
+public function contact_address(){
+    return $this->belongsTo(Address::class,'contact_address_id');
+}
+
 }

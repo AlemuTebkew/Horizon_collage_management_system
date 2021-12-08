@@ -10,4 +10,5 @@ class Address extends Model
     use HasFactory;
     public $fillable=['country','region','zone','subcity','kebele','house_no'];
 
+    
 }

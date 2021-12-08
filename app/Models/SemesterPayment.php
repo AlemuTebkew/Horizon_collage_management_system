@@ -13,7 +13,7 @@ class SemesterPayment extends Model
     public function degree_student(){
         return $this->belongsToMany(DegreeStudent::class);
    }
-   public function semester(){
+   public function semesters(){
     return $this->belongsTo(Semester::class);
 }
 

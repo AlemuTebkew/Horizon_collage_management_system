@@ -13,15 +13,14 @@ class CreateDegreeStudentSemestersTable extends Migration
      */
     public function up()
     {
-        Schema::create('degree_student_semesters', function (Blueprint $table) {
+        Schema::create('degree_student_semester', function (Blueprint $table) {
             $table->id();
-            $table->integer('number');
             $table->foreignId('degree_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('semester_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('year_no');
             $table->string('semester_no');
-            $table->double('semester_GPA');
-            $table->string('tution_type');
+            $table->double('semester_GPA')->default(4.0);
+            $table->string('tution_type')->nullable();
             $table->timestamps();
         });
     }

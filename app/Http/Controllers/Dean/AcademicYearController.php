@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Dean;
+use  App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 
@@ -30,11 +30,18 @@ class AcademicYearController extends Controller
             'year'=>'required',
             'start_date'=>'required',
             'end_date'=>'required',
-            'status'=>'required',
-            'is_current'=>'required',
 
         ]);
-      return AcademicYear::create($request->all());
+       $ay=AcademicYear::where('status',1)->first();
+       if ($ay) {
+           return response()->json(['close active Academic year before creating']);
+       }
+       $data=$request->all();
+       $data['start_date']=date('Y-m-d',strtotime($request->start_date));
+       $data['end_date']=date('Y-m-d',strtotime($request->end_date));
+
+       
+      return AcademicYear::create($data);
     }
 
     /**
@@ -61,11 +68,12 @@ class AcademicYearController extends Controller
             'year'=>'required',
             'start_date'=>'required',
             'end_date'=>'required',
-            'status'=>'required',
-            'is_current'=>'required',
 
         ]);
-      return $academicYear->update($request->all());
+        $data=$request->all();
+        $data['start_date']=date('Y-m-d',strtotime($request->start_date));
+        $data['end_date']=date('Y-m-d',strtotime($request->end_date));
+      return $academicYear->update($data);
     }
 
     /**
@@ -77,5 +85,9 @@ class AcademicYearController extends Controller
     public function destroy(AcademicYear $academicYear)
     {
         $academicYear->delete();
+    }
+
+    public function closeAcademicYear(AcademicYear $academicYear){
+      $academicYear->update(['status'=>0,'is_current'=>0]);
     }
 }

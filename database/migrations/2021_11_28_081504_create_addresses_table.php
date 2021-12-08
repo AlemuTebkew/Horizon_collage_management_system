@@ -21,6 +21,7 @@ class CreateAddressesTable extends Migration
             $table->string('subcity')->nullable();
             $table->string('kebele')->nullable();
             $table->string('house_no')->nullable();
+            $table->string('town')->nullable();
             $table->timestamps();
         });
     }

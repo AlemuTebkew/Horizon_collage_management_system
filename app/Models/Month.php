@@ -12,4 +12,8 @@ class Month extends Model
     public function semesters(){
         return $this->belongsToMany(Month::class);
     }
+//students paid for this month
+    public function paid_students(){
+        return $this->belongsToMany(DegreeStudent::class);
+    }
 }

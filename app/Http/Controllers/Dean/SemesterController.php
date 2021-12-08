@@ -1,7 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Dean;
+use App\Http\Controllers\Controller;
 use App\Models\Semester;
 use Illuminate\Http\Request;
 
@@ -31,10 +31,12 @@ class SemesterController extends Controller
             'program_id'=>'required',
             'start_date'=>'required',
             'end_date'=>'required',
-            'status'=>'required',
-            'is_current'=>'required',
+
         ]);
-        return Semester::create($request->all());
+        $data=$request->all();
+        $data['start_date']=date('Y-m-d',strtotime($request->start_date));
+        $data['end_date']=date('Y-m-d',strtotime($request->end_date));
+        return Semester::create($data);
 
     }
 
@@ -64,10 +66,12 @@ class SemesterController extends Controller
             'program_id'=>'required',
             'start_date'=>'required',
             'end_date'=>'required',
-            'status'=>'required',
-            'is_current'=>'required',
+
         ]);
-         $semester->update($request->all());
+        $data=$request->all();
+        $data['start_date']=date('Y-m-d',strtotime($request->start_date));
+        $data['end_date']=date('Y-m-d',strtotime($request->end_date));
+         $semester->update($data);
          return $semester;
     }
 

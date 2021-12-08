@@ -15,7 +15,7 @@ class CreateDegreeStudentsTable extends Migration
     {
         Schema::create('degree_students', function (Blueprint $table) {
             $table->id();
-            $table->string('student_id')->unique();
+            $table->string('student_id')->unique()->nullable();
             $table->string('first_name');
             $table->string('last_name');
             $table->string('sex');
@@ -24,7 +24,7 @@ class CreateDegreeStudentsTable extends Migration
             $table->string('password');
             $table->string('martial_status');
             $table->string('emergency_contact_name');
-            $table->string('emergency_contact_relationShip');
+            $table->string('emergency_contact_relationship');
             $table->string('emergency_contact_phone_no');
             $table->string('EGSSE_result');
             $table->string('EHEEE_result');
@@ -34,17 +34,18 @@ class CreateDegreeStudentsTable extends Migration
             // $table->string('emergency_contact_address');
             $table->foreignId('birth_address_id')->constrained('addresses','id')->cascadeOnDelete()->cascadeOnUpdate();//place_of_birth_address
             $table->foreignId('residential_address_id')->constrained('addresses','id')->cascadeOnDelete()->cascadeOnUpdate();//current_residential_address
-            $table->foreignId('contact_address_id')->constrained('addresses','id')->cascadeOnDelete()->cascadeOnUpdate();//emergency_contact_address
+            $table->foreignId('emergency_address_id')->constrained('addresses','id')->cascadeOnDelete()->cascadeOnUpdate();//emergency_contact_address
+           // $table->string('program');
 
-            $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('degree_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             //
             $table->string('financial_source');
             $table->string('current_semester_no');
             $table->string('current_year_no');
             $table->string('batch');
-            $table->string('employment_profile');
             $table->boolean('is_graduated')->default(0);
+            $table->boolean('fully_scolarship')->default(0);
             $table->date('graduated_date')->nullable();
 
 

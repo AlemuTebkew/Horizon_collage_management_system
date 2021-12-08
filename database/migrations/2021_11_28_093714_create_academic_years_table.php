@@ -18,8 +18,8 @@ class CreateAcademicYearsTable extends Migration
            $table->string('year');
            $table->date('start_date');
            $table->date('end_date');
-           $table->boolean('status');
-           $table->boolean('is_current');
+           $table->boolean('status')->default(1);
+           $table->boolean('is_current')->default(1);
            $table->timestamps();
         });
     }
