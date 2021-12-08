@@ -18,7 +18,8 @@ class DegreeStudentController extends Controller
      */
     public function index()
     {
-        return DegreeStudent::all();
+        //getting all students
+        return DegreeStudent::with('degree_departments','department')->get();
     }
 
     /**
