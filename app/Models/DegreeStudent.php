@@ -55,4 +55,7 @@ public function contact_address(){
     return $this->belongsTo(Address::class,'contact_address_id');
 }
 
+public function degree_department(){
+    return $this->belongsTo(DegreeDepartment::class);
+}
 }

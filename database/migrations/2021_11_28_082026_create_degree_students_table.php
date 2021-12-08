@@ -45,7 +45,7 @@ class CreateDegreeStudentsTable extends Migration
             $table->string('current_year_no');
             $table->string('batch');
             $table->boolean('is_graduated')->default(0);
-            $table->boolean('fully_scolarship')->default(0);
+            $table->boolean('fully_scholarship')->default(0);
             $table->date('graduated_date')->nullable();
 
 

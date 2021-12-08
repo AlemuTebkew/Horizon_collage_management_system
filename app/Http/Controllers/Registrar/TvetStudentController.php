@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
-
+use App\Models\AcademicYear;
+use App\Models\Address;
+use App\Models\Level;
 use App\Models\TvetStudent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class TvetStudentController extends Controller
 {
@@ -37,7 +40,43 @@ class TvetStudentController extends Controller
             'emergency_contact_name'=>'required',
 
         ]);
-      return TvetStudent::create($request->all());
+
+
+        $academic_year=AcademicYear::where('status',1)->first();
+        $birth_address=Address::create($request->birth_address);
+        $residential_address=Address::create($request->residential_address);
+        $emergency_address=Address::create($request->emergency_address);
+
+        $data=$request->all();
+        $data['birth_address_id']=$birth_address->id;
+        $data['residential_address_id']=$residential_address->id;
+        $data['emergency_address_id']=$emergency_address->id;
+        $data['password']=Hash::make('HR'.$request->last_name);
+        $data['batch']=$academic_year->year;
+        $data['dob']=date('Y-m-d',strtotime($request->dob));
+
+
+        $semester=Level::find($request->level_id);
+        $student= TvetStudent::create($data);
+        $student->levels()->attach($request->level_id,
+        [
+
+            'academic_year_id'=>$academic_year->id,
+            'scholarship'=>$request->scholarship
+
+        ]);
+
+        foreach ($request->months as $month) {
+
+            $student->month_payments()->attach($month->id,[
+                'academic_fee_id'=>$month->academic_fee_id,
+                'academic_year_id'=>$academic_year->id,
+                'receipt_no'=>$request->receipt_no,
+                'paid_date'=>now()->toDateTime(),
+                'is_paid'=>1
+
+            ]);
+        }
     }
 
     /**

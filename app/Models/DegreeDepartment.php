@@ -17,6 +17,10 @@ class DegreeDepartment extends Model
     public function degree_sections(){
         return $this->hasMany(DegreeSection::class);
     }
-    
-   
+
+    public function degree_departments(){
+        return $this->hasMany(DegreeDepartment::class);
+    }
+
+
 }

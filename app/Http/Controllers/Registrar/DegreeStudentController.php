@@ -19,7 +19,7 @@ class DegreeStudentController extends Controller
     public function index()
     {
         //getting all students
-        return DegreeStudent::with('degree_departments','department')->get();
+        return DegreeStudent::with('degree_department','program')->get();
     }
 
     /**
@@ -66,7 +66,9 @@ class DegreeStudentController extends Controller
             [
                 'year_no'=>$request->year_no,
                 'semester_no'=>$request->semester_no,
-                'tution_type'=>$request->tution_type
+                'tution_type'=>$request->tution_type,
+                'scholarship'=>$request->scholarship
+
             ]);
           if ($request->tution_type == 'cp') {
             $semester->student_payments()->attach($student->id,
@@ -131,7 +133,7 @@ class DegreeStudentController extends Controller
      */
     public function show(DegreeStudent $degreeStudent)
     {
-        return $degreeStudent;
+        return $degreeStudent->load('semesters');
     }
 
     /**
@@ -182,5 +184,21 @@ class DegreeStudentController extends Controller
             return response()->json(['not succesfully deleted'.$e]);
 
         }
+    }
+
+    public function registerStudentForSemester(Request $request){
+      $student=DegreeStudent::find($request->student_id);
+    //   $semester=Semester::find($request->semester_id);
+      $student->semesters()->attach($request->semester_id,
+      [
+          'year_no'=>$request->year_no,
+          'semester_no'=>$request->semester_no,
+          'tution_type'=>$request->tution_type,
+          'scholarship'=>$request->scholarship
+      ]);
+    }
+
+    public function getStudentCourses(){
+
     }
 }

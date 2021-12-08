@@ -21,6 +21,7 @@ class CreateDegreeStudentSemestersTable extends Migration
             $table->string('semester_no');
             $table->double('semester_GPA')->default(4.0);
             $table->string('tution_type')->nullable();
+            $table->boolean('scolarship')->default(0);
             $table->timestamps();
         });
     }

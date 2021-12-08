@@ -37,9 +37,10 @@ class CreateTvetStudentsTable extends Migration
             $table->foreignId('tvet_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
             $table->string('financial_source');
-            $table->string('level_no');
+            $table->string('no_of_level');
             $table->string('current_level_no');
-            $table->string('employment_profile');
+            $table->string('batch');
+            $table->boolean('fully_scholarship')->default(0);
             $table->boolean('is_graduated')->default(0);
             $table->date('graduated_date')->nullable();
 
