@@ -2,6 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\Address;
+use App\Models\DegreeDepartment;
+use App\Models\Program;
+use App\Models\TvetDepartment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class DegreeStudentFactory extends Factory
@@ -14,7 +18,30 @@ class DegreeStudentFactory extends Factory
     public function definition()
     {
         return [
-            //
+
+
+            'first_name'=>$this->faker->firstName,
+            'last_name'=>$this->faker->lastName,
+            'phone_no'=>$this->faker->phoneNumber,
+            'sex'=>$this->faker->randomElement(['Male','Female']),
+            'dob'=>$this->faker->date,
+            'martial_status'=>$this->faker->randomElement(['single','maried']),
+            'emergency_contact_name'=>$this->faker->firstName,
+            'emergency_contact_relationship'=>$this->faker->word,
+            'emergency_contact_phone_no'=>$this->faker->phoneNumber,
+            'EGSSE_result'=>$this->faker->randomDigit(2,4),
+            'EHEEE_result'=>$this->faker->numberBetween(300,700),
+            'program_id'=>Program::inRandomOrder()->first()->id,
+            'degree_department_id'=>DegreeDepartment::inRandomOrder()->first()->id,
+            'financial_source'=>$this->faker->sentence(10,true),
+            'current_year_no'=>$this->faker->numberBetween(1,5),
+            'current_semester_no'=>1,
+            'batch'=> $this->faker->year ,
+            'fully_scolarship'=>$this->faker->randomElement(1,2),
+            'birth_address_id'=>Address::inRandomOrder()->first()->id,
+            'residential_address_id'=>Address::inRandomOrder()->first()->id,
+            'emergency_address_id'=>Address::inRandomOrder()->first()->id,
+
         ];
     }
 }

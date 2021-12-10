@@ -13,13 +13,13 @@ class CreateTvetStudentFeesTable extends Migration
      */
     public function up()
     {
-        Schema::create('tvet_student_fees', function (Blueprint $table) {
+        Schema::create('tvet_student_month', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tvet_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('academic_fee_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('month_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->double('paid_amount');
+            $table->double('paid_amount')->nullable();
             $table->dateTime('paid_date');
             $table->double('receipt_no');
             $table->boolean('is_paid');

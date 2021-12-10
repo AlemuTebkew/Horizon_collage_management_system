@@ -14,7 +14,14 @@ class AddressFactory extends Factory
     public function definition()
     {
         return [
-            //
+
+            'country'=>$this->faker->country,
+            'region'=>$this->faker->city(),
+            'zone'=>$this->faker->city,
+            'subcity'=>$this->faker->country,
+            'kebele'=>$this->faker->city(),
+            'house_no'=>$this->faker->randomDigitNotNull(),
+            'town'=>$this->faker->city,
         ];
     }
 }

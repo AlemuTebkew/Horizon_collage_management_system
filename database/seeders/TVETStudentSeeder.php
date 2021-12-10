@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\TvetStudent;
 use Illuminate\Database\Seeder;
 
-class TVETStudentSeeder extends Seeder
+class TvetStudentSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,6 +14,7 @@ class TVETStudentSeeder extends Seeder
      */
     public function run()
     {
-        //
+        TvetStudent::factory()->count(50)->create();
+
     }
 }

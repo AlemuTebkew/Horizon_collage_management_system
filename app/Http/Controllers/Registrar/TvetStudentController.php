@@ -7,6 +7,7 @@ use App\Models\Address;
 use App\Models\Level;
 use App\Models\TvetStudent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class TvetStudentController extends Controller
@@ -18,7 +19,7 @@ class TvetStudentController extends Controller
      */
     public function index()
     {
-        return TvetStudent::all();
+        return TvetStudent::with('tvet_department','program');
     }
 
     /**
@@ -29,8 +30,12 @@ class TvetStudentController extends Controller
      */
     public function store(Request $request)
     {
+
+        DB::beginTransaction();
+
+        try {
+
         $request->validate([
-            'student_id'=>'required',
             'first_name'=>'required',
             'last_name'=>'required',
             'sex'=>'required',
@@ -56,7 +61,7 @@ class TvetStudentController extends Controller
         $data['dob']=date('Y-m-d',strtotime($request->dob));
 
 
-        $semester=Level::find($request->level_id);
+        $level=Level::find($request->level_id);
         $student= TvetStudent::create($data);
         $student->levels()->attach($request->level_id,
         [
@@ -68,15 +73,26 @@ class TvetStudentController extends Controller
 
         foreach ($request->months as $month) {
 
-            $student->month_payments()->attach($month->id,[
-                'academic_fee_id'=>$month->academic_fee_id,
+            $student->month_payments()->attach($month['id'],[
+                'academic_fee_id'=>$month['academic_fee_id'],
                 'academic_year_id'=>$academic_year->id,
                 'receipt_no'=>$request->receipt_no,
                 'paid_date'=>now()->toDateTime(),
                 'is_paid'=>1
 
             ]);
+            $student->month_payments->forget($month['id']);
+
         }
+
+        DB::commit();
+        return $student->load('levels');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return $e;
+        return response()->json(['can t create student']);
+    }
+
     }
 
     /**
@@ -87,7 +103,7 @@ class TvetStudentController extends Controller
      */
     public function show(TvetStudent $tvetStudent)
     {
-       return $tvetStudent;
+       return $tvetStudent->load('levels');
     }
 
     /**
@@ -124,4 +140,20 @@ class TvetStudentController extends Controller
     {
         $tvetStudent->delete();
     }
+
+
+    public function registerStudentForLevel(Request $request){
+
+        $level=Level::find($request->level_id);
+        $student= TvetStudent::find($request->student_id);
+        $student->levels()->attach($request->level_id,
+        [
+
+            'academic_year_id'=>$request->academic_year_id,
+            'scholarship'=>$request->scholarship
+
+        ]);
+
+      }
+
 }

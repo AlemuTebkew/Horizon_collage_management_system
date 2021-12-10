@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Dean;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\UserLogin;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponser;
+use Illuminate\Support\Facades\Hash;
+
 class EmployeeController extends Controller
 {
 
@@ -31,11 +34,16 @@ class EmployeeController extends Controller
         $request->validate([
             'first_name'=>'required',
             'last_name'=>'required',
-            'email'=>'required',
+            'email'=>'required|unique:employees',
             'phone_no'=>'required',
-            'role_id'=>'required',
+            'role'=>'required',
 
         ]);
+        $login=new UserLogin();
+        $login->user_name=$request->email;
+        $login->password=Hash::make($request->last_name.'1234');
+        $login->user_type='employee';
+        $login->save();
       return Employee::create($request->all());
     }
 
@@ -64,7 +72,7 @@ class EmployeeController extends Controller
             'last_name'=>'required',
             'email'=>'required',
             'phone_no'=>'required',
-            'role_id'=>'required',
+            'role'=>'required',
 
         ]);
         $employee->update($request->all());
@@ -86,10 +94,13 @@ class EmployeeController extends Controller
         else{
             return $this->errorResponse('fail to Delete',501);
         }
-         
+
 
     }
 
+    public function getDepartmentHeads(){
+        return Employee::where('role','department head')->get();
+    }
 
 
 }

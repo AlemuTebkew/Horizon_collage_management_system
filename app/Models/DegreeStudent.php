@@ -19,6 +19,12 @@ class DegreeStudent extends Model
 
 ];
 
+
+public function getFullNameAttribute(){
+    return $this->first_name.' '.$this->last_name;
+}
+
+
 public function cocs(){
     // return $this->belongsToMany(DegreeStudent::class)
     // ->withPivot(['application_date','result','nature_of_assesment']);

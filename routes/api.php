@@ -41,6 +41,8 @@ Route::apiResource('/tvet_departments',TvetDepartmentController::class);
 Route::apiResource('/programs',ProgramController::class);
 Route::apiResource('/teachers',TeacherController::class);
 Route::apiResource('/employees',EmployeeController::class);
+Route::get('/department_heads',[EmployeeController::class,'getDepartmentHeads']);
+
 Route::apiResource('/courses',CourseController::class);
 Route::apiResource('/modules',ModuleController::class);
 Route::apiResource('/fee_types',FeeTypeController::class);

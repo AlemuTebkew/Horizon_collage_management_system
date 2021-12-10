@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Dean;
 
 use App\Http\Controllers\Controller;
 use App\Models\Teacher;
+use App\Models\UserLogin;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class TeacherController extends Controller
 {
@@ -29,13 +31,18 @@ class TeacherController extends Controller
         $request->validate([
             'first_name'=>'required',
             'last_name'=>'required',
-            'email'=>'required',
+            'email'=>'required|unique:teachers',
             'phone_no'=>'required',
             'type'=>'required',
             'profession'=>'required',
 
 
         ]);
+        $login=new UserLogin();
+        $login->user_name=$request->email;
+        $login->passwored=Hash::make($request->last_name.'1234');
+        $login->user_type='teacher';
+        $login->save();
       return Teacher::create($request->all());
     }
 

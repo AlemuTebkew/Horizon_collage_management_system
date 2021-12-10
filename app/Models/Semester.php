@@ -20,5 +20,13 @@ class Semester extends Model
     public function student_payments(){
         return $this->belongsToMany(DegreeStudent::class,'student_semester_payment');
     }
+
+    public function academic_year(){
+        return $this->belongsTo(AcademicYear::class);
+    }
+
+    public function program(){
+        return $this->belongsTo(Program::class);
+    }
     }
 

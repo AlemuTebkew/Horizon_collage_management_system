@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DegreeStudentResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
 use App\Models\DegreeStudent;
@@ -33,7 +34,6 @@ class DegreeStudentController extends Controller
 
    //  return $request->month_ids;
         DB::beginTransaction();
-
         try {
 
             $request->validate([
@@ -133,7 +133,7 @@ class DegreeStudentController extends Controller
      */
     public function show(DegreeStudent $degreeStudent)
     {
-        return $degreeStudent->load('semesters');
+        return new DegreeStudentResource($degreeStudent->load('semesters'));
     }
 
     /**

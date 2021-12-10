@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Dean;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DegreeDepartment as ResourcesDegreeDepartment;
+use App\Http\Resources\DegreeDepartmentResource;
 use App\Models\DegreeDepartment;
+use App\Models\Program;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class DegreeDepartmentController extends Controller
 {
@@ -15,7 +19,7 @@ class DegreeDepartmentController extends Controller
      */
     public function index()
     {
-        return DegreeDepartment::all();
+        return  DegreeDepartmentResource::collection(DegreeDepartment::with('programs')->get());
     }
 
     /**
@@ -27,29 +31,30 @@ class DegreeDepartmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'=>'required|unique:degree_departments',
-            // 'programs..no_of_semester'=>'required',
-            // 'no_of_year'=>'required',
+          //  'name'=>'required|unique:degree_departments',
+
 
         ]);
-         //  return $request->programs;
+          // return $request->all();
 //request->only([]);
       $dp= DegreeDepartment::create(['name'=>$request->name]);
 
       foreach ($request->programs as $program) {
- //     return $program['program_id'];
-    //    $check= DegreeDepartment::where('id',$dp) ->whereHas('programs' , function($q) use($program){
-    //       $q->where('program_id',$program->program_id);
-    //     })->get();
-
-        // if (! $dp->programs()->where('id',$program['program_id'])->get()) {
-            // return true;
-            $dp->programs()->attach($program['program_id'],
+           $id=Program::where(function($q1) use ($program){
+                        $q1->where('name', strtoupper($program['type']))
+                        ->orWhere('name', strtolower($program['type']));
+                    })
+                        ->where(function($q){
+                            $q->where('type','degree')
+                            ->orWhere('type','Degree');
+                        })->first()->id;
+            $dp->programs()->attach($id,
             ['no_of_semester'=>$program['no_of_semester'],'no_of_year'=>$program['no_of_year']]);
-        // }
+
 
       }
 
+    return new DegreeDepartmentResource($dp->load('programs'));
     }
 
     /**
@@ -60,7 +65,7 @@ class DegreeDepartmentController extends Controller
      */
     public function show(DegreeDepartment $degreeDepartment)
     {
-        return $degreeDepartment;
+        return $degreeDepartment->load('programs');
     }
 
     /**
@@ -78,23 +83,20 @@ class DegreeDepartmentController extends Controller
         ]);
         $degreeDepartment->update(['name'=>$request->name]);
 
-        //    $degreeDepartment->programs()->detach();
         foreach ($request->programs as $program) {
+          $id=Program::where(function($q1) use ($program){
+                       $q1->where('name', strtoupper($program['type']))
+                       ->orWhere('name', strtolower($program['type']));
+                   })
+                       ->where(function($q){
+                           $q->where('type','degree')
+                           ->orWhere('type','Degree');
+                       })->first()->id;
+           $degreeDepartment->programs()->updateExistingPivot($id,
+           ['no_of_semester'=>$program['no_of_semester'],'no_of_year'=>$program['no_of_year']]);
 
-                 /*
-                   //this is an other option ---detaching all first and attach it again
-                    $degreeDepartment->programs()->attach($program->program_id,
-                    ['no_of_term'=>$program->no_of_term,'no_of_year'=>$program->no_of_year]);
-                  */
 
-                    if ($degreeDepartment->programs()->where('id',$program->program_id)->get()) {
-                        $degreeDepartment->programs()->updateExistingPivot($program->program_id,
-                        ['no_of_term'=>$program->no_of_term,'no_of_year'=>$program->no_of_year]);
-                    }else {
-                        $degreeDepartment->programs()->attach($program->program_id,
-                        ['no_of_term'=>$program->no_of_term,'no_of_year'=>$program->no_of_year]);
-                    }
-              }
+     }
 
     }
 

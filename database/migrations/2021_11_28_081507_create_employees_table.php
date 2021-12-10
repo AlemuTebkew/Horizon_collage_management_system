@@ -20,7 +20,7 @@ class CreateEmployeesTable extends Migration
             $table->string('email')->unique();
             $table->string('password')->nullable();
             $table->string('phone_no')->unique();
-            $table->foreignId('role_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('role');
             $table->boolean('status')->default(1);
             $table->timestamps();
         });

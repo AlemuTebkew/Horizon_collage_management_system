@@ -19,4 +19,8 @@ class Level extends Model
     public function tvet_section(){
         return $this->hasMany(TvetSection::class);
     }
+
+    public function tvet_students(){
+        return $this->belongsToMany(TvetStudent::class,'tvet_studenet_level');
+    }
 }

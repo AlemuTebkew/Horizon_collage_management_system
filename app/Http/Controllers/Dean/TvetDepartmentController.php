@@ -29,7 +29,7 @@ class TvetDepartmentController extends Controller
     {
         $request->validate([
             'name'=>'required',
-            'sector'=>'required',
+            // 'sector'=>'required',
 
         ]);
       $td= TvetDepartment::create(['name'=>$request->name,'sector'=>$request->sector]);

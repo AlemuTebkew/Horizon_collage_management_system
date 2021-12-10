@@ -14,7 +14,7 @@ class TvetDepartmentFactory extends Factory
     public function definition()
     {
         return [
-            //
+
         ];
     }
 }

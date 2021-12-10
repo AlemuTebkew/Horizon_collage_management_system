@@ -13,7 +13,11 @@ class Month extends Model
         return $this->belongsToMany(Month::class);
     }
 //students paid for this month
-    public function paid_students(){
+    public function degree_paid_students(){
         return $this->belongsToMany(DegreeStudent::class);
+    }
+
+    public function tvet_paid_students(){
+        return $this->belongsToMany(TvetStudent::class,'tvet_student_month');
     }
 }

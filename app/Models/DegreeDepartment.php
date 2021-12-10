@@ -22,5 +22,8 @@ class DegreeDepartment extends Model
         return $this->hasMany(DegreeDepartment::class);
     }
 
+    public function manager(){
+        return $this->belongsTo(Employee::class,'department_head_id');
+    }
 
 }
