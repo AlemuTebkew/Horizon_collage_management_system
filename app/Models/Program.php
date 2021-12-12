@@ -14,6 +14,10 @@ class Program extends Model
     public function tvet_student(){
         return $this->hasMany(TvetStudent::class);
     }
+
+    public function courses(){
+        return $this->hasMany(Course::class);
+    }
     public function degree_departments(){
         return $this->belongsToMany(DegreeDepartment::class)->withPivot(['no_of_semester','no_of_year']);
     }

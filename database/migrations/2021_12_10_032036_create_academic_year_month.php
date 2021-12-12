@@ -16,7 +16,7 @@ class CreateAcademicYearMonth extends Migration
         Schema::create('academic_year_month', function (Blueprint $table) {
             $table->id();
             $table->foreignId('month_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('acadmic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
             $table->timestamps();
         });

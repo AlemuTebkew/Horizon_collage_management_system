@@ -101,6 +101,13 @@ class EmployeeController extends Controller
     public function getDepartmentHeads(){
         return Employee::where('role','department head')->get();
     }
+    public function getCashiers(){
+        return Employee::where('role','cashier')->get();
+    }
+    public function getRegistrars(){
+        return Employee::where('role','registrar')->get();
+    }
+
 
 
 }

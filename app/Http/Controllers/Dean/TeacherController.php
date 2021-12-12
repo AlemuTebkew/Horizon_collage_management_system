@@ -40,7 +40,7 @@ class TeacherController extends Controller
         ]);
         $login=new UserLogin();
         $login->user_name=$request->email;
-        $login->passwored=Hash::make($request->last_name.'1234');
+        $login->password=Hash::make($request->last_name.'1234');
         $login->user_type='teacher';
         $login->save();
       return Teacher::create($request->all());

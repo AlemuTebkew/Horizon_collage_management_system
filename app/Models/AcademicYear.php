@@ -22,4 +22,8 @@ class AcademicYear extends Model
     public function cocs(){
         return $this->hasMany(Coc::class);
     }
+
+    public function months(){
+        return $this->belongsToMany(Month::class);
+    }
 }

@@ -16,7 +16,7 @@ class TvetDepartmentController extends Controller
      */
     public function index()
     {
-        return TvetDepartment::all();
+        return TvetDepartment::with('levels')->get();
     }
 
     /**
@@ -41,7 +41,7 @@ class TvetDepartmentController extends Controller
            $l->tvet_department_id=$td->id;
            $l->save();
        }
-       return $td->load('levels');
+       return response()->json($td->load('levels'),200);
     }
 
     /**

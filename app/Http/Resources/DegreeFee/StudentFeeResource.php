@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\DegreeFee;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DegreeDepartment extends JsonResource
+class StudentFeeResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,7 +15,10 @@ class DegreeDepartment extends JsonResource
     public function toArray($request)
     {
         return [
-    
+            'id'=>$this->id,
+            'name'=>$this->full_name,
+            'student_id'=>$this->student_id,
+            'semesters'=>FeeSemesterResource::collection($this->semester_payments)
         ];
     }
 }

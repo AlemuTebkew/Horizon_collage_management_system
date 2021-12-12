@@ -87,4 +87,13 @@ class ProgramController extends Controller
     {
         $program->delete();
     }
+
+    public function getDegreeProgram(){
+      return response()->json(Program::where('type','degree')->get(),200);
+    }
+
+    public function getTvetProgram(){
+        return response()->json(Program::where('type','tvet')->get(),200);
+
+    }
 }

@@ -15,7 +15,7 @@ class Semester extends Model
         'semester_GPA','tution_type']);
     }
     public function months(){
-        return $this->belongsToMany(Month::class);
+        return $this->belongsToMany(Month::class,'semester_months');
     }
     public function student_payments(){
         return $this->belongsToMany(DegreeStudent::class,'student_semester_payment');
