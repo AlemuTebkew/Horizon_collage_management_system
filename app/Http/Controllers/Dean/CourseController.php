@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Dean;
 use App\Http\Controllers\Controller;
-
+use App\Http\Resources\Course\CourseResource;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
@@ -15,7 +15,7 @@ class CourseController extends Controller
      */
     public function index()
     {
-        return Course::all();
+        return CourseResource::collection(Course::with('department','program')->get());
     }
 
     /**
@@ -36,7 +36,8 @@ class CourseController extends Controller
             'program_id'=>'required',
 
         ]);
-      return Course::create($request->all());
+      $courses=  Course::create($request->all());
+      return response()->json(new CourseResource($courses->load('department','program')),200);
     }
 
 

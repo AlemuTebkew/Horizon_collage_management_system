@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DegreeStudentResource;
+use App\Http\Resources\StudentSemesterResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
 use App\Models\DegreeStudent;
+use App\Models\Month;
 use App\Models\Semester;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +34,8 @@ class DegreeStudentController extends Controller
     public function store(Request $request)
     {
 
+
+     //   return Month::all('id');
    //  return $request->month_ids;
         DB::beginTransaction();
         try {
@@ -46,8 +50,8 @@ class DegreeStudentController extends Controller
                 'emergency_contact_name'=>'required',
 
             ]);
-
             $academic_year=AcademicYear::where('status',1)->first();
+            $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
             $birth_address=Address::create($request->birth_address);
             $residential_address=Address::create($request->residential_address);
             $emergency_address=Address::create($request->emergency_address);
@@ -70,6 +74,8 @@ class DegreeStudentController extends Controller
                 'scholarship'=>$request->scholarship
 
             ]);
+
+
           if ($request->tution_type == 'cp') {
             $semester->student_payments()->attach($student->id,
             [
@@ -100,9 +106,21 @@ class DegreeStudentController extends Controller
 
           ]);
 
+
+          foreach ($month_id as $id) {
+
+            $student->month_payments()->attach($id,[
+                'academic_year_id'=>$academic_year->id,
+
+
+            ]);
+        }
+
+
+
             foreach ($request->month_ids as $id) {
 
-                $student->month_payments()->attach($id,[
+                $student->month_payments()->updateExistingPivot($id,[
                     'academic_fee_id'=>$request->academic_fee_id1,
                     'academic_year_id'=>$academic_year->id,
                     'receipt_no'=>$request->receipt_no,
@@ -133,7 +151,7 @@ class DegreeStudentController extends Controller
      */
     public function show(DegreeStudent $degreeStudent)
     {
-        return new DegreeStudentResource($degreeStudent->load('semesters'));
+      // return $degreeStudent->load('semesters.months');
     }
 
     /**
@@ -196,6 +214,10 @@ class DegreeStudentController extends Controller
           'tution_type'=>$request->tution_type,
           'scholarship'=>$request->scholarship
       ]);
+    }
+
+    public function getStudentSemesters(DegreeStudent $degreeStudent){
+        return new StudentSemesterResource($degreeStudent->load('semesters'));
     }
 
     public function getStudentCourses(){

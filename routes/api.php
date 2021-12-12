@@ -10,6 +10,7 @@ use App\Http\Controllers\Dean\ProgramController;
 use App\Http\Controllers\Dean\TeacherController;
 use App\Http\Controllers\Dean\TvetDepartmentController;
 use App\Http\Controllers\Dean\SemesterController;
+use App\Http\Controllers\DegreeStudentFeeController;
 use App\Http\Controllers\Registrar\AddressController;
 use App\Http\Controllers\Registrar\DegreeStudentController;
 use App\Http\Controllers\Registrar\TvetStudentController;
@@ -39,6 +40,8 @@ Route::apiResource('/semesters',SemesterController::class);
 Route::apiResource('/degree_departments',DegreeDepartmentController::class);
 Route::apiResource('/tvet_departments',TvetDepartmentController::class);
 Route::apiResource('/programs',ProgramController::class);
+Route::get('/degree_programs',[ProgramController::class,'getDegreeProgram']);
+Route::get('/tvet_programs',[ProgramController::class,'getTvetProgram']);
 Route::apiResource('/teachers',TeacherController::class);
 Route::apiResource('/employees',EmployeeController::class);
 Route::get('/department_heads',[EmployeeController::class,'getDepartmentHeads']);
@@ -53,6 +56,14 @@ Route::post('/assign_tvet_department_head', [TvetDepartmentController::class,'as
 Route::apiResource('/degree_students',DegreeStudentController::class);
 Route::apiResource('/tvet_students',TvetStudentController::class);
 Route::apiResource('/address',AddressController::class);
+Route::get('/get_registrars',[EmployeeController::class,'getRegistrars']);
+
+Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
+
+
+
+//------------------------cashier related--------------------------------//
+Route::get('/get_cashiers',[EmployeeController::class,'getCashiers']);
 
 
 Route::fallback(function(){

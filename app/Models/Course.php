@@ -12,4 +12,11 @@ class Course extends Model
 
 'semester_no','year_no',];
 
+public function department(){
+    return $this->belongsTo(DegreeDepartment::class,'degree_department_id');
+}
+
+public function program(){
+    return $this->belongsTo(Program::class);
+}
 }

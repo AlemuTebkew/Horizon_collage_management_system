@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dean;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Module\ModuleResource;
 use App\Models\Module;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,7 @@ class ModuleController extends Controller
      */
     public function index()
     {
-        return Module::all();
+        return ModuleResource::collection(Module::all());
     }
 
     /**

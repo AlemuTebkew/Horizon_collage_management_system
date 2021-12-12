@@ -1,11 +1,15 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\DegreeFee;
 
+use App\Models\DegreeStudent;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DegreeStudentResource extends JsonResource
+class DegreeStudentsFeeResource extends JsonResource
 {
+
+  //  public $collects = DegreeStudent::class;
+
     /**
      * Transform the resource into an array.
      *
@@ -18,9 +22,7 @@ class DegreeStudentResource extends JsonResource
             'id'=>$this->id,
             'name'=>$this->full_name,
             'student_id'=>$this->student_id,
-            'department'=>$this->department ? $this->department->name:null,
-            'program'=>$this->program ? $this->program->name:null,
-            'semesters'=>SemesterResource::collection($this->semesters)
+            'months'=>MonthResource::collection($this->month_payments)
         ];
     }
 }

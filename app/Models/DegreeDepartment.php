@@ -10,6 +10,7 @@ class DegreeDepartment extends Model
     use HasFactory;
 
     public $fillable=['name','department_head_id',];
+    public $hidden=['created_at','updated_at',];
 
     public function programs(){
         return $this->belongsToMany(Program::class)->withPivot(['no_of_semester','no_of_year']);
@@ -18,6 +19,9 @@ class DegreeDepartment extends Model
         return $this->hasMany(DegreeSection::class);
     }
 
+    public function courses(){
+        return $this->hasMany(Course::class);
+    }
     public function degree_departments(){
         return $this->hasMany(DegreeDepartment::class);
     }
