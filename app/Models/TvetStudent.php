@@ -37,5 +37,15 @@ public function month_payments(){
 public function tvet_sections(){
     return $this->belongsToMany(TvetSection::class);
 }
+public function birth_address(){
+    return $this->belongsTo(Address::class,'birth_address_id');
+}
+public function residential_address(){
+    return $this->belongsTo(Address::class,'residential_address_id');
+}
+public function contact_address(){
+    return $this->belongsTo(Address::class,'contact_address_id');
+}
+
 
 }
