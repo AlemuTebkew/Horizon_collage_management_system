@@ -134,8 +134,8 @@ class DegreeStudentController extends Controller
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            return $e;
-            return response()->json(['can t create student']);
+           // return $e;
+            return response()->json(['can t create student'],500);
         }
 
 
@@ -151,7 +151,7 @@ class DegreeStudentController extends Controller
      */
     public function show(DegreeStudent $degreeStudent)
     {
-      // return $degreeStudent->load('semesters.months');
+       return $degreeStudent->load('semesters.months');
     }
 
     /**

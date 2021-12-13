@@ -95,6 +95,7 @@ class DegreeDepartmentController extends Controller
            $degreeDepartment->programs()->updateExistingPivot($id,
            ['no_of_semester'=>$program['no_of_semester'],'no_of_year'=>$program['no_of_year']]);
 
+           return new DegreeDepartmentResource($degreeDepartment->load('programs'));
 
      }
 
@@ -114,7 +115,7 @@ class DegreeDepartmentController extends Controller
     public function assignDepartmentHead(Request $request){
       $department=DegreeDepartment::find($request->department_id);
       $department->update(['department_head_id'=>$request->employee_id]);
-      return $department;
+      return $department->load('manager');
     }
 
     public function getDepartmentsWithPrograms(Request $request){

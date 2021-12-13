@@ -71,9 +71,20 @@ class TvetStudentController extends Controller
 
         ]);
 
+        $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
+
+        foreach ($month_id as $id) {
+
+            $student->month_payments()->attach($id,[
+                'academic_year_id'=>$academic_year->id,
+
+            ]);
+        }
+
+
         foreach ($request->months as $month) {
 
-            $student->month_payments()->attach($month['id'],[
+            $student->month_payments()->updateExistingPivot($month['id'],[
                 'academic_fee_id'=>$month['academic_fee_id'],
                 'academic_year_id'=>$academic_year->id,
                 'receipt_no'=>$request->receipt_no,

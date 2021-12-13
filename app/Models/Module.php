@@ -13,8 +13,8 @@ class Module extends Model
 public function level(){
     return $this->belongsTo(Level::class);
 }
-public function tvet_department(){
-    return $this->belongsTo(TvetDepartment::class);
+public function department(){
+    return $this->belongsTo(TvetDepartment::class,'tvet_department_id');
 }
 
 public function program(){

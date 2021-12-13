@@ -16,7 +16,7 @@ class Employee extends Model
     public function getFullNameAttribute(){
         return $this->first_name.' '.$this->last_name;
     }
-    public function manages(){
-        return $this->hasMany(DegreeDepartment::class,'department_head_id');
+    public function manage(){
+        return $this->hasOne(DegreeDepartment::class,'department_head_id');
     }
 }

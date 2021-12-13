@@ -15,7 +15,7 @@ class ModuleController extends Controller
      */
     public function index()
     {
-        return ModuleResource::collection(Module::all());
+        return ModuleResource::collection(Module::with('department','program')->get());
     }
 
     /**
@@ -34,7 +34,9 @@ class ModuleController extends Controller
             'tvet_department_id'=>'required',
 
         ]);
-      return Module::create($request->all());
+      $module= Module::create($request->all());
+      return response()->json([new ModuleResource($module->load('department','program')),200]);
+
     }
 
     /**
@@ -45,7 +47,8 @@ class ModuleController extends Controller
      */
     public function show(Module $module)
     {
-        return $module;
+        return response()->json([new ModuleResource($module->load('department','program')),200]);
+
     }
 
     /**
@@ -66,7 +69,8 @@ class ModuleController extends Controller
 
         ]);
        $module->update($request->all());
-       return $module;
+       return response()->json([new ModuleResource($module->load('department','program')),200]);
+
     }
 
     /**
