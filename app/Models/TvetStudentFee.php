@@ -12,4 +12,5 @@ class TvetStudentFee extends Model
     'academic_year_id','month_id','paid_amount'
     ,'paid_date','receipt_no',
     'is_paid'];
+    
 }

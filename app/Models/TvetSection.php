@@ -22,4 +22,7 @@ class TvetSection extends Model
     public function level(){
         return $this->belongsTo(Program::class);
     }
+    public function tvet_students(){
+        return $this->belongsToMany(TvetStudent::class,);
+    }
 }

@@ -20,4 +20,7 @@ public function tvet_department(){
 public function program(){
     return $this->belongsTo(Program::class);
 }
+public function teachers(){
+    return $this->belongsToMany(Teacher::class);
+}
 }
