@@ -42,7 +42,7 @@ public function semesters(){
 // }
 
 public function semester_payments(){
-    return $this->belongsToMany(Semester::class,'student_semester_payment');
+    return $this->belongsToMany(Semester::class,'student_semester_payment')->withPivot(['receipt_no']);
 }
 
 /*

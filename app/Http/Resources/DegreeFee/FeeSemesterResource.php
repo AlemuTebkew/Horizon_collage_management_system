@@ -18,7 +18,7 @@ class FeeSemesterResource extends JsonResource
 
             'semester_no'=>$this->number,
             'pad'=>$this->pivot->receipt_no,
-            'months'=> MonthResource::collection($this->months)
+           // 'months'=> MonthResource::collection($this->months)
         ];
     }
 }

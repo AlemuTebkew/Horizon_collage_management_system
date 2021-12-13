@@ -17,7 +17,13 @@ class DegreeStudentFeeController extends Controller
      */
     public function index()
     {
-        return DegreeStudentsFeeResource::collection(DegreeStudent::with('month_payments')->get());
+        $monthly_paid= DegreeStudentsFeeResource::collection(DegreeStudent::with('month_payments')->get());
+        $semester_paid= DegreeStudentsFeeResource::collection(DegreeStudent::with('semester_payments')->get());
+
+        return response()->json([
+            'monthly_paid'=>$monthly_paid,
+            'semester_paid'=>$semester_paid
+        ]);
     }
 
     /**
@@ -42,7 +48,7 @@ class DegreeStudentFeeController extends Controller
         $degreeStudent=DegreeStudent::find($id);
 
              // return $degreeStudent->load('semesters.months');
-             return new StudentFeeResource($degreeStudent->load('semesters.months'));
+             return new StudentFeeResource($degreeStudent->load('semester_payments.months'));
     }
 
     /**
