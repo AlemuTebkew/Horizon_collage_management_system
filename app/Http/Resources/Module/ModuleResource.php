@@ -15,6 +15,7 @@ class ModuleResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id'=>$this->id,
             'code'=>$this->code,
             'title'=>$this->title,
             'training_hour'=>$this->training_hour,

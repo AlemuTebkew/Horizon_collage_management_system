@@ -49,7 +49,7 @@ class CourseController extends Controller
      */
     public function show(Course $course)
     {
-        return $course;
+        return response()->json(new CourseResource($course->load('department','program')),200);
     }
 
     /**
@@ -72,7 +72,8 @@ class CourseController extends Controller
 
         ]);
        $course->update($request->all());
-       return $course;
+       return response()->json(new CourseResource($course->load('department','program')),200);
+
 
     }
 

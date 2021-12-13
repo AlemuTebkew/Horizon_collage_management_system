@@ -23,4 +23,9 @@ public function program(){
 public function teachers(){
     return $this->belongsToMany(Teacher::class);
 }
+
+public function degree_students(){
+    return $this->belongsToMany(DegreeStudent::class,'student_semester_courses')
+    ->withPivot('semester_id','total_mark','grade_point');
+}
 }

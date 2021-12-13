@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Course\CourseResource;
+use App\Http\Resources\DegreeResult\CourseResultResource;
 use App\Http\Resources\DegreeStudentResource;
 use App\Http\Resources\StudentSemesterResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
+use App\Models\DegreeDepartment;
 use App\Models\DegreeStudent;
 use App\Models\Month;
 use App\Models\Semester;
@@ -199,7 +202,7 @@ class DegreeStudentController extends Controller
             return response()->json(['succesfully deleted']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['not succesfully deleted'.$e]);
+            return response()->json(['not succesfully deleted'.$e],500);
 
         }
     }
@@ -216,11 +219,29 @@ class DegreeStudentController extends Controller
       ]);
     }
 
-    public function getStudentSemesters(DegreeStudent $degreeStudent){
+    public function getStudentSemesters( $degreeStudent_id){
+        $degreeStudent= DegreeStudent::find($degreeStudent_id);
         return new StudentSemesterResource($degreeStudent->load('semesters'));
     }
 
-    public function getStudentCourses(){
+    public function getStudentSemesterCourses($id){
 
+        $dep_id=DegreeStudent::find($id)->degree_department_id;
+        $department=DegreeDepartment::find($dep_id);
+        $courses=$department->courses()->where('semester_no',request('semester_no'))->get();
+        return response()->json( CourseResultResource::collection($courses->load('department','program')),200);
+    }
+
+    public function giveCourseResult(){
+        $student=DegreeStudent::find(request('student_id'));
+
+        foreach (request()->courses as $course) {
+             $student->attach($course['id'],[
+                 'semester_id'=>$course['semester_id'],
+                 'total_mark'=>$course['total_mark']
+
+             ]);
+
+        }
     }
 }

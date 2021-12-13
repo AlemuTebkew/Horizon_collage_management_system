@@ -61,6 +61,9 @@ Route::apiResource('/tvet_students_fees',TvetStudentFeeController::class);
 
 Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
 
+Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudentSemesters']);
+Route::get('/student_semester_courses/{id}',[DegreeStudentController::class,'getStudentSemesterCourses']);
+Route::get('/give_course_result',[DegreeStudentController::class,'giveCourseResult']);
 
 
 //------------------------cashier related--------------------------------//

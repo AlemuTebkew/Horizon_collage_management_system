@@ -54,7 +54,7 @@ class DegreeDepartmentController extends Controller
 
       }
 
-    return new DegreeDepartmentResource($dp->load('programs'));
+    return new DegreeDepartmentResource($dp->load('programs','manager'));
     }
 
     /**
@@ -65,7 +65,7 @@ class DegreeDepartmentController extends Controller
      */
     public function show(DegreeDepartment $degreeDepartment)
     {
-        return $degreeDepartment->load('programs');
+        return $degreeDepartment->load('programs','manager');
     }
 
     /**
@@ -95,7 +95,7 @@ class DegreeDepartmentController extends Controller
            $degreeDepartment->programs()->updateExistingPivot($id,
            ['no_of_semester'=>$program['no_of_semester'],'no_of_year'=>$program['no_of_year']]);
 
-           return new DegreeDepartmentResource($degreeDepartment->load('programs'));
+           return new DegreeDepartmentResource($degreeDepartment->load('programs','manager'));
 
      }
 
@@ -115,7 +115,8 @@ class DegreeDepartmentController extends Controller
     public function assignDepartmentHead(Request $request){
       $department=DegreeDepartment::find($request->department_id);
       $department->update(['department_head_id'=>$request->employee_id]);
-      return $department->load('manager');
+      return response()->json(new DegreeDepartmentResource($department->load('programs','manager')),200);
+
     }
 
     public function getDepartmentsWithPrograms(Request $request){
