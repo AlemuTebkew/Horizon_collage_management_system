@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources\Course;
+namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CourseResource extends JsonResource
+class StudentLevelResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -14,17 +14,14 @@ class CourseResource extends JsonResource
      */
     public function toArray($request)
     {
-        return
-        [
+        return [
             'id'=>$this->id,
-            'code'=>$this->code,
-            'title'=>$this->title,
-            'type'=>$this->type,
-            'semester_no'=>$this->semester_no,
-            'cp'=>$this->cp,
-            'department'=>$this->department ? $this->department:null ,
-            'year_no'=>$this->year_no,
+            'name'=>$this->full_name,
+            'student_id'=>$this->student_id,
+            'department'=>$this->department ? $this->department->name:null,
             'program'=>$this->program ? $this->program->name:null,
+            'student_id'=>$this->current_level_no,
+            'levels'=>LevelResource::collection($this->levels)
         ];
     }
 }

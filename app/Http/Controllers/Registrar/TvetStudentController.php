@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StudentLevelResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
 use App\Models\Level;
@@ -149,7 +150,21 @@ class TvetStudentController extends Controller
      */
     public function destroy(TvetStudent $tvetStudent)
     {
-        $tvetStudent->delete();
+        DB::beginTransaction();
+
+        try {
+            $tvetStudent->birth_address()->delete();
+            $tvetStudent->contact_address()->delete();
+            $tvetStudent->residential_address()->delete();
+            $tvetStudent->delete();
+
+            DB::commit();
+            return response()->json(['succesfully deleted']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['not succesfully deleted'.$e],500);
+
+        }
     }
 
 
@@ -167,4 +182,8 @@ class TvetStudentController extends Controller
 
       }
 
+      public function getStudentLevels( $tvetStudent_id){
+        $tvetStudent= TvetStudent::find($tvetStudent_id);
+        return new StudentLevelResource($tvetStudent->load('levels'));
+    }
 }

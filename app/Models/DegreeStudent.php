@@ -64,4 +64,9 @@ public function contact_address(){
 public function degree_department(){
     return $this->belongsTo(DegreeDepartment::class);
 }
+
+public function courses(){
+    return $this->belongsToMany(Course::class,'student_semester_courses')
+    ->withPivot('semester_id','total_mark','grade_point');
+}
 }
