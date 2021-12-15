@@ -41,14 +41,19 @@ class Account extends Controller
         ],200);
 
 */
-        $user=UserLogin::where('user_name',$request->user_name);
+        $request->validate([
+
+            'user_name'=>'required',
+            'password'=>'required',
+
+        ]);
+        $user=UserLogin::where('user_name',$request->user_name)->first();
         if (! $user ) {
             return response()->json([
                 'message'=>' incorrect user_name and password',
                 ]
                ,404 );
         }
-
         $check=Hash::check($request->password, $user->password);
         if (! $check ) {
             return response()->json([
@@ -59,7 +64,7 @@ class Account extends Controller
 
         if ($user->user_type == 'teacher') {
 
-            $teacher=Teacher::where('email',$user->user_name);
+            $teacher=Teacher::where('email',$user->user_name)->first();
 
             $token= $teacher->createToken('auth_token')->plainTextToken;
             return response()->json([
@@ -68,7 +73,7 @@ class Account extends Controller
             ],200);
 
          }elseif ($user->user_type == 'degree_student') {
-            $degree_student=DegreeStudent::where('student_id',$user->user_name);
+            $degree_student=DegreeStudent::where('student_id',$user->user_name)->first();
 
             $token= $degree_student->createToken('auth_token')->plainTextToken;
             return response()->json([
@@ -77,7 +82,7 @@ class Account extends Controller
             ],200);
 
          } elseif ($user->user_type == 'tvet_student') {
-            $tvet_student=TvetStudent::where('student_id',$user->user_name);
+            $tvet_student=TvetStudent::where('student_id',$user->user_name)->first();
 
             $token= $tvet_student->createToken('auth_token')->plainTextToken;
             return response()->json([
@@ -86,9 +91,8 @@ class Account extends Controller
             ],200);
 
          } elseif ($user->user_type == 'employee') {
-            $employee=Employee::where('email',$user->user_name);
-
-            $token= $employee->createToken('auth_token')->plainTextToken;
+            $employee=Employee::where('email',$user->user_name)->first();
+            $token= $user->createToken('auth_token')->plainTextToken;
             return response()->json([
                 'access_token'=>$token,
                 'user'=>$employee,

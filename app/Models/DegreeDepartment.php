@@ -22,9 +22,9 @@ class DegreeDepartment extends Model
     public function courses(){
         return $this->hasMany(Course::class);
     }
-    public function degree_departments(){
-        return $this->hasMany(DegreeDepartment::class);
-    }
+    // public function degree_departments(){
+    //     return $this->hasMany(DegreeDepartment::class);
+    // }
 
     public function manager(){
         return $this->belongsTo(Employee::class,'department_head_id');

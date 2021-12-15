@@ -13,10 +13,16 @@ class Employee extends Model
     public $fillable=['first_name',
     'last_name','password','email','role','phone_no','status'];
 
+    protected $hidden=['password','created_at','updated_at','status'];
+
     public function getFullNameAttribute(){
         return $this->first_name.' '.$this->last_name;
     }
     public function manage(){
         return $this->hasOne(DegreeDepartment::class,'department_head_id');
+    }
+
+    public function managet(){
+        return $this->hasOne(TvetDepartment::class,'department_head_id');
     }
 }

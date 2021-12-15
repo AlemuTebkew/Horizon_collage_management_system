@@ -17,4 +17,11 @@ class DegreeSection extends Model
         return $this->belongsTo(AcademicYear::class);
     }
 
+    public function semester(){
+        return $this->belongsTo(Semester::class);
+    }
+
+    public function degree_students(){
+        return $this->belongsToMany(DegreeStudent::class);
+    }
 }

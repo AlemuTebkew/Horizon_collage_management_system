@@ -21,6 +21,9 @@ class Program extends Model
     public function degree_departments(){
         return $this->belongsToMany(DegreeDepartment::class)->withPivot(['no_of_semester','no_of_year']);
     }
+      public function tvet_departments(){
+        return $this->belongsToMany(TvetDepartment::class,'tvet_department_program');
+    }
     public function tvet_sections(){
         return $this->hasMany(TvetSection::class);
     }
