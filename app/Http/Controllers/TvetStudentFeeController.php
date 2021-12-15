@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicYear;
+use App\Models\TvetStudent;
 use App\Models\TvetStudentFee;
 use Illuminate\Http\Request;
 
@@ -14,7 +16,34 @@ class TvetStudentFeeController extends Controller
      */
     public function index()
     {
-        return TvetStudentFee::all();
+
+        $academic_year=AcademicYear::where('status',1)->first();
+        $all_paid_months=[];
+        $student=[];
+        $students=[];
+       foreach(TvetStudent::all() as $tvtStudent){
+           //return $tvtStudent;
+           
+           $all_pads=[];
+           foreach ($tvtStudent->month_payments as $monthPayment) {
+              // return $monthPayment;
+              // $pads=[];
+            if($monthPayment->academic_year=$academic_year){
+                $pads['month']=$monthPayment->name;
+                $pads['pad_no']=$monthPayment->pivot->receipt_no;
+              //  return $pads;
+                $all_pads[]=$pads;
+               
+            }
+      
+            
+       }
+        $all_paid_months=array_merge($all_paid_months,$all_pads);
+        $student[][$tvtStudent->id]=$all_paid_months;
+        // return $student;
+    }
+    $students=array_merge($students, $student);   
+     return response()->json(['students'=> $students]);
     }
 
     /**

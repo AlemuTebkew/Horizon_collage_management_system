@@ -16,7 +16,7 @@ use App\Http\Controllers\DegreeStudentFeeController;
 use App\Http\Controllers\Registrar\AddressController;
 use App\Http\Controllers\Registrar\DegreeStudentController;
 use App\Http\Controllers\Registrar\TvetStudentController;
-
+use App\Http\Controllers\TvetStudentFeeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -67,6 +67,7 @@ Route::apiResource('/degree_students',DegreeStudentController::class);
 Route::apiResource('/tvet_students',TvetStudentController::class);
 Route::apiResource('/address',AddressController::class);
 Route::get('/get_registrars',[EmployeeController::class,'getRegistrars']);
+Route::apiResource('/tvet_students_fees',TvetStudentFeeController::class);
 
 Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
 
