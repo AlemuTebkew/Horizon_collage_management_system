@@ -32,7 +32,7 @@ public function levels(){
 }
 //for payment
 public function month_payments(){
-    return $this->belongsToMany(Month::class,'tvet_student_month')->withPivot(['receipt_no']);
+    return $this->belongsToMany(Month::class,'tvet_student_month')->withPivot(['receipt_no','academic_year_id']);
 
 }
 public function tvet_sections(){

@@ -74,9 +74,39 @@ class TvetStudentFeeController extends Controller
      * @param  \App\Models\TvetStudentFee  $tvetStudentFee
      * @return \Illuminate\Http\Response
      */
-    public function show(TvetStudentFee $tvetStudentFee)
+    public function show($tvetStudentId)
     {
-        return $tvetStudentFee;
+        $tvetStudent=TvetStudent::find($tvetStudentId);
+        // return $tvetStudent->month_payments;
+        foreach($tvetStudent->month_payments as $month){
+            //check through relationship method
+            //return $month;
+          $academic_year_id=$month->pivot->academic_year_id;
+          $academic_year=AcademicYear::find($academic_year_id);
+          $years[$academic_year_id]=$academic_year;
+        }
+       //return $years;
+       $all_pads=[];
+       $year_payments=[];
+       $all_year_payments=[];
+       foreach($years as $year){
+        
+            $pads=[];
+            foreach($tvetStudent->month_payments as $month){
+                if($year->id=$month->pivot->academic_year_id){
+                $pads['month']=$month->name;
+                $pads['pad_no']=$month->pivot->receipt_no;
+              //  return $pads;
+                $all_pads[]=$pads;
+               $year_payments[$year->year]=$all_pads;
+                }
+               
+            }
+            //return $year_payments;
+             $all_payment=array_merge($all_year_payments,$year_payments);
+              return $all_payment;
+        
+        }
     }
 
     /**
