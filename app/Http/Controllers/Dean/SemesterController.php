@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Dean;
 use App\Http\Controllers\Controller;
+use App\Models\AcademicYear;
 use App\Models\Semester;
 use Illuminate\Http\Request;
 
@@ -14,7 +15,9 @@ class SemesterController extends Controller
      */
     public function index()
     {
-        return Semester::all();
+        $academic_year=AcademicYear::where('status',1)->first();
+
+        return Semester::where('academic_year_id',$academic_year->id)->get();
     }
 
     /**

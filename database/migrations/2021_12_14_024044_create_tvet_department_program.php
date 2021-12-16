@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAcademicYearMonth extends Migration
+class CreateTvetDepartmentProgram extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateAcademicYearMonth extends Migration
      */
     public function up()
     {
-        Schema::create('academic_year_month', function (Blueprint $table) {
+        Schema::create('tvet_department_program', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('month_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->boolean('selected');
+            $table->foreignId('tvet_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ class CreateAcademicYearMonth extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('academic_year_month');
+        Schema::dropIfExists('tvet_department_program');
     }
 }

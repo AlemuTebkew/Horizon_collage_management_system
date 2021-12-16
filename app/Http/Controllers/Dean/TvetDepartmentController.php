@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Dean;
 use App\Http\Controllers\Controller;
-
+use App\Http\Resources\TvetDepartmentResource;
 use App\Models\Level;
+use App\Models\Program;
 use App\Models\TvetDepartment;
 use Illuminate\Http\Request;
 
@@ -16,7 +17,7 @@ class TvetDepartmentController extends Controller
      */
     public function index()
     {
-        return TvetDepartment::with('levels')->get();
+        return TvetDepartmentResource::collection(TvetDepartment::with('levels')->get());
     }
 
     /**
@@ -33,6 +34,18 @@ class TvetDepartmentController extends Controller
 
         ]);
       $td= TvetDepartment::create(['name'=>$request->name,'sector'=>$request->sector]);
+        $programs=['regular','extension'];
+      foreach ($programs as $program) {
+        $id=Program::where(function($q1) use ($program){
+                     $q1->where('name', strtoupper($program))
+                     ->orWhere('name', strtolower($program));
+                 })
+                     ->where(function($q){
+                         $q->where('type','tvet')
+                         ->orWhere('type','Tvet');
+                     })->first()->id;
+         $td->programs()->attach($id);
+        }
 
        foreach ($request->levels as $level) {
            $l=new Level();
@@ -88,6 +101,6 @@ class TvetDepartmentController extends Controller
     public function assignDepartmentHead(Request $request){
         $department=TvetDepartment::find($request->department_id);
         $department->update(['department_head_id'=>$request->employee_id]);
-        return $department;
-      }
+        return response()->json(new TvetDepartmentResource($department->load('programs','manager')),200);
+    }
 }

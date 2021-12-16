@@ -1,8 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Head;
+use App\Http\Controllers\Controller;
+use App\Models\Course;
 use App\Models\DegreeSection;
+use App\Models\DegreeStudent;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 
 class DegreeSectionController extends Controller
@@ -14,7 +17,7 @@ class DegreeSectionController extends Controller
      */
     public function index()
     {
-        return DegreeSection::all();
+        return DegreeSection::with('degree_department','academic_year','semester')->get();
     }
 
     /**
@@ -33,7 +36,8 @@ class DegreeSectionController extends Controller
             'semester_id'=>'required',
 
         ]);
-      return DegreeSection::create($request->all());
+      $ds= DegreeSection::create($request->all());
+      return $ds->load('degree_department','academic_year','semester');
     }
 
     /**
@@ -44,7 +48,7 @@ class DegreeSectionController extends Controller
      */
     public function show(DegreeSection $degreeSection)
     {
-        return $degreeSection;
+        return $degreeSection->load('degree_department','academic_year','semester');
     }
 
     /**
@@ -76,5 +80,38 @@ class DegreeSectionController extends Controller
     public function destroy(DegreeSection $degreeSection)
     {
         $degreeSection->delete();
+    }
+
+    public function getSectionStudents(){
+        $ds=DegreeSection::find(request('section_id'));
+        return  $ds->degree_students;
+    }
+
+    public function AddStudentsToSection(){
+        $sec= DegreeSection::find(request('section_id'));
+        $sec->degree_students->attach(request('students_id'));
+        return $sec->load('degree_students');
+
+    }
+    public function getSectionCourses(){
+        $ds=DegreeSection::find(request('section_id'));
+        $courses=Course::where('degree_department_id',request('degree_department_id'))
+                        ->where('program_id',request('program_id'))
+                        ->where('year_no',request('year_no'))
+                        ->where('semester_no',request('semester_no'))->get();
+
+        return $courses;
+    }
+
+
+    public function assignTeacherForCourse(){
+        $ds=DegreeSection::find(request('section_id'));
+        $course=Course::find(request('course_id'));
+        $teacher=Teacher::find(request('teacher_id'));
+        $teacher->coureses()->attach($course->id,[
+            'degree_section_id'=>$ds->id,
+        ]);
+
+        return $course->load('teachers');
     }
 }

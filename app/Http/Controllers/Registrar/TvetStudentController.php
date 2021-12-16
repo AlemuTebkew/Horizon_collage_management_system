@@ -20,7 +20,7 @@ class TvetStudentController extends Controller
      */
     public function index()
     {
-        return TvetStudent::with('tvet_department','program');
+        return TvetStudent::with('tvet_department','program')->get();
     }
 
     /**

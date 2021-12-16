@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Account;
 use App\Http\Controllers\Dean\AcademicYearController;
 use App\Http\Controllers\Dean\CourseController;
 use App\Http\Controllers\Dean\ModuleController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Dean\ProgramController;
 use App\Http\Controllers\Dean\TeacherController;
 use App\Http\Controllers\Dean\TvetDepartmentController;
 use App\Http\Controllers\Dean\SemesterController;
+use App\Http\Controllers\Head\DegreeSectionController;
 use App\Http\Controllers\DegreeStudentFeeController;
 use App\Http\Controllers\Registrar\AddressController;
 use App\Http\Controllers\Registrar\DegreeStudentController;
@@ -29,13 +31,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum', function (Request $request) {
+  Route::middleware(['auth:sanctum'])->group(function () {
+    Route::post('/logout',[Account::class,'logout']);
 
-//----------------Dean related-------------------//
+});
+    //----------------Dean related-------------------//
 Route::apiResource('/academic_years',AcademicYearController::class);
 Route::apiResource('/semesters',SemesterController::class);
+Route::apiResource('/sections',DegreeSectionController::class);
 
 Route::apiResource('/degree_departments',DegreeDepartmentController::class);
 Route::apiResource('/tvet_departments',TvetDepartmentController::class);
@@ -51,6 +55,12 @@ Route::apiResource('/modules',ModuleController::class);
 Route::apiResource('/fee_types',FeeTypeController::class);
 Route::post('/assign_degree_department_head', [DegreeDepartmentController::class,'assignDepartmentHead']);
 Route::post('/assign_tvet_department_head', [TvetDepartmentController::class,'assignDepartmentHead']);
+
+
+// });
+
+Route::post('/login',[Account::class,'login']);
+
 
 // ----------------Registrar related==========================///////
 Route::apiResource('/degree_students',DegreeStudentController::class);

@@ -68,5 +68,12 @@ public function degree_department(){
 public function courses(){
     return $this->belongsToMany(Course::class,'student_semester_courses')
     ->withPivot('semester_id','total_mark','grade_point');
+
+
 }
+
+public function degree_sections(){
+    return $this->belongsToMany(DegreeSection::class);
+}
+
 }

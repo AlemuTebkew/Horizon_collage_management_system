@@ -55,6 +55,7 @@ class DegreeStudentController extends Controller
             ]);
             $academic_year=AcademicYear::where('status',1)->first();
             $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
+            $semester=Semester::find($request->semester_id);
             $birth_address=Address::create($request->birth_address);
             $residential_address=Address::create($request->residential_address);
             $emergency_address=Address::create($request->emergency_address);
@@ -65,14 +66,15 @@ class DegreeStudentController extends Controller
             $data['emergency_address_id']=$emergency_address->id;
             $data['password']=Hash::make('HR'.$request->last_name);
             $data['batch']=$academic_year->year;
+            $data['current_semester_no']=$semester->semester_no;
+            $data['current_year_no']=$request->year_no;
             $data['dob']=date('Y-m-d',strtotime($request->dob));
 
-             $semester=Semester::find($request->semester_id);
             $student= DegreeStudent::create($data);
             $student->semesters()->attach($request->semester_id,
             [
                 'year_no'=>$request->year_no,
-                'semester_no'=>$request->semester_no,
+                'semester_no'=>$semester->semester_no,
                 'tution_type'=>$request->tution_type,
                 'scholarship'=>$request->scholarship
 
@@ -82,7 +84,7 @@ class DegreeStudentController extends Controller
           if ($request->tution_type == 'cp') {
             $semester->student_payments()->attach($student->id,
             [
-              'academic_fee_id'=>$request->academic_fee_id1,
+              'fee_type_id'=>$request->fee_type_id1,
               'receipt_no'=>$request->receipt_no,
               'paid_date'=>now()->toDateTime(),
               'is_paid'=>1
@@ -91,7 +93,7 @@ class DegreeStudentController extends Controller
            $semester->student_payments->forget($student->id);
             $semester->student_payments()->attach($student->id,
             [
-              'academic_fee_id'=>$request->academic_fee_id2,
+              'fee_type_id'=>$request->fee_type_id2,
               'receipt_no'=>$request->receipt_no,
               'paid_date'=>now()->toDateTime(),
               'is_paid'=>1
@@ -102,7 +104,7 @@ class DegreeStudentController extends Controller
 
             $semester->student_payments()->attach($student->id,
             [
-              'academic_fee_id'=>$request->academic_fee_id2,
+              'fee_type_id'=>$request->fee_type_id2,
               'receipt_no'=>$request->receipt_no,
               'paid_date'=>now()->toDateTime(),
               'is_paid'=>1
@@ -124,7 +126,7 @@ class DegreeStudentController extends Controller
             foreach ($request->month_ids as $id) {
 
                 $student->month_payments()->updateExistingPivot($id,[
-                    'academic_fee_id'=>$request->academic_fee_id1,
+                    'fee_type_id'=>$request->fee_type_id1,
                     'academic_year_id'=>$academic_year->id,
                     'receipt_no'=>$request->receipt_no,
                     'paid_date'=>now()->toDateTime(),

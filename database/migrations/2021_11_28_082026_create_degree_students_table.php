@@ -17,6 +17,7 @@ class CreateDegreeStudentsTable extends Migration
             $table->id();
             $table->string('student_id')->unique()->nullable();
             $table->string('first_name');
+            $table->string('middle_name');
             $table->string('last_name');
             $table->string('sex');
             $table->date('dob');

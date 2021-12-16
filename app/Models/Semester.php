@@ -28,5 +28,9 @@ class Semester extends Model
     public function program(){
         return $this->belongsTo(Program::class);
     }
+
+    public function degree_sections(){
+        return $this->hasMany(DegreeSection::class);
+    }
     }
 

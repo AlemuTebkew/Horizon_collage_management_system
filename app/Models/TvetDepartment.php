@@ -19,7 +19,14 @@ class TvetDepartment extends Model
     public function tvet_sections(){
         return $this->hasMany(TvetSection::class);
     }
-   
+
+    public function programs(){
+        return $this->belongsTo(Program::class,'tvet_department_program');
+    }
+
+    public function manager(){
+        return $this->belongsTo(Employee::class,'department_head_id');
+    }
     // public function department_head(){
     //     return $this->belongsTo(Dep)
     // }
