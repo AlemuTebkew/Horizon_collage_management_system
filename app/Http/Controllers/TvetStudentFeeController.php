@@ -98,13 +98,14 @@ class TvetStudentFeeController extends Controller
                 $pads['pad_no']=$month->pivot->receipt_no;
               //  return $pads;
                 $all_pads[]=$pads;
-               $year_payments[$year->year]=$all_pads;
+              
                 }
                
             }
-            //return $year_payments;
-             $all_payment=array_merge($all_year_payments,$year_payments);
-              return $all_payment;
+            $year_payments[$year->year]=$all_pads;
+           //return $year_payments;
+          //return   $all_payment=array_merge($all_year_payments,$year_payments);
+              return $all_year_payments[]=$year_payments;
         
         }
     }
