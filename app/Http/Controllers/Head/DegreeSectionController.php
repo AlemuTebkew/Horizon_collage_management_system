@@ -103,7 +103,6 @@ class DegreeSectionController extends Controller
         return $courses;
     }
 
-
     public function assignTeacherForCourse(){
         $ds=DegreeSection::find(request('section_id'));
         $course=Course::find(request('course_id'));

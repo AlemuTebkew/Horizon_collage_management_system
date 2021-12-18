@@ -15,7 +15,7 @@ class ProgramController extends Controller
      */
     public function index()
     {
-        return Program::all();
+        return Program::with('semesters')->get();
     }
 
     /**

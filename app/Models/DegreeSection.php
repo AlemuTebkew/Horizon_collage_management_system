@@ -9,7 +9,7 @@ class DegreeSection extends Model
 {
     use HasFactory;
 
-    public $fillable=['name','year_no','degree_department_id','academic_year_id','semester_id'];
+    public $fillable=['name','year_no','semester_no','degree_department_id','academic_year_id','semester_id','program_id'];
     public function degree_department(){
         return $this->belongsTo(DegreeDepartment::class);
     }
@@ -19,6 +19,10 @@ class DegreeSection extends Model
 
     public function semester(){
         return $this->belongsTo(Semester::class);
+    }
+
+    public function program(){
+        return $this->belongsTo(Program::class);
     }
 
     public function degree_students(){

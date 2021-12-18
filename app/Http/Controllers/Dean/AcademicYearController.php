@@ -19,7 +19,7 @@ class AcademicYearController extends Controller
      */
     public function index()
     {
-        return AcademicYear::all();
+        return AcademicYear::with('semesters.months')->get();
     }
 
     /**
@@ -45,7 +45,7 @@ class AcademicYearController extends Controller
        $data['start_date']=date('Y-m-d',strtotime($request->start_date));
        $data['end_date']=date('Y-m-d',strtotime($request->end_date));
 
-       
+
       return AcademicYear::create($data);
     }
 

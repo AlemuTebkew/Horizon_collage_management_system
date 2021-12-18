@@ -23,7 +23,7 @@ class CreateDegreeStudentsTable extends Migration
             $table->date('dob');
             $table->string('phone_no');
             $table->string('password');
-            $table->string('martial_status');
+            $table->string('maritial_status');
             $table->string('emergency_contact_name');
             $table->string('emergency_contact_relationship');
             $table->string('emergency_contact_phone_no');

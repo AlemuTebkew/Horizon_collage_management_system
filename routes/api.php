@@ -8,12 +8,14 @@ use App\Http\Controllers\Dean\ModuleController;
 use App\Http\Controllers\Dean\DegreeDepartmentController;
 use App\Http\Controllers\Dean\EmployeeController;
 use App\Http\Controllers\Dean\FeeTypeController;
+use App\Http\Controllers\Dean\LevelController ;
 use App\Http\Controllers\Dean\ProgramController;
 use App\Http\Controllers\Dean\TeacherController;
 use App\Http\Controllers\Dean\TvetDepartmentController;
 use App\Http\Controllers\Dean\SemesterController;
 use App\Http\Controllers\Head\DegreeSectionController;
 use App\Http\Controllers\DegreeStudentFeeController;
+use App\Http\Controllers\MonthController;
 use App\Http\Controllers\Registrar\AddressController;
 use App\Http\Controllers\Registrar\DashBoardController as RegistrarDashBoardController;
 use App\Http\Controllers\Registrar\DegreeStudentController;
@@ -76,6 +78,8 @@ Route::get('/degree_students/{department_Head_id}',[DegreeStudentController::cla
 
 Route::apiResource('/tvet_students',TvetStudentController::class);
 Route::apiResource('/address',AddressController::class);
+Route::apiResource('/months',MonthController::class);
+Route::apiResource('/levels',LevelController::class);
 Route::get('/get_registrars',[EmployeeController::class,'getRegistrars']);
 Route::apiResource('/tvet_students_fees',TvetStudentFeeController::class);
 Route::apiResource('/dash_board',RegistrarDashBoardController::class);

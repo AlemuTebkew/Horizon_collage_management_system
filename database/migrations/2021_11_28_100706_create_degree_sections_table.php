@@ -17,9 +17,11 @@ class CreateDegreeSectionsTable extends Migration
             $table->id();
             $table->string('name');
             $table->integer('year_no');
+            $table->integer('semester_no');
             $table->foreignId('degree_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('semester_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();
         });
     }

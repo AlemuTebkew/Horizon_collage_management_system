@@ -11,6 +11,7 @@ use App\Models\Address;
 use App\Models\DegreeDepartment;
 use App\Models\DegreeStudent;
 use App\Models\Employee;
+use App\Models\FeeType;
 use App\Models\Month;
 use App\Models\Semester;
 use Illuminate\Http\Request;
@@ -38,9 +39,6 @@ class DegreeStudentController extends Controller
     public function store(Request $request)
     {
 
-
-     //   return Month::all('id');
-   //  return $request->month_ids;
         DB::beginTransaction();
         try {
 
@@ -50,13 +48,19 @@ class DegreeStudentController extends Controller
                 'sex'=>'required',
                 'dob'=>'required',
                 'phone_no'=>'required',
-                'martial_status'=>'required',
+                'maritial_status'=>'required',
                 'emergency_contact_name'=>'required',
 
             ]);
             $academic_year=AcademicYear::where('status',1)->first();
             $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
-            $semester=Semester::find($request->semester_id);
+
+
+
+           $active_semester=Semester::where('academic_year_id',$academic_year->id)
+                            ->where('status',1)
+                            ->where('program_id',$request->program_id)->first();
+
             $birth_address=Address::create($request->birth_address);
             $residential_address=Address::create($request->residential_address);
             $emergency_address=Address::create($request->emergency_address);
@@ -67,80 +71,89 @@ class DegreeStudentController extends Controller
             $data['emergency_address_id']=$emergency_address->id;
             $data['password']=Hash::make('HR'.$request->last_name);
             $data['batch']=$academic_year->year;
-            $data['current_semester_no']=$semester->semester_no;
-            $data['current_year_no']=$request->year_no;
+             $data['current_semester_no']=$request->semester_no;
+             $data['current_year_no']=$request->year_no;
             $data['dob']=date('Y-m-d',strtotime($request->dob));
 
             $student= DegreeStudent::create($data);
-            $student->semesters()->attach($request->semester_id,
+
+         //   return $student;
+            $student->semesters()->attach($active_semester->id,
             [
                 'year_no'=>$request->year_no,
-                'semester_no'=>$semester->semester_no,
-                'tution_type'=>$request->tution_type,
-                'scholarship'=>$request->scholarship
+                'semester_no'=>$request->semester_no,
+                'tuition_type'=>$request->tuition_type,
+                'partial_scholarship'=>$request->partial_scholarship
 
             ]);
 
+            if (!($request->partial_scholarship || $request->fully_scholarship)) {
 
-          if ($request->tution_type == 'cp') {
-            $semester->student_payments()->attach($student->id,
-            [
-              'fee_type_id'=>$request->fee_type_id1,
-              'receipt_no'=>$request->receipt_no,
-              'paid_date'=>now()->toDateTime(),
-              'is_paid'=>1
-            ]);
+                $reg_fee_id= FeeType::where('name','Registration Fee')->first()->id;
+                $tuition_fee_id= FeeType::where('name','CP Fee')->first()->id;
+                $monthly_fee_id= FeeType::where('name','Monthly Fee')->first()->id;
 
-           $semester->student_payments->forget($student->id);
-            $semester->student_payments()->attach($student->id,
-            [
-              'fee_type_id'=>$request->fee_type_id2,
-              'receipt_no'=>$request->receipt_no,
-              'paid_date'=>now()->toDateTime(),
-              'is_paid'=>1
-            ]);
+            //   if ($request->tuition_type == 'cp') {
 
+            //     $active_semester->student_payments()->attach($student->id,
+            //     [
 
-          }elseif ($request->tution_type == 'monthly') {
+            //       'fee_type_id'=>$tuition_fee_id,
+            //       'receipt_no'=>$request->receipt_no,
+            //       'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+            //       'paid_amount'=>$request->tuition_fee,
+            //       'is_paid'=>1
+            //     ]);
 
-            $semester->student_payments()->attach($student->id,
-            [
-              'fee_type_id'=>$request->fee_type_id2,
-              'receipt_no'=>$request->receipt_no,
-              'paid_date'=>now()->toDateTime(),
-              'is_paid'=>1
+            //    $active_semester->student_payments->forget($student->id);
+            //     $active_semester->student_payments()->attach($student->id,
+            //     [
+            //       'fee_type_id'=>$reg_fee_id,
+            //       'receipt_no'=>$request->receipt_no,
+            //       'paid_amount'=>$request->registration_fee,
+            //       'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+            //       'is_paid'=>1
+            //     ]);
+            //   }elseif ($request->tuition_type == 'monthly') {
 
-          ]);
-
-
-          foreach ($month_id as $id) {
-
-            $student->month_payments()->attach($id,[
-                'academic_year_id'=>$academic_year->id,
-
-
-            ]);
-        }
-
-
-
-            foreach ($request->month_ids as $id) {
-
-                $student->month_payments()->updateExistingPivot($id,[
-                    'fee_type_id'=>$request->fee_type_id1,
+                $student->degree_other_fees()->attach($reg_fee_id,[
                     'academic_year_id'=>$academic_year->id,
                     'receipt_no'=>$request->receipt_no,
-                    'paid_date'=>now()->toDateTime(),
+                    'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+                    'paid_amount'=>$request->registration_fee,
                     'is_paid'=>1
 
                 ]);
+
+
+              foreach ($month_id as $id) {
+
+                $student->month_payments()->attach($id,[
+                    'academic_year_id'=>$academic_year->id,
+
+                ]);
             }
-          }
+
+                foreach ($request->tuition_months as $id) {
+
+                    $student->month_payments()->updateExistingPivot($id,[
+                        'fee_type_id'=>$tuition_fee_id,
+                        'academic_year_id'=>$academic_year->id,
+                        'receipt_no'=>$request->receipt_no,
+                        'paid_amount'=>$request->tuition_fee,
+                        'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+                        'is_paid'=>1
+
+                    ]);
+                }
+              }
+            // }
+
 
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-           // return $e;
+            return $e;
             return response()->json(['can t create student'],500);
         }
 
@@ -217,7 +230,7 @@ class DegreeStudentController extends Controller
       [
           'year_no'=>$request->year_no,
           'semester_no'=>$request->semester_no,
-          'tution_type'=>$request->tution_type,
+          'tuition_type'=>$request->tuition_type,
           'scholarship'=>$request->scholarship
       ]);
     }
