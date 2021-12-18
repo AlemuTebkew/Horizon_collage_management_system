@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Account;
+use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\Dean\AcademicYearController;
 use App\Http\Controllers\Dean\CourseController;
 use App\Http\Controllers\Dean\ModuleController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Head\DegreeSectionController;
 use App\Http\Controllers\DegreeStudentFeeController;
 use App\Http\Controllers\MonthController;
 use App\Http\Controllers\Registrar\AddressController;
+use App\Http\Controllers\Registrar\DashBoardController as RegistrarDashBoardController;
 use App\Http\Controllers\Registrar\DegreeStudentController;
 use App\Http\Controllers\Registrar\TvetStudentController;
 use App\Http\Controllers\TvetStudentFeeController;
@@ -72,6 +74,8 @@ Route::apiResource('/months',MonthController::class);
 Route::apiResource('/levels',LevelController::class);
 Route::get('/get_registrars',[EmployeeController::class,'getRegistrars']);
 Route::apiResource('/tvet_students_fees',TvetStudentFeeController::class);
+Route::apiResource('/dash_board',RegistrarDashBoardController::class);
+
 
 Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
 
