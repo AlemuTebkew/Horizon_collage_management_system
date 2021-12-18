@@ -9,8 +9,8 @@ class DegreeStudent extends Model
 {
     use HasFactory;
     public $fillable=['student_id','first_name',
-    'last_name','password','sex','dob',
-    'phone_no','martial_status', 'emergency_contact_name','emergency_contact_relationship',
+    'last_name','middle_name','password','sex','dob',
+    'phone_no','maritial_status', 'emergency_contact_name','emergency_contact_relationship',
     'emergency_contact_phone_no','EGSSE_result','EHEEE_result',
     'birth_address_id','residential_address_id','emergency_address_id',
     'program_id','degree_department_id','financial_source',
@@ -30,12 +30,18 @@ public function cocs(){
     // ->withPivot(['application_date','result','nature_of_assesment']);
     return $this->morphToMany(Coc::class,'cocable');
 }
+
+public function degree_other_fees(){
+
+    return $this->belongsToMany(FeeType::class,'degree_other_fees');
+}
+
 public function program(){
      return $this->belongsTo(Program::class);
 }
 public function semesters(){
     return $this->belongsToMany(Semester::class)->withPivot(['semester_no','year_no',
-    'semester_GPA','tution_type']);
+    'semester_GPA','tuition_type']);
 }
 // public function semester_payment(){
 //     return $this->hasOne(SemesterPayment::class);

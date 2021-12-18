@@ -5,7 +5,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentLevelResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
+use App\Models\FeeType;
 use App\Models\Level;
+use App\Models\Month;
 use App\Models\TvetStudent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +22,7 @@ class TvetStudentController extends Controller
      */
     public function index()
     {
-        return TvetStudent::with('tvet_department','program')->get();
+        return TvetStudent::with('tvet_department','program','month_payments')->get();
     }
 
     /**
@@ -29,26 +31,28 @@ class TvetStudentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    public $id=0;
     public function store(Request $request)
     {
 
-        DB::beginTransaction();
+        // DB::beginTransaction();
 
-        try {
+        // try {
 
         $request->validate([
             'first_name'=>'required',
             'last_name'=>'required',
+            'middle_name'=>'required',
             'sex'=>'required',
             'dob'=>'required',
             'phone_no'=>'required',
-            'martial_status'=>'required',
+            'maritial_status'=>'required',
             'emergency_contact_name'=>'required',
-
         ]);
 
-
         $academic_year=AcademicYear::where('status',1)->first();
+        $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
+        $level=Level::find($request->level_id);
         $birth_address=Address::create($request->birth_address);
         $residential_address=Address::create($request->residential_address);
         $emergency_address=Address::create($request->emergency_address);
@@ -59,21 +63,25 @@ class TvetStudentController extends Controller
         $data['emergency_address_id']=$emergency_address->id;
         $data['password']=Hash::make('HR'.$request->last_name);
         $data['batch']=$academic_year->year;
+        $data['current_level_no']=$level->level_no;
         $data['dob']=date('Y-m-d',strtotime($request->dob));
 
 
-        $level=Level::find($request->level_id);
+
         $student= TvetStudent::create($data);
-        $student->levels()->attach($request->level_id,
+        $student->levels()->attach($level->id,
         [
 
             'academic_year_id'=>$academic_year->id,
-            'scholarship'=>$request->scholarship
+            'partial_scholarship'=>$request->partial_scholarship
 
         ]);
 
-        $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
+        $reg_fee_id= FeeType::where('name','Registration Fee')->first()->id;
+        $monthly_fee_id= FeeType::where('name','Monthly Fee')->first()->id;
 
+
+      // return $month_id;
         foreach ($month_id as $id) {
 
             $student->month_payments()->attach($id,[
@@ -82,28 +90,38 @@ class TvetStudentController extends Controller
             ]);
         }
 
+        foreach ($request->tuition_months as $id) {
 
-        foreach ($request->months as $month) {
-
-            $student->month_payments()->updateExistingPivot($month['id'],[
-                'academic_fee_id'=>$month['academic_fee_id'],
+            $student->month_payments()->updateExistingPivot($id,[
+                'fee_type_id'=>$monthly_fee_id,
                 'academic_year_id'=>$academic_year->id,
                 'receipt_no'=>$request->receipt_no,
-                'paid_date'=>now()->toDateTime(),
+                'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+                'paid_amount'=>$request->tuition_fee,
                 'is_paid'=>1
 
             ]);
-            $student->month_payments->forget($month['id']);
+          //  $student->month_payments->forget($id);
 
         }
+       // $student->month_payments->forget($this->id);
 
-        DB::commit();
-        return $student->load('levels');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return $e;
-        return response()->json(['can t create student']);
-    }
+        $student->tvet_other_fees()->attach($reg_fee_id,[
+            'academic_year_id'=>$academic_year->id,
+            'receipt_no'=>$request->receipt_no,
+            'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+            'paid_amount'=>$request->registration_fee,
+            'is_paid'=>1
+
+        ]);
+        return $student->load('month_payments');
+    //     DB::commit();
+    //     return $student->load('levels');
+    // } catch (\Exception $e) {
+    //     DB::rollBack();
+    //     return $e;
+    //     return response()->json(['can t create student']);
+    // }
 
     }
 
@@ -115,7 +133,7 @@ class TvetStudentController extends Controller
      */
     public function show(TvetStudent $tvetStudent)
     {
-       return $tvetStudent->load('levels');
+       return $tvetStudent->load('month_payments');
     }
 
     /**

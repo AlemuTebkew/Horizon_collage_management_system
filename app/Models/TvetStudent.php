@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class TvetStudent extends Model
 {
     use HasFactory;
-    public $fillable=['student_id','first_name',
+    public $fillable=['student_id','first_name','middle_name',
     'last_name','password','sex','dob',
-    'phone_no','martial_status', 'emergency_contact_name','emergency_contact_relationship',
+    'phone_no','maritial_status', 'emergency_contact_name','emergency_contact_relationship',
     'emergency_contact_phone_no','EGSSE_result','EHEEE_result',
     'birth_address_id','residential_address_id','emergency_address_id',
     'program_id','tvet_department_id','financial_source',
@@ -27,14 +27,23 @@ public function program(){
     return $this->belongsTo(Program::class);
 }
 
+public function tvet_department(){
+    return $this->belongsTo(TvetDepartment::class);
+}
 public function levels(){
-    return $this->belongsToMany(Level::class,'tvet_studenet_level');
+    return $this->belongsToMany(Level::class,'tvet_student_level');
 }
 //for payment
 public function month_payments(){
     return $this->belongsToMany(Month::class,'tvet_student_month')->withPivot(['receipt_no']);
 
 }
+
+public function tvet_other_fees(){
+
+    return $this->belongsToMany(FeeType::class,'tvet_other_fees');
+}
+
 public function tvet_sections(){
     return $this->belongsToMany(TvetSection::class);
 }

@@ -27,8 +27,13 @@ class Program extends Model
     public function tvet_sections(){
         return $this->hasMany(TvetSection::class);
     }
+    public function degree_sections(){
+        return $this->hasMany(DegreeSection::class);
+    }
     public function degree_students(){
         return $this->hasMany(DegreeStudent::class);
     }
-
+    public function semesters(){
+        return $this->hasMany(Semester::class);
+    }
 }

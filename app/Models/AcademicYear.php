@@ -26,4 +26,7 @@ class AcademicYear extends Model
     public function months(){
         return $this->belongsToMany(Month::class);
     }
+    public function semesters(){
+        return $this->hasMany(Semester::class);
+    }
 }

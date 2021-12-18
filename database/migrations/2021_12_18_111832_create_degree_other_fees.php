@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateMonthlyDegreeStudentFeesTable extends Migration
+class CreateDegreeOtherFees extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,17 @@ class CreateMonthlyDegreeStudentFeesTable extends Migration
      */
     public function up()
     {
-        Schema::create('degree_student_month', function (Blueprint $table) {
+        Schema::create('degree_other_fees', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('month_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('degree_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('fee_type_id')->nullable()->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('academic_year_id')->nullable()->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('fee_type_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->string('receipt_no')->nullable();
             $table->double('paid_amount')->nullable();
             $table->dateTime('paid_date')->nullable();
-            $table->double('receipt_no')->nullable();
             $table->boolean('is_paid')->default(0);
-             $table->timestamps();
+
+            $table->timestamps();
         });
     }
 
@@ -34,6 +34,6 @@ class CreateMonthlyDegreeStudentFeesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('monthly_degree_student_fees');
+        Schema::dropIfExists('degree_other_fees');
     }
 }

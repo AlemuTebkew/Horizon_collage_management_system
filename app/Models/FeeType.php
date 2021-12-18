@@ -9,4 +9,14 @@ class FeeType extends Model
 {
     use HasFactory;
     public $fillable=['name'];
+
+
+    public function degree_paids(){
+
+        return $this->belongsToMany(FeeType::class,'degree_other_fees');
+    }
+    public function tvet_paids(){
+
+        return $this->belongsToMany(FeeType::class,'tvet_other_fees');
+    }
 }

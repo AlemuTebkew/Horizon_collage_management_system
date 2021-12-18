@@ -14,7 +14,7 @@ class Coc extends Model
     {
         // return $this->belongsToMany(DegreeStudent::class)
         // ->withPivot(['application_date','result','nature_of_assesment']);
-        return $this->morphedByMany(TvetStudent::class, 'cocable')
+        return $this->morphedByMany(DegreeStudent::class, 'cocable')
         ->withPivot(['application_date','result','nature_of_assesment']);    }
 
     public function tvet_students()
