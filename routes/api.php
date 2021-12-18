@@ -40,6 +40,8 @@ use Illuminate\Support\Facades\Route;
 });
     //----------------Dean related-------------------//
 Route::apiResource('/academic_years',AcademicYearController::class);
+Route::post('/all_academic_years',[AcademicYearController::class,'getAllAcademicYear']);
+
 Route::apiResource('/semesters',SemesterController::class);
 Route::apiResource('/sections',DegreeSectionController::class);
 
@@ -53,6 +55,9 @@ Route::apiResource('/employees',EmployeeController::class);
 Route::get('/department_heads',[EmployeeController::class,'getDepartmentHeads']);
 
 Route::apiResource('/courses',CourseController::class);
+Route::get('/get_courses/{department_Head_id}',[CourseController::class,'getCourse']);
+
+
 Route::apiResource('/modules',ModuleController::class);
 Route::apiResource('/fee_types',FeeTypeController::class);
 Route::post('/assign_degree_department_head', [DegreeDepartmentController::class,'assignDepartmentHead']);
@@ -66,6 +71,9 @@ Route::post('/login',[Account::class,'login']);
 
 // ----------------Registrar related==========================///////
 Route::apiResource('/degree_students',DegreeStudentController::class);
+Route::get('/degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
+
+
 Route::apiResource('/tvet_students',TvetStudentController::class);
 Route::apiResource('/address',AddressController::class);
 Route::get('/get_registrars',[EmployeeController::class,'getRegistrars']);
