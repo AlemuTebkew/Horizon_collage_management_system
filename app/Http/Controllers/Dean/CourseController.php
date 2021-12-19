@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Dean;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Course\CourseResource;
 use App\Models\Course;
+use App\Models\DegreeDepartment;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
@@ -86,5 +88,12 @@ class CourseController extends Controller
     public function destroy(Course $course)
     {
         $course->delete();
+    }
+    /*
+    **/
+    public function getCourse($department_Head_id){
+        $dep_head=Employee::find($department_Head_id);
+        $department=$dep_head->manage;
+        return $course=Course::where('degree_department_id',$department->id)->get();
     }
 }

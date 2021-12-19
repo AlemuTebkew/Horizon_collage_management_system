@@ -114,4 +114,5 @@ class DegreeSectionController extends Controller
 
         return $course->load('teachers');
     }
+    
 }

@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Dean;
 use  App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
+use App\Models\Course;
+use App\Models\DegreeSection;
+use App\Models\DegreeStudent;
+use App\Models\Employee;
+use App\Models\Semester;
 use Illuminate\Http\Request;
 
 class AcademicYearController extends Controller
@@ -89,5 +94,25 @@ class AcademicYearController extends Controller
 
     public function closeAcademicYear(AcademicYear $academicYear){
       $academicYear->update(['status'=>0,'is_current'=>0]);
+    }
+    public function getAllAcademicYear($departmentHeadId){
+        $current_academic_year=AcademicYear::where('status',1);
+        $current_semester=Semester::where('status',1);
+
+      return  $department_head=Employee::find($departmentHeadId);
+        $department=$department_head->manage();
+        $academic_years=AcademicYear::all();
+        $all_academic_year=[];
+        foreach ( $academic_years as  $academic_year) { 
+          $all_academic_year[$academic_year->year]=$academic_year->semesters;
+        }
+        $course=Course::where('department_id',$department->id);
+        $section=DegreeSection::where('department_id',$department->id)
+                                ->orwhere('acadmic_year_id',$current_academic_year->id)
+                                ->orWhere('semester_id',$current_semester->id)->get();
+        $students= DegreeStudent::where('department_id',$department->id)->with('degree_department','program')->get();
+        foreach ($students as $student) {
+           return $student->courses;
+        }
     }
 }

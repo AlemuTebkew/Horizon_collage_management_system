@@ -10,6 +10,7 @@ use App\Models\AcademicYear;
 use App\Models\Address;
 use App\Models\DegreeDepartment;
 use App\Models\DegreeStudent;
+use App\Models\Employee;
 use App\Models\FeeType;
 use App\Models\Month;
 use App\Models\Semester;
@@ -258,5 +259,11 @@ class DegreeStudentController extends Controller
              ]);
 
         }
+    }
+    public function getDegreeStudent($department_Head_id){
+        $dep_head=Employee::find($department_Head_id);
+        $department=$dep_head->manage;
+        return  $students= DegreeStudent::where('department_id',$department->id)->with('degree_department','program')->get();
+      
     }
 }

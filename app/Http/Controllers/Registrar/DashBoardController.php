@@ -25,7 +25,7 @@ class DashBoardController extends Controller
            $dashboard_data['new_tvet_student']=TvetStudent::where('batch',$current_academic_year->year)->count();
            $dashboard_data['tvet_scholarship_students']=TvetStudent::where('fully_scholarship',1)->get();
            $dashboard_data['degree_scholarship_students']=DegreeStudent::where('fully_scholarship',1)->get();
-
+            
             return response()->json(['students'=>  $dashboard_data]);
     }
 
