@@ -38,12 +38,12 @@ use Illuminate\Support\Facades\Route;
 // Route::middleware('auth:sanctum', function (Request $request) {
   Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout',[Account::class,'logout']);
+    Route::apiResource('/degree_sections',DegreeSectionController::class);
 
 });
     //----------------Dean related-------------------//
 Route::apiResource('/academic_years',AcademicYearController::class);
 Route::apiResource('/semesters',SemesterController::class);
-Route::apiResource('/sections',DegreeSectionController::class);
 
 Route::apiResource('/degree_departments',DegreeDepartmentController::class);
 Route::apiResource('/tvet_departments',TvetDepartmentController::class);

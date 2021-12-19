@@ -31,13 +31,14 @@ class DegreeSectionController extends Controller
         $request->validate([
             'name'=>'required',
             'year_no'=>'required',
-            'degree_department_id'=>'required',
             'academic_year_id'=>'required',
             'semester_id'=>'required',
 
         ]);
-      $ds= DegreeSection::create($request->all());
-      return $ds->load('degree_department','academic_year','semester');
+        $data=$request->all();
+        $data['degree_department_id']=$request->user()->manage->id;
+        $ds= DegreeSection::create($data);
+        return $ds->load('degree_department','academic_year','semester');
     }
 
     /**

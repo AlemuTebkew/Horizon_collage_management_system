@@ -35,9 +35,9 @@ class TvetStudentController extends Controller
     public function store(Request $request)
     {
 
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
-        // try {
+        try {
 
         $request->validate([
             'first_name'=>'required',
@@ -114,14 +114,13 @@ class TvetStudentController extends Controller
             'is_paid'=>1
 
         ]);
-        return $student->load('month_payments');
-    //     DB::commit();
-    //     return $student->load('levels');
-    // } catch (\Exception $e) {
-    //     DB::rollBack();
-    //     return $e;
-    //     return response()->json(['can t create student']);
-    // }
+        DB::commit();
+        return $student->load('levels','month_payments');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return $e;
+        return response()->json(['can t create student'],501);
+    }
 
     }
 

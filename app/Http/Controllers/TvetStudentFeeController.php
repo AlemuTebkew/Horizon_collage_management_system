@@ -18,31 +18,34 @@ class TvetStudentFeeController extends Controller
     {
 
         $academic_year=AcademicYear::where('status',1)->first();
-        $all_paid_months=[];
         $student=[];
         $students=[];
-       foreach(TvetStudent::all() as $tvtStudent){
+      //  return TvetStudent::with('month_payments')->get();
+       foreach(TvetStudent::with('month_payments')->get() as $tvtStudent){
            //return $tvtStudent;
-           
+           $all_paid_months=[];
+
            $all_pads=[];
            foreach ($tvtStudent->month_payments as $monthPayment) {
               // return $monthPayment;
               // $pads=[];
-            if($monthPayment->academic_year=$academic_year){
-                $pads['month']=$monthPayment->name;
+            if($monthPayment->pivot->academic_year_id == $academic_year->id){
+                $pads['id']=$monthPayment->id;
+                $pads['month_number']=$monthPayment->number;
+                $pads['month_name']=$monthPayment->name;
                 $pads['pad_no']=$monthPayment->pivot->receipt_no;
               //  return $pads;
                 $all_pads[]=$pads;
-               
+
             }
-      
-            
+
+
        }
         $all_paid_months=array_merge($all_paid_months,$all_pads);
         $student[][$tvtStudent->id]=$all_paid_months;
         // return $student;
     }
-    $students=array_merge($students, $student);   
+    $students=array_merge($students, $student);
      return response()->json(['students'=> $students]);
     }
 
@@ -90,7 +93,7 @@ class TvetStudentFeeController extends Controller
        $year_payments=[];
        $all_year_payments=[];
        foreach($years as $year){
-        
+
             $pads=[];
             foreach($tvetStudent->month_payments as $month){
                 if($year->id=$month->pivot->academic_year_id){
@@ -98,15 +101,15 @@ class TvetStudentFeeController extends Controller
                 $pads['pad_no']=$month->pivot->receipt_no;
               //  return $pads;
                 $all_pads[]=$pads;
-              
+
                 }
-               
+
             }
             $year_payments[$year->year]=$all_pads;
            //return $year_payments;
           //return   $all_payment=array_merge($all_year_payments,$year_payments);
               return $all_year_payments[]=$year_payments;
-        
+
         }
     }
 
