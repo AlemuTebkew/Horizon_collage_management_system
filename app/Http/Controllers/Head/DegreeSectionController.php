@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers\Head;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Head\DegreeSectionResource;
+use App\Http\Resources\Head\DegreeSectionStudentResource;
+use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\DegreeSection;
 use App\Models\DegreeStudent;
+use App\Models\Employee;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
 
@@ -17,7 +21,10 @@ class DegreeSectionController extends Controller
      */
     public function index()
     {
-        return DegreeSection::with('degree_department','academic_year','semester')->get();
+        $academic_year=AcademicYear::where('status',1)->first();
+
+        return DegreeSectionResource::collection(DegreeSection::with('degree_department','semester')
+              ->where('academic_year_id',$academic_year->id)->get());
     }
 
     /**
@@ -36,9 +43,11 @@ class DegreeSectionController extends Controller
 
         ]);
         $data=$request->all();
-        $data['degree_department_id']=$request->user()->manage->id;
+        $employee=Employee::where('email',$request->user()->user_name)->first();
+    //   return $employee;
+        $data['degree_department_id']=$employee->manage->id;
         $ds= DegreeSection::create($data);
-        return $ds->load('degree_department','academic_year','semester');
+        return new DegreeSectionResource($ds->load('degree_department','semester'));
     }
 
     /**
@@ -49,7 +58,7 @@ class DegreeSectionController extends Controller
      */
     public function show(DegreeSection $degreeSection)
     {
-        return $degreeSection->load('degree_department','academic_year','semester');
+        return new DegreeSectionResource($degreeSection->load('degree_department','semester'));
     }
 
     /**
@@ -64,12 +73,18 @@ class DegreeSectionController extends Controller
         $request->validate([
             'name'=>'required',
             'year_no'=>'required',
-            'degree_department_id'=>'required',
             'academic_year_id'=>'required',
             'semester_id'=>'required',
 
         ]);
-      return $degreeSection->update($request->all());
+        //'email',$request->user()->user_name)->first()
+        $data=$request->all();
+        $employee=Employee::where('email',$request->user()->user_name)->first();
+     // return $employee;
+        $data['degree_department_id']=$employee->manage->id;
+        $degreeSection->update($data);
+        return new DegreeSectionResource($degreeSection->load('degree_department','semester'));
+     // return $degreeSection->update($request->all());
     }
 
     /**
@@ -85,13 +100,15 @@ class DegreeSectionController extends Controller
 
     public function getSectionStudents(){
         $ds=DegreeSection::find(request('section_id'));
-        return  $ds->degree_students;
+        return DegreeSectionStudentResource::collection($ds->degree_students);
     }
 
-    public function AddStudentsToSection(){
+    public function addStudentsToSection(){
         $sec= DegreeSection::find(request('section_id'));
-        $sec->degree_students->attach(request('students_id'));
-        return $sec->load('degree_students');
+        foreach (request('student_ids')  as  $student_id) {
+           $sec->degree_students()->attach($student_id);
+        }
+        return DegreeSectionStudentResource::collection($sec->degree_students);
 
     }
     public function getSectionCourses(){
@@ -114,5 +131,5 @@ class DegreeSectionController extends Controller
 
         return $course->load('teachers');
     }
-    
+
 }

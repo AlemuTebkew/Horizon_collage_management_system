@@ -91,9 +91,14 @@ class CourseController extends Controller
     }
     /*
     **/
-    public function getCourse($department_Head_id){
-        $dep_head=Employee::find($department_Head_id);
-        $department=$dep_head->manage;
-        return $course=Course::where('degree_department_id',$department->id)->get();
+    public function getCourse(){
+
+        $employee=Employee::where('email',request()->user()->user_name)->first();
+        // return $employee;
+           $department_head=$employee->manage;
+
+
+        return  CourseResource::collection ( Course::where('degree_department_id',$department_head->id)
+        ->with('department','program')->get());
     }
 }

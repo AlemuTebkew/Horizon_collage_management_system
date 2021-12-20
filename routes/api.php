@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Route;
   Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout',[Account::class,'logout']);
     Route::apiResource('/degree_sections',DegreeSectionController::class);
+    Route::get('/department_courses',[CourseController::class,'getCourse']);
 
 });
     //----------------Dean related-------------------//
@@ -57,7 +58,6 @@ Route::apiResource('/employees',EmployeeController::class);
 Route::get('/department_heads',[EmployeeController::class,'getDepartmentHeads']);
 
 Route::apiResource('/courses',CourseController::class);
-Route::get('/get_courses/{department_Head_id}',[CourseController::class,'getCourse']);
 
 
 Route::apiResource('/modules',ModuleController::class);
@@ -81,15 +81,17 @@ Route::apiResource('/address',AddressController::class);
 Route::apiResource('/months',MonthController::class);
 Route::apiResource('/levels',LevelController::class);
 Route::get('/get_registrars',[EmployeeController::class,'getRegistrars']);
-Route::apiResource('/tvet_students_fees',TvetStudentFeeController::class);
 Route::apiResource('/dash_board',RegistrarDashBoardController::class);
 
 
 Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
+Route::apiResource('/tvet_student_fees',TvetStudentFeeController::class);
 
+/////////////////////Head////////////////////
 Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudentSemesters']);
 Route::get('/student_semester_courses/{id}',[DegreeStudentController::class,'getStudentSemesterCourses']);
 Route::get('/give_course_result',[DegreeStudentController::class,'giveCourseResult']);
+Route::get('/degree_section_students',[DegreeSectionController ::class,'getSectionStudents']);
 
 
 //------------------------cashier related--------------------------------//

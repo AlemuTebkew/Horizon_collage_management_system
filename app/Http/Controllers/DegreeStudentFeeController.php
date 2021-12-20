@@ -18,45 +18,35 @@ class DegreeStudentFeeController extends Controller
      */
     public function index()
     {
-
+        $all=[];
+        $student=[];
          $academic_year=AcademicYear::where('status',1)->first();
-          foreach (DegreeStudent::all() as  $degreeStudent) {
-              foreach ($degreeStudent->semesters as $value) {
-                $paid_months=[];
+         $degreeStudents=DegreeStudent::whereHas('month_payments')
+                                     ->with('month_payments')->get();
+          foreach ($degreeStudents as  $degreeStudent) {
 
-                 if ($value->pivot->tution_type == 'cp') {
-                    foreach ($degreeStudent->semester_payments as $semester) {
-                       $all_pads=[];
-                       if ($semester->academic_year->id == $academic_year->id) {
-                          foreach ($semester->months as $month) {
-                              $pads=[];
-                              $pads['month']=$month->name;
-                              $pads['pad_no']=$semester->pivot->receipt_no;
-                              $all_pads[]=$pads;
-
-                          }
-                       }
-                   $paid_months=  array_merge($paid_months,$all_pads);
-
-                      }
-                 }else {
-                    $all_pads=[];
+                 $student['id']=$degreeStudent->id;
+                 $student['full_name']=$degreeStudent->full_name;
+                 $student['sex']=$degreeStudent->sex;
+                 $month_pad=[];
+                 $total=0;
                     foreach ($degreeStudent->month_payments as $month) {
+                  //    return  $month;
+                        if($month->pivot->academic_year_id == $academic_year->id){
 
-                                 $pads['month']=$month->name;
-                                 $pads['pad_no']=$month->pivot->receipt_no;
-                                 $all_pads[]=$pads;
+                            $month_pad[$month->name] = $month->pivot->receipt_no;
+                            $total+=(double)$month->pivot->paid_amount;
 
                          }
-                     $paid_months=  array_merge($paid_months,$all_pads);
+                        }
 
-                 }
-              }
+           $student['total']=$total;
+           $student['pads']=$month_pad;
 
-                $students[$degreeStudent->id]= $paid_months;
+           $all[]=$student;
+
           }
-
-          return response()->json(['students'=> $students]);
+         return response()->json( $all);
     }
 
     /**
@@ -80,15 +70,70 @@ class DegreeStudentFeeController extends Controller
     {
         $degreeStudent=DegreeStudent::find($id);
 
-        $monthly_paid= new DegreeStudentsFeeResource($degreeStudent->load('month_payments'));
-        $semester_paid= new StudentFeeResource($degreeStudent->load('semester_payments'));
+       // return $degreeStudent;
+        $all=[];
+        $student=[];
+        $years=[];
+       // $academic_year=AcademicYear::where('status',1)->first();
+        // $degreeStudents=DegreeStudent::whereHas('month_payments')->with('month_payments')->get();
+        if ($degreeStudent->month_payments) {
+            foreach($degreeStudent->month_payments as $month){
+            $academic_year_id=$month->pivot->academic_year_id;
+            $academic_year=AcademicYear::find($academic_year_id);
+            $years[$academic_year_id]=$academic_year;
+            }
+        }else {
+            return 'not paid';
+        }
 
-        return response()->json([
-            'monthly_paid'=>$monthly_paid,
-            'semester_paid'=>$semester_paid
-        ]);
 
+        $student['id']=$degreeStudent->id;
+        $student['student_id']=$degreeStudent->student_id;
+        $student['full_name']=$degreeStudent->full_name;
+        $student['department']=$degreeStudent->degree_department->name;
+        $student['program']=$degreeStudent->program->name;
+        $student['year_no']=$degreeStudent->current_year_no;
+
+        $year=[];
+        foreach ($years as $y) {
+            // return $y->year;
+            $year['year']=$y->year;
+            $year['semesters']=null;
+            $semester=[];
+            $j=0;
+            $semesters=$y->semesters->where('program_id',$degreeStudent->program->id );
+            foreach ($semesters as  $s) {
+            $semester['id']=$s->id;
+            $semester['semester_no']=$s->number;
+            $total_pads=[];
+            $total=0;
+            for ($i=0; $i < count($s->months) ; $i++) {
+                $month_pad=[];
+
+                $m= $degreeStudent->month_payments[$j];
+
+                if($m->pivot->academic_year_id == $s->academic_year_id){
+
+                    $month_pad['id']=$m->id;
+                    $month_pad['name']=$m->name;
+                    $month_pad['pad']=$m->pivot->receipt_no;
+                    $total+=(double)$month->pivot->paid_amount;
+
+                    $j+=1;
+                 }
+
+            $total_pads[]= $month_pad;
+
+            }
+            $semester['months']= $total_pads;
+
+            $year['semesters'][]=$semester;
+        }
+       $student['years'][]=$year;
     }
+   return response()->json( $student);
+
+}
 
     /**
      * Update the specified resource in storage.
