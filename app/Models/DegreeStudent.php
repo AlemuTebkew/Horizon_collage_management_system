@@ -19,7 +19,7 @@ class DegreeStudent extends Model
 
 ];
 
-
+public $hidden=['password','created_at','updated_at'];
 public function getFullNameAttribute(){
     return $this->first_name.' '.$this->last_name;
 }
@@ -55,7 +55,7 @@ public function semester_payments(){
  *this mothode is for monthly payment not for month
 */
 public function month_payments(){
-    return $this->belongsToMany(Month::class)->withPivot('receipt_no');
+    return $this->belongsToMany(Month::class)->withPivot('receipt_no','academic_year_id');
 }
 public function birth_address(){
     return $this->belongsTo(Address::class,'birth_address_id');

@@ -22,6 +22,7 @@ class CreateDegreeStudentSemestersTable extends Migration
             $table->double('semester_GPA')->default(4.0);
             $table->string('tuition_type')->nullable();
             $table->boolean('partial_scholarship')->default(0);
+            $table->boolean('approved')->default(0);
             $table->timestamps();
         });
     }

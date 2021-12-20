@@ -13,7 +13,7 @@ class CreateTvetStudentLevel extends Migration
      */
     public function up()
     {
-        
+
         Schema::create('tvet_student_level', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tvet_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
@@ -22,6 +22,7 @@ class CreateTvetStudentLevel extends Migration
             $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->boolean('is_finished')->default(0);
             $table->boolean('partial_scholarship')->default(0);
+            $table->boolean('approved')->default(0);
 
             $table->timestamps();
         });

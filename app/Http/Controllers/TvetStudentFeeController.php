@@ -18,35 +18,34 @@ class TvetStudentFeeController extends Controller
     {
 
         $academic_year=AcademicYear::where('status',1)->first();
+        $all=[];
         $student=[];
-        $students=[];
-      //  return TvetStudent::with('month_payments')->get();
-       foreach(TvetStudent::with('month_payments')->get() as $tvtStudent){
-           //return $tvtStudent;
-           $all_paid_months=[];
+        $tvetStudents=TvetStudent::whereHas('month_payments')
+                                 ->with('month_payments')->get();
+       foreach($tvetStudents as $tvtStudent){
 
-           $all_pads=[];
-           foreach ($tvtStudent->month_payments as $monthPayment) {
-              // return $monthPayment;
-              // $pads=[];
-            if($monthPayment->pivot->academic_year_id == $academic_year->id){
-                $pads['id']=$monthPayment->id;
-                $pads['month_number']=$monthPayment->number;
-                $pads['month_name']=$monthPayment->name;
-                $pads['pad_no']=$monthPayment->pivot->receipt_no;
-              //  return $pads;
-                $all_pads[]=$pads;
+        $student['id']=$tvtStudent->id;
+        $student['full_name']=$tvtStudent->full_name;
+        $student['sex']=$tvtStudent->sex;
+        $month_pad=[];
+        $total=0;
+           foreach ($tvtStudent->month_payments as $month) {
+
+
+            if($month->pivot->academic_year_id == $academic_year->id){
+
+                $month_pad[$month->name] = $month->pivot->receipt_no;
+                $total+=(double)$month->pivot->paid_amount;
 
             }
-
-
        }
-        $all_paid_months=array_merge($all_paid_months,$all_pads);
-        $student[][$tvtStudent->id]=$all_paid_months;
+       $student['total']=$total;
+       $student['pads']=$month_pad;
+
+       $all[]=$student;
         // return $student;
     }
-    $students=array_merge($students, $student);
-     return response()->json(['students'=> $students]);
+     return response()->json($all);
     }
 
     /**
@@ -99,7 +98,6 @@ class TvetStudentFeeController extends Controller
                 if($year->id=$month->pivot->academic_year_id){
                 $pads['month']=$month->name;
                 $pads['pad_no']=$month->pivot->receipt_no;
-              //  return $pads;
                 $all_pads[]=$pads;
 
                 }
@@ -108,9 +106,11 @@ class TvetStudentFeeController extends Controller
             $year_payments[$year->year]=$all_pads;
            //return $year_payments;
           //return   $all_payment=array_merge($all_year_payments,$year_payments);
-              return $all_year_payments[]=$year_payments;
 
         }
+        // return $all_year_payments[]=$year_payments;
+        return $year_payments;
+
     }
 
     /**
