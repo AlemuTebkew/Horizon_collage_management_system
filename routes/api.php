@@ -75,7 +75,7 @@ Route::post('/login',[Account::class,'login']);
 Route::apiResource('/degree_students',DegreeStudentController::class);
 // Route::get('/get_degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
 //Route::get('/get_degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
-Route::get('/get_students_degree/{department_Head_id}',[DegreeStudentController::class,'getStudentsDegree']);
+Route::get('/get_degree_student_by_department',[DegreeStudentController::class,'getDegreeStudentsByDepartment']);
 Route::apiResource('/tvet_students',TvetStudentController::class);
 Route::apiResource('/address',AddressController::class);
 Route::apiResource('/months',MonthController::class);

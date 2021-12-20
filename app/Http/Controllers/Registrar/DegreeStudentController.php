@@ -260,11 +260,11 @@ class DegreeStudentController extends Controller
 
         }
     }
-    public function getStudentsDegree($department_Head_id){
+    public function getDegreeStudentsByDepartment(){
        
-            $dep_head=Employee::find($department_Head_id);
+            $dep_head=Employee::where('email',request()->user()->user_name);
             $department=$dep_head->manage;
-        return  $students= DegreeStudent::where('degree_department_id',$department->id)->with('degree_department','program')->get();
+            return  $students= DegreeStudent::where('degree_department_id',$department->id)->with('degree_department','program')->get();
       
     }
 }
