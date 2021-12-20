@@ -262,7 +262,7 @@ class DegreeStudentController extends Controller
     }
     public function getDegreeStudentsByDepartment(){
        
-            $dep_head=Employee::where('email',request()->user()->user_name);
+            $dep_head=Employee::where('email',request()->user()->user_name)->first();
             $department=$dep_head->manage;
             return  $students= DegreeStudent::where('degree_department_id',$department->id)->with('degree_department','program')->get();
       

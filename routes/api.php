@@ -15,6 +15,7 @@ use App\Http\Controllers\Dean\TvetDepartmentController;
 use App\Http\Controllers\Dean\SemesterController;
 use App\Http\Controllers\Head\DegreeSectionController;
 use App\Http\Controllers\DegreeStudentFeeController;
+use App\Http\Controllers\Head\ReportController;
 use App\Http\Controllers\MonthController;
 use App\Http\Controllers\Registrar\AddressController;
 use App\Http\Controllers\Registrar\DashBoardController as RegistrarDashBoardController;
@@ -40,6 +41,10 @@ use Illuminate\Support\Facades\Route;
     Route::post('/logout',[Account::class,'logout']);
     Route::apiResource('/degree_sections',DegreeSectionController::class);
     Route::get('/department_courses',[CourseController::class,'getCourse']);
+    Route::get('/degree_students_by_department',[DegreeStudentController::class,'getDegreeStudentsByDepartment']);
+    Route::post('/get_course_by_semester',[ReportController::class,'getCourseTakenBySemester']);
+
+  
 
 });
     //----------------Dean related-------------------//
@@ -75,7 +80,6 @@ Route::post('/login',[Account::class,'login']);
 Route::apiResource('/degree_students',DegreeStudentController::class);
 // Route::get('/get_degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
 //Route::get('/get_degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
-Route::get('/get_degree_student_by_department',[DegreeStudentController::class,'getDegreeStudentsByDepartment']);
 Route::apiResource('/tvet_students',TvetStudentController::class);
 Route::apiResource('/address',AddressController::class);
 Route::apiResource('/months',MonthController::class);
