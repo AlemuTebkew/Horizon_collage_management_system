@@ -73,9 +73,9 @@ Route::post('/login',[Account::class,'login']);
 
 // ----------------Registrar related==========================///////
 Route::apiResource('/degree_students',DegreeStudentController::class);
-Route::get('/degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
-
-
+// Route::get('/get_degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
+//Route::get('/get_degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
+Route::get('/get_degree_student_by_department',[DegreeStudentController::class,'getDegreeStudentsByDepartment']);
 Route::apiResource('/tvet_students',TvetStudentController::class);
 Route::apiResource('/address',AddressController::class);
 Route::apiResource('/months',MonthController::class);

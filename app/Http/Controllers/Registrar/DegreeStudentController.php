@@ -74,7 +74,6 @@ class DegreeStudentController extends Controller
              $data['current_semester_no']=$request->semester_no;
              $data['current_year_no']=$request->year_no;
             $data['dob']=date('Y-m-d',strtotime($request->dob));
-
             $student= DegreeStudent::create($data);
 
          //   return $student;
@@ -260,5 +259,11 @@ class DegreeStudentController extends Controller
 
         }
     }
+    public function getDegreeStudentsByDepartment(){
 
+            $dep_head=Employee::where('email',request()->user()->user_name);
+            $department=$dep_head->manage;
+            return  $students= DegreeStudent::where('degree_department_id',$department->id)->with('degree_department','program')->get();
+
+    }
 }

@@ -101,12 +101,14 @@ class DegreeStudentFeeController extends Controller
             $year['semesters']=null;
             $semester=[];
             $j=0;
-            $semesters=$y->semesters->where('program_id',$degreeStudent->program->id );
+        //   $semesters=$y->semesters->where('program_id',$degreeStudent->program->id );
+            $semesters=$degreeStudent->semesters;
             foreach ($semesters as  $s) {
             $semester['id']=$s->id;
             $semester['semester_no']=$s->number;
+            $semester['tution_type']=$s->pivot->tuition_type;
             $total_pads=[];
-            $total=0;
+            $total=0.0;
             for ($i=0; $i < count($s->months) ; $i++) {
                 $month_pad=[];
 
@@ -117,7 +119,8 @@ class DegreeStudentFeeController extends Controller
                     $month_pad['id']=$m->id;
                     $month_pad['name']=$m->name;
                     $month_pad['pad']=$m->pivot->receipt_no;
-                    $total+=(double)$month->pivot->paid_amount;
+                    $month_pad['paid_date']= $m->pivot->paid_date;
+                    $total+=number_format ($month->pivot->paid_amount);
 
                     $j+=1;
                  }
@@ -125,6 +128,7 @@ class DegreeStudentFeeController extends Controller
             $total_pads[]= $month_pad;
 
             }
+            $semester['total']= $total;
             $semester['months']= $total_pads;
 
             $year['semesters'][]=$semester;
