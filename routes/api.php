@@ -44,19 +44,16 @@ use Illuminate\Support\Facades\Route;
     Route::get('/department_courses',[CourseController::class,'getDepartmentCourses']);
     Route::get('/degree_students_by_department',[DegreeStudentController::class,'getDegreeStudentsByDepartment']);
     Route::post('/get_course_by_semester',[ReportController::class,'getCourseTakenBySemester']);
-    Route::post('/section_suggested_students',[DegreeStudentController::class,'sectionSuggestedStudents']);
+    Route::get('/section_suggested_students',[DegreeStudentController::class,'sectionSuggestedStudents']);
     Route::get('/section_courses',[CourseController::class,'getSectionCourses']);
     Route::get('/active_teachers',[TeacherController::class,'getActiveTeacher']);
     Route::post('/assign_teacher_for_course',[CourseController::class,'assignTeacherForCourse']);
 
-<<<<<<< HEAD
     Route::apiResource('/courses',CourseController::class);
 
 
     
-=======
 
->>>>>>> 15cdbcd68120999b015a6b5d2c3feb5388408a28
 
 });
     //----------------Dean related-------------------//

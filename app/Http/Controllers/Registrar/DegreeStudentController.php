@@ -9,6 +9,7 @@ use App\Http\Resources\StudentSemesterResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
 use App\Models\DegreeDepartment;
+use App\Models\DegreeSection;
 use App\Models\DegreeStudent;
 use App\Models\Employee;
 use App\Models\FeeType;
@@ -276,21 +277,27 @@ class DegreeStudentController extends Controller
        
         $dep_head=Employee::where('email',request()->user()->user_name)->first();
         $department=$dep_head->manage;
+        $id=request()->section_id;
+        $section=DegreeSection::find($id);
+     //   return $section;
           $students= DegreeStudent::where('degree_department_id',$department->id)
-                                         ->where('current_year_no',request()->year_no)
-                                         ->where('current_semester_no',request()->semester_no)
-                                         ->whereDoesntHave('degree_sections', function (Builder $query,$department) {
+                                         ->where('current_year_no',$section->year_no)
+                                         ->where('current_semester_no',$section->semester_no)
+                                         ->whereDoesntHave('degree_sections', function (Builder $query) use($department,$section) {
                                             $query->where('degree_department_id',$department->id)
-                                            ->where('year_no',request()->year_no)
-                                            ->where('semester_no',request()->semester_no)
-                                            ->where('academic_year_id',request()->academic_year_id);
+                                                  ->where('year_no',$section->year_no)
+                                                  ->where('semester_no',$section->semester_no)
+                                                  ->where('academic_year_id',$section->academic_year_id);
 
                                         }) ->with('degree_department','program')->get();
 
 
         //  return  $students= DegreeStudent::
         //                               where('degree_department_id',$department->id)
-        //                               ->with('degree_department','program')->get();
+                        
+        //                               ->where('current_year_no',$section->year_no)
+        //                               ->where('current_semester_no',$section->semester_no)
+        //                                ->with('degree_department','program')->get();
   
 }
 }
