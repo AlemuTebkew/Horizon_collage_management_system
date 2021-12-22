@@ -14,13 +14,6 @@ class StudentSemesterResource extends JsonResource
      */
     public function toArray($request)
     {
-        return [
-            'id'=>$this->id,
-            'name'=>$this->full_name,
-            'student_id'=>$this->student_id,
-            'department'=>$this->department ? $this->department->name:null,
-            'program'=>$this->program ? $this->program->name:null,
-            'semesters'=>SemesterResource::collection($this->semesters)
-        ];
+        return SemesterResource::collection($this->semesters);
     }
 }
