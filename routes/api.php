@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Account;
+use App\Http\Controllers\Cashier\StudentFeeController;
 use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\Dean\AcademicYearController;
 use App\Http\Controllers\Dean\CourseController;
@@ -48,10 +49,14 @@ use Illuminate\Support\Facades\Route;
     Route::get('/active_teachers',[TeacherController::class,'getActiveTeacher']);
     Route::post('/assign_teacher_for_course',[CourseController::class,'assignTeacherForCourse']);
 
+<<<<<<< HEAD
     Route::apiResource('/courses',CourseController::class);
 
 
     
+=======
+
+>>>>>>> 15cdbcd68120999b015a6b5d2c3feb5388408a28
 
 });
     //----------------Dean related-------------------//
@@ -95,6 +100,8 @@ Route::apiResource('/dash_board',RegistrarDashBoardController::class);
 
 Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
 Route::apiResource('/tvet_student_fees',TvetStudentFeeController::class);
+Route::get('/students_paid',[StudentFeeController::class,'studentsPaid']);
+Route::get('/payment_detail',[StudentFeeController::class,'getStudentPaymentDetail']);
 
 /////////////////////Head////////////////////
 Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudentSemesters']);

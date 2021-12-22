@@ -17,6 +17,11 @@ class TvetStudent extends Model
     'isGraduated','isGraduated','fully_scholarship'
 ];
 
+public $hidden=['password','created_at','updated_at'];
+public function getFullNameAttribute(){
+    return $this->first_name.' '.$this->last_name;
+}
+
 public function cocs(){
     // return $this->belongsToMany(TvetStudent::class)
     // ->withPivot(['application_date','result','nature_of_assesment']);

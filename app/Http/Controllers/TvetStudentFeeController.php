@@ -80,6 +80,7 @@ class TvetStudentFeeController extends Controller
     {
         $tvetStudent=TvetStudent::find($tvetStudentId);
         // return $tvetStudent->month_payments;
+        $years=[];
         foreach($tvetStudent->month_payments as $month){
             //check through relationship method
             //return $month;
@@ -91,25 +92,33 @@ class TvetStudentFeeController extends Controller
        $all_pads=[];
        $year_payments=[];
        $all_year_payments=[];
-       foreach($years as $year){
+       $student['id']=$tvetStudent->id;
+       $student['student_id']=$tvetStudent->student_id;
+       $student['full_name']=$tvetStudent->full_name;
+       $student['department']=$tvetStudent->tvet_department->name;
+       $student['program']=$tvetStudent->program->name;
+       $student['level_no']=$tvetStudent->current_level_no;
 
+       $year=[];
+       foreach($years as $y){
+            $year['year']=$y->year;
             $pads=[];
             foreach($tvetStudent->month_payments as $month){
-                if($year->id=$month->pivot->academic_year_id){
-                $pads['month']=$month->name;
-                $pads['pad_no']=$month->pivot->receipt_no;
-                $all_pads[]=$pads;
+                if($y->id=$month->pivot->academic_year_id){
+               // $pads['month']=$month->name;
+                $pads[$month->name]=$month->pivot->receipt_no;
+               // $all_pads[]=$pads;
 
                 }
 
             }
-            $year_payments[$year->year]=$all_pads;
-           //return $year_payments;
-          //return   $all_payment=array_merge($all_year_payments,$year_payments);
 
+            $year['total']=0;
+            $year['months']=$pads;
+            $student['years'][]=$year;
         }
-        // return $all_year_payments[]=$year_payments;
-        return $year_payments;
+
+        return $student;
 
     }
 
