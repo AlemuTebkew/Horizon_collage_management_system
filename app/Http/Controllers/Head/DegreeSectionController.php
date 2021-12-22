@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Head;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Course\CourseResource;
 use App\Http\Resources\Head\DegreeSectionResource;
 use App\Http\Resources\Head\DegreeSectionStudentResource;
 use App\Models\AcademicYear;
@@ -98,8 +99,8 @@ class DegreeSectionController extends Controller
         $degreeSection->delete();
     }
 
-    public function getSectionStudents(){
-        $ds=DegreeSection::find(request('section_id'));
+    public function getSectionStudents($section_id){
+        $ds=DegreeSection::find($section_id);
         return DegreeSectionStudentResource::collection($ds->degree_students);
     }
 
@@ -108,28 +109,17 @@ class DegreeSectionController extends Controller
         foreach (request('student_ids')  as  $student_id) {
            $sec->degree_students()->attach($student_id);
         }
+        // $new_students=[];
+        // foreach($sec->degree_students as $degree_student){
+        //     if()
+        //   $new_students=  
+        // }
+
         return DegreeSectionStudentResource::collection($sec->degree_students);
 
     }
-    public function getSectionCourses(){
-        $ds=DegreeSection::find(request('section_id'));
-        $courses=Course::where('degree_department_id',request('degree_department_id'))
-                        ->where('program_id',request('program_id'))
-                        ->where('year_no',request('year_no'))
-                        ->where('semester_no',request('semester_no'))->get();
+  
 
-        return $courses;
-    }
 
-    public function assignTeacherForCourse(){
-        $ds=DegreeSection::find(request('section_id'));
-        $course=Course::find(request('course_id'));
-        $teacher=Teacher::find(request('teacher_id'));
-        $teacher->coureses()->attach($course->id,[
-            'degree_section_id'=>$ds->id,
-        ]);
-
-        return $course->load('teachers');
-    }
 
 }

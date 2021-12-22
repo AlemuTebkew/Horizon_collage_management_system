@@ -40,11 +40,18 @@ use Illuminate\Support\Facades\Route;
   Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout',[Account::class,'logout']);
     Route::apiResource('/degree_sections',DegreeSectionController::class);
-    Route::get('/department_courses',[CourseController::class,'getCourse']);
+    Route::get('/department_courses',[CourseController::class,'getDepartmentCourses']);
     Route::get('/degree_students_by_department',[DegreeStudentController::class,'getDegreeStudentsByDepartment']);
     Route::post('/get_course_by_semester',[ReportController::class,'getCourseTakenBySemester']);
+    Route::post('/section_suggested_students',[DegreeStudentController::class,'sectionSuggestedStudents']);
+    Route::get('/section_courses',[CourseController::class,'getSectionCourses']);
+    Route::get('/active_teachers',[TeacherController::class,'getActiveTeacher']);
+    Route::post('/assign_teacher_for_course',[CourseController::class,'assignTeacherForCourse']);
 
-  
+    Route::apiResource('/courses',CourseController::class);
+
+
+    
 
 });
     //----------------Dean related-------------------//
@@ -61,8 +68,6 @@ Route::get('/tvet_programs',[ProgramController::class,'getTvetProgram']);
 Route::apiResource('/teachers',TeacherController::class);
 Route::apiResource('/employees',EmployeeController::class);
 Route::get('/department_heads',[EmployeeController::class,'getDepartmentHeads']);
-
-Route::apiResource('/courses',CourseController::class);
 
 
 Route::apiResource('/modules',ModuleController::class);
@@ -95,7 +100,8 @@ Route::apiResource('/tvet_student_fees',TvetStudentFeeController::class);
 Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudentSemesters']);
 Route::get('/student_semester_courses/{id}',[DegreeStudentController::class,'getStudentSemesterCourses']);
 Route::get('/give_course_result',[DegreeStudentController::class,'giveCourseResult']);
-Route::get('/degree_section_students',[DegreeSectionController ::class,'getSectionStudents']);
+Route::get('/degree_section_students/{section_id}',[DegreeSectionController ::class,'getSectionStudents']);
+Route::post('/add_section_students',[DegreeSectionController ::class,'addStudentsToSection']);
 
 
 //------------------------cashier related--------------------------------//

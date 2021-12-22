@@ -14,6 +14,7 @@ use App\Models\Employee;
 use App\Models\FeeType;
 use App\Models\Month;
 use App\Models\Semester;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -264,7 +265,32 @@ class DegreeStudentController extends Controller
        
             $dep_head=Employee::where('email',request()->user()->user_name)->first();
             $department=$dep_head->manage;
-            return  $students= DegreeStudent::where('degree_department_id',$department->id)->with('degree_department','program')->get();
+            return  $students= DegreeStudent::where('degree_department_id',$department->id)
+                                          ->with('degree_department','program')->get();
+            //  return  $students= DegreeStudent::
+            //                               where('degree_department_id',$department->id)
+            //                               ->with('degree_department','program')->get();
       
     }
+    public function sectionSuggestedStudents(){
+       
+        $dep_head=Employee::where('email',request()->user()->user_name)->first();
+        $department=$dep_head->manage;
+          $students= DegreeStudent::where('degree_department_id',$department->id)
+                                         ->where('current_year_no',request()->year_no)
+                                         ->where('current_semester_no',request()->semester_no)
+                                         ->whereDoesntHave('degree_sections', function (Builder $query,$department) {
+                                            $query->where('degree_department_id',$department->id)
+                                            ->where('year_no',request()->year_no)
+                                            ->where('semester_no',request()->semester_no)
+                                            ->where('academic_year_id',request()->academic_year_id);
+
+                                        }) ->with('degree_department','program')->get();
+
+
+        //  return  $students= DegreeStudent::
+        //                               where('degree_department_id',$department->id)
+        //                               ->with('degree_department','program')->get();
+  
+}
 }

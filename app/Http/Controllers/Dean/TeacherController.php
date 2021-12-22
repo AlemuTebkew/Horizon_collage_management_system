@@ -90,4 +90,9 @@ class TeacherController extends Controller
     {
         $teacher->delete();
     }
+    public function getActiveTeacher()
+    {
+        $teachers=Teacher::where('status',1)->get();
+        return  $teachers->makeHidden('type','profession','status');
+    }
 }

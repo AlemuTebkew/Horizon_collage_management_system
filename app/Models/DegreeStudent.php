@@ -79,7 +79,7 @@ public function courses(){
 }
 
 public function degree_sections(){
-    return $this->belongsToMany(DegreeSection::class);
+    return $this->belongsToMany(DegreeSection::class,'degree_sections_students');
 }
 
 }

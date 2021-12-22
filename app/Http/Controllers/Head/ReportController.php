@@ -77,7 +77,10 @@ class ReportController extends Controller
 }
     public function getGradeReport(Request $request){
         $employee=Employee::where('email',request()->user()->user_name)->first();
-       $courses=Course::where('semmm');
+       $courses=Course::where('degree_department_id',request()->degree_department_id)
+       ->where('program_id',request()->program_id)
+       ->where('year_no',request()->year_no)
+       ->where('semester_no',request()->semester_no)->get();
 
 
     }
