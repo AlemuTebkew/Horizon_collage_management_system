@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Cashier;
 
 use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
+use App\Models\Course;
 use App\Models\DegreeStudent;
+use App\Models\FeeType;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -98,11 +100,18 @@ class StudentFeeController extends Controller
 
     public function getStudentPaymentDetail(){
         $academic_year=AcademicYear::where('status',1)->first();
+        $student=[];
+        $mf_id=FeeType::where('name','Monthly Fee')->first()->id;
+        $cpf_id=FeeType::where('name','CP Fee')->first()->id;
+        $month_fee=$academic_year->academic_fees()->where('fee_type_id',$mf_id)->first()->amount;
+        $cp_fee=$academic_year->academic_fees()->where('fee_type_id',$cpf_id)->first()->amount;
+
+        // return $cp_fee;
 
         if (request('type') == 'degree') {
             $degreeStudent=DegreeStudent::where('student_id',request('student_id'))->first();
             if ($degreeStudent) {
-                 $student=[];
+
 
                  $student['id']=$degreeStudent->id;
                  $student['student_id']=$degreeStudent->student_id;
@@ -110,28 +119,76 @@ class StudentFeeController extends Controller
                  $student['department']=$degreeStudent->degree_department->name;
                  $student['program']=$degreeStudent->program->name;
                  $student['year_no']=$degreeStudent->current_year_no;
+                 $student['month_payment']=$month_fee;
+                 $student['cp_payment']=$cp_fee;
 
               $semesters=$degreeStudent->semesters
                          ->where('academic_year_id',$academic_year->id);
-                         return $semesters;
-              foreach ($semesters as $s) {
-                  if ($s->pivot->tuition_type == 'monthly') {
 
+                        //return $semesters;
+              foreach ($semesters as $s) {
+
+
+                  if ($s->pivot->tuition_type == 'monthly' || $s->pivot->tuition_type == null ) {
+                  $total_cp= $this->getTotalCp($degreeStudent,$s);
                     $semester['id']=$s->id;
                     $semester['semester_no']=$s->number;
                     $semester['tution_type']=$s->pivot->tuition_type;
+                    $semester['semester_payment']=$cp_fee * $total_cp;
 
+                    $total=0;
+                    $total_pad=[];
+                //    return $s->months;
+             //   return $degreeStudent->month_payments ->where('pivot.academic_year_id',$academic_year->id);
                  foreach ($s->months as $month) {
-                    foreach ($degreeStudent->month_payments as $month_payment) {
-
+                     $month_payments=$degreeStudent->month_payments
+                     ->where('pivot.academic_year_id',$academic_year->id);
+                    foreach ($month_payments as $month_payment) {
+                        if ($month->id == $month_payment->id) {
+                            $month_pad['id']=$month_payment->id;
+                            $month_pad['name']=$month_payment->name;
+                            $month_pad['pad']=$month_payment->pivot->receipt_no;
+                            $month_pad['paid_date']= $month_payment->pivot->paid_date;
+                            $total+= ($month_payment->pivot->paid_amount);
+                            $total_pad[]=$month_pad;
+                        }
 
                     }
                 }
+                $semester['total']=$total;
+                $semester['months']=$total_pad;
+                $student['semesters'][]=$semester;
+                  }else if ($s->pivot->tuition_type == 'cp' ) {
+                            $semester=[];
+                        $semester['id']=$s->id;
+                        $semester['semester_no']=$s->number;
+                        $semester['tution_type']=$s->pivot->tuition_type;
+                        $total=0;
+                        $month_pad=null;
+                    //    return $s->months;
+                 //   return $degreeStudent->month_payments ->where('pivot.academic_year_id',$academic_year->id);
+                     foreach ($s->months as $month) {
+                         $month_payments=$degreeStudent->month_payments
+                         ->where('pivot.academic_year_id',$academic_year->id);
+                        foreach ($month_payments as $month_payment) {
+                            if ($month->id == $month_payment->id) {
+
+                                $month_pad=$month_payment->pivot->receipt_no;
+                              //  $month_pad= $month_payment->pivot->paid_date;
+                                $total+= ($month_payment->pivot->paid_amount);
+                               // $total_pad[]=$month_pad;
+                            }
+
+                        }
+                    }
+                    $semester['total']=$total;
+                    $semester['pad']=$month_pad;
+                    $student['cp'][]=$semester;
                   }
 
 
-
               }
+
 
            }else {
                return response()->json('student not found');
@@ -140,13 +197,23 @@ class StudentFeeController extends Controller
 
         }
 
+        return $student;
+
     }
 
 
 
 
 
+    private function getTotalCp($student,$semester){
+        $courses=Course::where('degree_department_id',$student->degree_department_id)
+        ->where('program_id',$student->program_id)
+        ->where('year_no',$semester->pivot->year_no)
+        ->where('semester_no',$semester->pivot->semester_no)
+        ->get();
 
+    return $courses->sum('cp');
+    }
 
 
 

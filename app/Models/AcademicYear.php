@@ -13,7 +13,7 @@ class AcademicYear extends Model
     public function tvet_section(){
         return $this->hasMany(TvetSection::class);
     }
-    public function academic_fee(){
+    public function academic_fees(){
         return $this->hasMany(AcademicFee::class);
     }
     public function degree_sections(){
