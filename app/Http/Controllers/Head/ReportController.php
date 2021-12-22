@@ -67,7 +67,7 @@ class ReportController extends Controller
         
         $employee=Employee::where('email',request()->user()->user_name)->first();
         $department_head=$employee->manage;
-        return Course::where('degree_department_id',$department_head->id)->get();
+        // return Course::where('degree_department_id',$department_head->id)->get();
         return  $course=Course::where('degree_department_id',$department_head->id)
                             ->where('program_id',$request->program_id)
                             ->where('year_no',$request->year_no)
