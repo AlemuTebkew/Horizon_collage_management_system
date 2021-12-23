@@ -92,7 +92,7 @@ Route::apiResource('/dash_board',RegistrarDashBoardController::class);
 Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
 Route::apiResource('/tvet_student_fees',TvetStudentFeeController::class);
 Route::get('/students_paid',[StudentFeeController::class,'studentsPaid']);
-Route::get('/payment_detail',[StudentFeeController::class,'getStudentPaymentDetail']);
+Route::post('/degree_student_payment_detail/{student_id}',[StudentFeeController::class,'getStudentPaymentDetail']);
 
 /////////////////////Head////////////////////
 Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudentSemesters']);

@@ -7,6 +7,7 @@ use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\DegreeStudent;
 use App\Models\FeeType;
+use App\Models\TvetStudent;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -98,8 +99,8 @@ class StudentFeeController extends Controller
 
     }
 
-    public function getStudentPaymentDetail(){
-        $academic_year=AcademicYear::where('status',1)->first();
+    public function getStudentPaymentDetail($student_id){
+        $academic_year=AcademicYear::find(request('academic_year_id'));
         $student=[];
         $mf_id=FeeType::where('name','Monthly Fee')->first()->id;
         $cpf_id=FeeType::where('name','CP Fee')->first()->id;
@@ -109,7 +110,7 @@ class StudentFeeController extends Controller
         // return $cp_fee;
 
         if (request('type') == 'degree') {
-            $degreeStudent=DegreeStudent::where('student_id',request('student_id'))->first();
+            $degreeStudent=DegreeStudent::where('student_id',$student_id)->first();
             if ($degreeStudent) {
 
 
@@ -189,15 +190,41 @@ class StudentFeeController extends Controller
 
               }
 
-
+          return $student;
            }else {
                return response()->json('student not found');
            }
         }else if (request('type') == 'tvet') {
 
+            $tvetStudent=TvetStudent::where('student_id',$student_id)->first();
+            if ($tvetStudent) {
+                $student['id']=$tvetStudent->id;
+                $student['student_id']=$tvetStudent->student_id;
+                $student['full_name']=$tvetStudent->full_name;
+                $student['department']=$tvetStudent->tvet_department->name;
+                $student['program']=$tvetStudent->program->name;
+                $student['level_no']=$tvetStudent->current_level_no;
+
+                $month_payments=$tvetStudent->month_payments
+                ->where('pivot.academic_year_id',$academic_year->id);
+                foreach($month_payments as $month_payment){
+                   // $pads['month']=$month->name;
+                    $pads[$month_payment->name]=$month_payment->pivot->receipt_no;
+                   // $all_pads[]=$pads;
+
+
+
+                }
+
+                $student['total']=0;
+                $student['months']=$pads;
+            }
+
+
+            return $student;
         }
 
-        return $student;
+
 
     }
 
