@@ -18,6 +18,7 @@ class StudentFeeController extends Controller
     public function studentsPaid(){
 
 
+        $per_page=request()->has('per_page') ? request('per_page') : 2;
       $degree_payment_query=DB::table('degree_student_month')
                               ->whereNotNull('receipt_no')
                               // ->distinct('receipt_no')
@@ -83,22 +84,45 @@ class StudentFeeController extends Controller
                                       // ->get()
                                       ;
 
-              // return $tvet_students_tuition_fee;
+               $tvet_students_other_fee=DB::table('tvet_students')
+               ->join('tvet_other_fees','tvet_students.id','=','tvet_other_fees.tvet_student_id')
+               ->join('fee_types','fee_types.id','=','tvet_other_fees.fee_type_id')
+               ->whereNotNull('receipt_no')
+               ->select('tvet_students.id','student_id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),'tvet_other_fees.paid_date',
+               'tvet_other_fees.receipt_no','tvet_other_fees.paid_amount','fee_types.name as payment_type');
 
 
-        $students_all_fee=DB::table('tvet_students')
-                              ->join('tvet_other_fees','tvet_students.id','=','tvet_other_fees.tvet_student_id')
-                              ->join('fee_types','fee_types.id','=','tvet_other_fees.fee_type_id')
-                              ->whereNotNull('receipt_no')
-                              ->select('tvet_students.id','student_id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),'tvet_other_fees.paid_date',
-                              'tvet_other_fees.receipt_no','tvet_other_fees.paid_amount','fee_types.name as payment_type')
+        $students_all_fee=    $tvet_students_other_fee
                               ->unionAll($tvet_students_tuition_fee)
                               ->unionAll($degree_students_tuition_fee)
-                              ->unionAll($degree_students_other_fee)
-                              ->get();
-            return $students_all_fee;
+                              ->unionAll($degree_students_other_fee);
 
-    }
+                         //    ->orderByDesc('paid_date');
+                          // return  $students_all_fee->select('*')->get();
+                            $s= request('search_query');
+                            //   ->paginate($per_page);
+                          //  $query = $query1->union($query2);
+            $querySql = $students_all_fee->toSql();
+            $query = DB::table(DB::raw("($querySql ) as a"))
+            ->mergeBindings($students_all_fee);
+
+            return $query->orderByDesc('paid_date')
+                        ->when(request('search_query') ,function($query){
+                            return $query->where('receipt_no', '=',request('search_query'));
+                        })
+                        ->when(request('payment_type_query') ,function($query){
+                            return $query->where('payment_type', '=',request('payment_type_query'));
+                        })
+                        ->when(request('date_query') ,function($query){
+                            return $query->where('paid_date', '=',request('date_query'));
+                        })
+                        ->when(request('date_between_query') ,function($query){
+                            [$start,$end]=explode(',',request('date_between_query'));
+                            return $query->whereBetween('paid_date',[$start,$end]);
+                        })
+                        ->paginate($per_page);
+
+                }
 
     public function getStudentPaymentDetail($student_id){
         $academic_year=AcademicYear::find(request('academic_year_id'));
@@ -146,12 +170,13 @@ class StudentFeeController extends Controller
                      $month_payments=$degreeStudent->month_payments
                      ->where('pivot.academic_year_id',$academic_year->id);
                     foreach ($month_payments as $month_payment) {
+                        $month_pad=[];
                         if ($month->id == $month_payment->id) {
                             $month_pad['id']=$month_payment->id;
                             $month_pad['name']=$month_payment->name;
                             $month_pad['pad']=$month_payment->pivot->receipt_no;
                             $month_pad['paid_date']= $month_payment->pivot->paid_date;
-                            $total+= ($month_payment->pivot->paid_amount);
+                            $total+= doubleval($month_payment->pivot->paid_amount);
                             $total_pad[]=$month_pad;
                         }
 
@@ -205,17 +230,26 @@ class StudentFeeController extends Controller
                 $student['department']=$tvetStudent->tvet_department->name;
                 $student['program']=$tvetStudent->program->name;
                 $student['level_no']=$tvetStudent->current_level_no;
-
+                $student['month_payment']=$month_fee;
+                 $total=0;
+                 $total_pad=[];
                 $month_payments=$tvetStudent->month_payments
                 ->where('pivot.academic_year_id',$academic_year->id);
                 foreach($month_payments as $month_payment){
-                   // $pads['month']=$month->name;
-                    $pads[$month_payment->name]=$month_payment->pivot->receipt_no;
+                   $month_pad=[];
+               //     $pads[$month_payment->name]=$month_payment->pivot->receipt_no;
+
+
+                    $month_pad['id']=$month_payment->id;
+                    $month_pad['name']=$month_payment->name;
+                    $month_pad['pad']=$month_payment->pivot->receipt_no;
+                    $total+= doubleval($month_payment->pivot->paid_amount);
+                    $total_pad[]=$month_pad;
 
                 }
 
-                $student['total']=0;
-                $student['months']=$pads;
+                $student['total']=$total;
+                $student['months']=$total_pad;
             }
 
 
@@ -253,7 +287,7 @@ class StudentFeeController extends Controller
                     'tuition_type'=>$request->tuition_type,
 
                 ]);
-                 $month_amount=doubleval($request->tuition_fee)/count($semester->months);
+                 $month_amount=doubleval($request->amount)/count($semester->months);
                 foreach ($semester->months as $month) {
 
                     $student->month_payments()->updateExistingPivot($month->id,[
@@ -268,13 +302,14 @@ class StudentFeeController extends Controller
                 }
 
             }elseif ($request->tuition_type == 'monthly') {
-                foreach ($request->months as $month) {
+                $month_amount=(double)$request->amount /count($request->months);
 
-                    $student->month_payments()->updateExistingPivot($month->id,[
+                foreach ($request->months as $id) {
+                    $student->month_payments()->updateExistingPivot($id,[
                         'fee_type_id'=>$tuition_fee_id,
                         'academic_year_id'=>$request->academic_year_id,
                         'receipt_no'=>$request->receipt_no,
-                        'paid_amount'=>$request->paid_amount,
+                        'paid_amount'=>$month_amount,
                         'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
                         'is_paid'=>1
 
