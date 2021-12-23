@@ -55,7 +55,7 @@ public function semester_payments(){
  *this mothode is for monthly payment not for month
 */
 public function month_payments(){
-    return $this->belongsToMany(Month::class)->withPivot('receipt_no','academic_year_id');
+    return $this->belongsToMany(Month::class)->withPivot('receipt_no','academic_year_id','paid_date','paid_amount');
 }
 public function birth_address(){
     return $this->belongsTo(Address::class,'birth_address_id');

@@ -52,7 +52,7 @@ use Illuminate\Support\Facades\Route;
     Route::apiResource('/courses',CourseController::class);
 
 
-    
+
 
 
 });
@@ -98,7 +98,8 @@ Route::apiResource('/dash_board',RegistrarDashBoardController::class);
 Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
 Route::apiResource('/tvet_student_fees',TvetStudentFeeController::class);
 Route::get('/students_paid',[StudentFeeController::class,'studentsPaid']);
-Route::post('/degree_student_payment_detail/{student_id}',[StudentFeeController::class,'getStudentPaymentDetail']);
+Route::post('/student_tuition_detail/{student_id}',[StudentFeeController::class,'getStudentPaymentDetail']);
+Route::post('/add_payment/{student_id}',[StudentFeeController::class,'addTuitionPayment']);
 
 /////////////////////Head////////////////////
 Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudentSemesters']);

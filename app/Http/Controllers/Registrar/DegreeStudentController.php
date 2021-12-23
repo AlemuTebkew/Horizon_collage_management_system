@@ -83,75 +83,23 @@ class DegreeStudentController extends Controller
             [
                 'year_no'=>$request->year_no,
                 'semester_no'=>$request->semester_no,
-                'tuition_type'=>$request->tuition_type,
-                'partial_scholarship'=>$request->partial_scholarship
+                'partial_scholarship'=>$request->partial_scholarship,
+                'status'=>'waiting'
 
             ]);
 
-            if (!($request->partial_scholarship || $request->fully_scholarship)) {
 
-                $reg_fee_id= FeeType::where('name','Registration Fee')->first()->id;
-                $tuition_fee_id= FeeType::where('name','CP Fee')->first()->id;
-                $monthly_fee_id= FeeType::where('name','Monthly Fee')->first()->id;
+           foreach ($month_id as $id) {
 
-            //   if ($request->tuition_type == 'cp') {
+             $student->month_payments()->attach($id,[
+                'academic_year_id'=>$academic_year->id,
 
-            //     $active_semester->student_payments()->attach($student->id,
-            //     [
-
-            //       'fee_type_id'=>$tuition_fee_id,
-            //       'receipt_no'=>$request->receipt_no,
-            //       'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-            //       'paid_amount'=>$request->tuition_fee,
-            //       'is_paid'=>1
-            //     ]);
-
-            //    $active_semester->student_payments->forget($student->id);
-            //     $active_semester->student_payments()->attach($student->id,
-            //     [
-            //       'fee_type_id'=>$reg_fee_id,
-            //       'receipt_no'=>$request->receipt_no,
-            //       'paid_amount'=>$request->registration_fee,
-            //       'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-            //       'is_paid'=>1
-            //     ]);
-            //   }elseif ($request->tuition_type == 'monthly') {
-
-                $student->degree_other_fees()->attach($reg_fee_id,[
-                    'academic_year_id'=>$academic_year->id,
-                    'receipt_no'=>$request->receipt_no,
-                    'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-                    'paid_amount'=>$request->registration_fee,
-                    'is_paid'=>1
-
-                ]);
-
-
-              foreach ($month_id as $id) {
-
-                $student->month_payments()->attach($id,[
-                    'academic_year_id'=>$academic_year->id,
-
-                ]);
+            ]);
             }
-
-                foreach ($request->tuition_months as $id) {
-
-                    $student->month_payments()->updateExistingPivot($id,[
-                        'fee_type_id'=>$tuition_fee_id,
-                        'academic_year_id'=>$academic_year->id,
-                        'receipt_no'=>$request->receipt_no,
-                        'paid_amount'=>$request->tuition_fee,
-                        'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-                        'is_paid'=>1
-
-                    ]);
-                }
-              }
-            // }
 
 
             DB::commit();
+            return $student;
         } catch (\Exception $e) {
             DB::rollBack();
             return $e;
@@ -229,14 +177,14 @@ class DegreeStudentController extends Controller
     //   $semester=Semester::find($request->semester_id);
       $student->semesters()->attach($request->semester_id,
       [
-          'year_no'=>$request->year_no,
-          'semester_no'=>$request->semester_no,
-          'tuition_type'=>$request->tuition_type,
-          'scholarship'=>$request->scholarship
+        'year_no'=>$request->year_no,
+        'semester_no'=>$request->semester_no,
+        'partial_scholarship'=>$request->partial_scholarship,
+        'status'=>'waiting'
       ]);
     }
 
-    public function getStudentSemesters( $degreeStudent_id){
+    public function getStudentSemesters($degreeStudent_id){
         $degreeStudent= DegreeStudent::find($degreeStudent_id);
         return new StudentSemesterResource($degreeStudent->load('semesters'));
     }
@@ -271,10 +219,10 @@ class DegreeStudentController extends Controller
             //  return  $students= DegreeStudent::
             //                               where('degree_department_id',$department->id)
             //                               ->with('degree_department','program')->get();
-      
+
     }
     public function sectionSuggestedStudents(){
-       
+
         $dep_head=Employee::where('email',request()->user()->user_name)->first();
         $department=$dep_head->manage;
         $id=request()->section_id;
@@ -294,10 +242,10 @@ class DegreeStudentController extends Controller
 
         //  return  $students= DegreeStudent::
         //                               where('degree_department_id',$department->id)
-                        
+
         //                               ->where('current_year_no',$section->year_no)
         //                               ->where('current_semester_no',$section->semester_no)
         //                                ->with('degree_department','program')->get();
-  
+
 }
 }
