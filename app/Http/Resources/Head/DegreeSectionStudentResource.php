@@ -17,7 +17,9 @@ class DegreeSectionStudentResource extends JsonResource
         return [
             'id'=>$this->id,
             'student_id'=>$this->student_id,
-            'full_name'=>$this->full_name,
+            //'full_name'=>$this->full_name,
+            'first_name'=>$this->first_name,
+            'middle_name'=>$this->middle_name,
             'sex'=>$this->sex
         ];
     }

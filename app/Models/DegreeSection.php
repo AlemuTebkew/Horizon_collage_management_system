@@ -26,6 +26,6 @@ class DegreeSection extends Model
     }
 
     public function degree_students(){
-        return $this->belongsToMany(DegreeStudent::class);
+        return $this->belongsToMany(DegreeStudent::class,'degree_sections_students');
     }
 }

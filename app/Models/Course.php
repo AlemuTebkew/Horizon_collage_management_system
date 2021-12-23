@@ -21,7 +21,11 @@ public function program(){
 }
 
 public function teachers(){
-    return $this->belongsToMany(Teacher::class);
+    return $this->belongsToMany(Teacher::class,'teacher_section_courses');
+}
+public function teacher(){
+    return $this->belongsToMany(Teacher::class,'teacher_section_courses');
+
 }
 
 public function degree_students(){
