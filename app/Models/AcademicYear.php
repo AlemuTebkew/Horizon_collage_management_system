@@ -28,6 +28,7 @@ class AcademicYear extends Model
         return $this->hasMany(Semester::class);
     }
     public function fee_types(){
-        return $this->belongsToMany(FeeType::class,'academic_fees');
+        return $this->belongsToMany(FeeType::class,'academic_fees')
+        ->withPivot('fee_type_id','academic_year_id','amount');
     }
 }

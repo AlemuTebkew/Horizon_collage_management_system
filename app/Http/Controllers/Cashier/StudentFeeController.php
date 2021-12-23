@@ -126,16 +126,21 @@ class StudentFeeController extends Controller
 
     public function getStudentPaymentDetail($student_id){
         $academic_year=AcademicYear::find(request('academic_year_id'));
+       // return $academic_year->fee_types;
         $student=[];
         $mf_id=FeeType::where('name','Monthly Fee')->first()->id;
         $cpf_id=FeeType::where('name','CP Fee')->first()->id;
-        $month_fee=$academic_year->academic_fees()->where('fee_type_id',$mf_id)->first()->amount;
-        $cp_fee=$academic_year->academic_fees()->where('fee_type_id',$cpf_id)->first()->amount;
+        // $month_fee=$academic_year->fee_types->where('pivot.fee_type_id',$mf_id)->first()->amount;
+        // $cp_fee=$academic_year->fee_types->where('pivot.fee_type_id',$cpf_id)->first()->amount;
+     return  $month_fee=$academic_year->fee_types->where('pivot.fee_type_id',$mf_id)->first();
+        $cp_fee=$academic_year->fee_types->where('pivot.fee_type_id',$cpf_id)->amount;
 
-        // return $cp_fee;
+        return $cp_fee;
 
         if (request('type') == 'degree') {
-            $degreeStudent=DegreeStudent::where('student_id',$student_id)->first();
+            $degreeStudent=DegreeStudent::where('student_id',$student_id)
+                                         ->with('semesters','month_payments')
+                                         ->first();
             if ($degreeStudent) {
 
 
@@ -167,8 +172,8 @@ class StudentFeeController extends Controller
                 //    return $s->months;
              //   return $degreeStudent->month_payments ->where('pivot.academic_year_id',$academic_year->id);
                  foreach ($s->months as $month) {
-                     $month_payments=$degreeStudent->month_payments
-                     ->where('pivot.academic_year_id',$academic_year->id);
+                     $month_payments=$degreeStudent->month_payments()
+                     ->wherePivot('academic_year_id',$academic_year->id)->get();
                     foreach ($month_payments as $month_payment) {
                         $month_pad=[];
                         if ($month->id == $month_payment->id) {
@@ -234,7 +239,7 @@ class StudentFeeController extends Controller
                  $total=0;
                  $total_pad=[];
                 $month_payments=$tvetStudent->month_payments
-                ->where('pivot.academic_year_id',$academic_year->id);
+                ->where('pivot.academic_year_id',$academic_year->id)->orderBy('number');
                 foreach($month_payments as $month_payment){
                    $month_pad=[];
                //     $pads[$month_payment->name]=$month_payment->pivot->receipt_no;
