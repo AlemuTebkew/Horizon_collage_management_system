@@ -68,13 +68,13 @@ class ReportController extends Controller
         
         $employee=Employee::where('email',request()->user()->user_name)->first();
         $department_head=$employee->manage;
-        // return Course::where('degree_department_id',$department_head->id)->get();
+         Course::where('degree_department_id',$department_head->id)->get();
           $course=Course::where('degree_department_id',$department_head->id)
                             ->where('program_id',$request->program_id)
                             ->where('year_no',$request->year_no)
                             ->where('semester_no',$request->semester_no)->get();
-          return FeeType::where('name','CP Fee')->academic_years()
-                     ->where('pivot.academic_year_id',$request->academic_year_id);
+          $fee_type=FeeType::where('name','CP Fee')->first();
+          return $fee_type->academic_years->wherePivot('academic_year_id',$request->academic_year_id);
     
 }
     public function getGradeReport(Request $request){
