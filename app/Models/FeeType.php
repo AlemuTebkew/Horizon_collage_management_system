@@ -19,4 +19,7 @@ class FeeType extends Model
 
         return $this->belongsToMany(FeeType::class,'tvet_other_fees');
     }
+    public function academic_years(){
+        return $this->belongsToMany(AcademicYear::class,'academic_fees');
+    }
 }

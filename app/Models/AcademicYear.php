@@ -29,4 +29,7 @@ class AcademicYear extends Model
     public function semesters(){
         return $this->hasMany(Semester::class);
     }
+    public function fee_types(){
+        return $this->belongsToMany(FeeType::class,'academic_fees');
+    }
 }

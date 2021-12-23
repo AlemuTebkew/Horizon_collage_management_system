@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Head;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Employee;
+use App\Models\FeeType;
 use Illuminate\Http\Request;
 
 class ReportController extends Controller
@@ -68,11 +69,12 @@ class ReportController extends Controller
         $employee=Employee::where('email',request()->user()->user_name)->first();
         $department_head=$employee->manage;
         // return Course::where('degree_department_id',$department_head->id)->get();
-        return  $course=Course::where('degree_department_id',$department_head->id)
+          $course=Course::where('degree_department_id',$department_head->id)
                             ->where('program_id',$request->program_id)
                             ->where('year_no',$request->year_no)
                             ->where('semester_no',$request->semester_no)->get();
-
+          return FeeType::where('name','CP Fee')->academic_years()
+                     ->where('pivot.academic_year_id',$request->academic_year_id);
     
 }
     public function getGradeReport(Request $request){
