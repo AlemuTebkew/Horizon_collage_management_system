@@ -18,7 +18,7 @@ class StudentFeeController extends Controller
     public function studentsPaid(){
 
 
-        $per_page=request()->has('per_page') ? request('per_page') : 2;
+        $per_page=request()->has('per_page') ? request('per_page') : 5;
       $degree_payment_query=DB::table('degree_student_month')
                               ->whereNotNull('receipt_no')
                               // ->distinct('receipt_no')
@@ -121,21 +121,19 @@ class StudentFeeController extends Controller
                             return $query->whereBetween('paid_date',[$start,$end]);
                         })
                         ->paginate($per_page);
+                        // ->get();
 
                 }
 
-    public function getStudentPaymentDetail($student_id){
-        $academic_year=AcademicYear::find(request('academic_year_id'));
-       // return $academic_year->fee_types;
-        $student=[];
-        $mf_id=FeeType::where('name','Monthly Fee')->first()->id;
-        $cpf_id=FeeType::where('name','CP Fee')->first()->id;
-        // $month_fee=$academic_year->fee_types->where('pivot.fee_type_id',$mf_id)->first()->amount;
-        // $cp_fee=$academic_year->fee_types->where('pivot.fee_type_id',$cpf_id)->first()->amount;
-     return  $month_fee=$academic_year->fee_types->where('pivot.fee_type_id',$mf_id)->first();
-        $cp_fee=$academic_year->fee_types->where('pivot.fee_type_id',$cpf_id)->amount;
+        public function getStudentPaymentDetail($student_id){
+            $academic_year=AcademicYear::find(request('academic_year_id'));
+            $student=[];
+            $mf_id=FeeType::where('name','Monthly Fee')->first()->id;
+            $cpf_id=FeeType::where('name','CP Fee')->first()->id;
+            $month_fee=$academic_year->fee_types()->wherePivot('fee_type_id',$mf_id)->first()->pivot->amount;
+            $cp_fee=$academic_year->fee_types()->wherePivot('fee_type_id',$cpf_id)->first()->pivot->amount;
 
-        return $cp_fee;
+
 
         if (request('type') == 'degree') {
             $degreeStudent=DegreeStudent::where('student_id',$student_id)
@@ -200,8 +198,8 @@ class StudentFeeController extends Controller
                     //    return $s->months;
                  //   return $degreeStudent->month_payments ->where('pivot.academic_year_id',$academic_year->id);
                      foreach ($s->months as $month) {
-                         $month_payments=$degreeStudent->month_payments
-                         ->where('pivot.academic_year_id',$academic_year->id);
+                         $month_payments=$degreeStudent->month_payments()
+                         ->wherePivot('academic_year_id',$academic_year->id)->get();
                         foreach ($month_payments as $month_payment) {
                             if ($month->id == $month_payment->id) {
 
@@ -238,8 +236,8 @@ class StudentFeeController extends Controller
                 $student['month_payment']=$month_fee;
                  $total=0;
                  $total_pad=[];
-                $month_payments=$tvetStudent->month_payments
-                ->where('pivot.academic_year_id',$academic_year->id)->orderBy('number');
+                $month_payments=$tvetStudent->month_payments()
+                ->wherePivot('academic_year_id',$academic_year->id)->get();
                 foreach($month_payments as $month_payment){
                    $month_pad=[];
                //     $pads[$month_payment->name]=$month_payment->pivot->receipt_no;
@@ -281,22 +279,25 @@ class StudentFeeController extends Controller
     public function addTuitionPayment(Request $request,$student_id){
 
 
-            $tuition_fee_id= FeeType::where('name','CP Fee')->first()->id;
+            $cp_fee_id= FeeType::where('name','CP Fee')->first()->id;
             $monthly_fee_id= FeeType::where('name','Monthly Fee')->first()->id;
+
+            if (request('student_type') == 'degree') {
+
             $student=DegreeStudent::find($student_id);
             $semester=Semester::find($request->semester_id);
+            $student->semesters()->updateExistingPivot($semester->id,
+            [
+                'tuition_type'=>$request->tuition_type,
+
+            ]);
             if ($request->tuition_type == 'cp') {
 
-                $student->semesters()->updateExistingPivot($semester->id,
-                [
-                    'tuition_type'=>$request->tuition_type,
-
-                ]);
                  $month_amount=doubleval($request->amount)/count($semester->months);
                 foreach ($semester->months as $month) {
 
                     $student->month_payments()->updateExistingPivot($month->id,[
-                        'fee_type_id'=>$tuition_fee_id,
+                        'fee_type_id'=>$cp_fee_id,
                         'academic_year_id'=>$request->academic_year_id,
                         'receipt_no'=>$request->receipt_no,
                         'paid_amount'=>$month_amount,
@@ -311,7 +312,7 @@ class StudentFeeController extends Controller
 
                 foreach ($request->months as $id) {
                     $student->month_payments()->updateExistingPivot($id,[
-                        'fee_type_id'=>$tuition_fee_id,
+                        'fee_type_id'=>$monthly_fee_id,
                         'academic_year_id'=>$request->academic_year_id,
                         'receipt_no'=>$request->receipt_no,
                         'paid_amount'=>$month_amount,
@@ -323,10 +324,31 @@ class StudentFeeController extends Controller
             }
 
             return $student->load('month_payments');
+        }elseif (request('student_type') == 'tvet') {
+
+            $student=TvetStudent::find($student_id);
+
+            $month_amount=(double)$request->amount /count($request->months);
+
+            foreach ($request->months as $id) {
+                $student->month_payments()->updateExistingPivot($id,[
+                    'fee_type_id'=>$monthly_fee_id,
+                    'academic_year_id'=>$request->academic_year_id,
+                    'receipt_no'=>$request->receipt_no,
+                    'paid_amount'=>$month_amount,
+                    'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+                    'is_paid'=>1
+
+                ]);
+            }
+            return $student->load('month_payments');
+
+        }
      }
 
-     public function addOtherPayment(){
+     public function addOtherPayment(Request $request){
 
+        $academic_year=AcademicYear::where('status',1)->first();
 
         $reg_fee_id= FeeType::where('name','Registration Fee')->first()->id;
         $tuition_fee_id= FeeType::where('name','CP Fee')->first()->id;
@@ -334,19 +356,52 @@ class StudentFeeController extends Controller
 
         $reg_fee_id= FeeType::where('name','Registration Fee')->first()->id;
 
+        if (request('type') == 'degree') {
+            $student=DegreeStudent::where('student_id',request('student_id'))->first();
+            $student->degree_other_fees()->attach($request->fee_type_id,[
+                'academic_year_id'=>$academic_year->id,
+                'receipt_no'=>$request->receipt_no,
+                'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+                'paid_amount'=>$request->amount,
+                'is_paid'=>1
 
-//         $student->degree_other_fees()->attach($reg_fee_id,[
-//             'academic_year_id'=>$academic_year->id,
-//             'receipt_no'=>$request->receipt_no,
-//             'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-//             'paid_amount'=>$request->registration_fee,
-//             'is_paid'=>1
+            ]);
+        } else if (request('type') == 'tvet') {
+            $student=TvetStudent::where('student_id',request('student_id'))->first();
+            $student->tvet_other_fees()->attach($request->fee_type_id,[
+                'academic_year_id'=>$academic_year->id,
+                'receipt_no'=>$request->receipt_no,
+                'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+                'paid_amount'=>$request->amount,
+                'is_paid'=>1
 
-//         ]);
+            ]);
+        }
+
 
 
 
 
  }
 
+        public function getAcademicFee(){
+            $academic_year=null;
+            if (request('academic_year_id')) {
+                $academic_year=AcademicYear::find(request('academic_year_id'));
+
+            }else {
+                $academic_year=AcademicYear::where('status',1)->first();
+            }
+
+                $all=[];
+
+               foreach ($academic_year->fee_types as $fee_type) {
+                $fee=[];
+                $fee['id']=$fee_type->id;
+                $fee['name']=$fee_type->name;
+                $fee['amount']=$fee_type->pivot->amount;
+                $all[]=$fee;
+            }
+         return response()->json($all,200);
+        }
 }

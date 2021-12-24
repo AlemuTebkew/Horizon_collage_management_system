@@ -32,5 +32,6 @@ class Semester extends Model
     public function degree_sections(){
         return $this->hasMany(DegreeSection::class);
     }
+
     }
 
