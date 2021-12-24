@@ -174,7 +174,8 @@ class DegreeStudentController extends Controller
 
     public function registerStudentForSemester(Request $request){
       $student=DegreeStudent::find($request->student_id);
-    //   $semester=Semester::find($request->semester_id);
+
+          //   $semester=Semester::find($request->semester_id);
       $student->semesters()->attach($request->semester_id,
       [
         'year_no'=>$request->year_no,
