@@ -41,7 +41,7 @@ public function program(){
 }
 public function semesters(){
     return $this->belongsToMany(Semester::class)->withPivot(['semester_no','year_no',
-    'semester_GPA','tuition_type']);
+    'semester_GPA','semester_grade_point','semester_credit_hour','semester_avarege','cgpa','tuition_type']);
 }
 // public function semester_payment(){
 //     return $this->hasOne(SemesterPayment::class);
