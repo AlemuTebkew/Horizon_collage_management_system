@@ -99,7 +99,10 @@ Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
 Route::apiResource('/tvet_student_fees',TvetStudentFeeController::class);
 Route::get('/students_paid',[StudentFeeController::class,'studentsPaid']);
 Route::post('/student_tuition_detail/{student_id}',[StudentFeeController::class,'getStudentPaymentDetail']);
-Route::post('/add_payment/{student_id}',[StudentFeeController::class,'addTuitionPayment']);
+Route::post('/add_tuition_payment/{student_id}',[StudentFeeController::class,'addTuitionPayment']);
+Route::post('/add_other_payment',[StudentFeeController::class,'addOtherPayment']);
+Route::get('/academic_fees',[StudentFeeController::class,'getAcademicFee']);
+Route::get('/students2',[DegreeStudentController::class,'getArrangedStudents']);
 
 /////////////////////Head////////////////////
 Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudentSemesters']);

@@ -12,7 +12,7 @@ class Semester extends Model
     'program_id','start_date','end_date','status','is_current'];
     public function degree_students(){
         return $this->belongsToMany(DegreeStudent::class)->withPivot(['year_no','semester_no',
-        'semester_GPA','tution_type']);
+        'semester_GPA','tuition_type']);
     }
     public function months(){
         return $this->belongsToMany(Month::class,'semester_months');
@@ -32,5 +32,6 @@ class Semester extends Model
     public function degree_sections(){
         return $this->hasMany(DegreeSection::class);
     }
+
     }
 
