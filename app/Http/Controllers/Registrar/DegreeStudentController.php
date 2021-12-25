@@ -31,25 +31,10 @@ class DegreeStudentController extends Controller
         //getting all students
         $academic_year=AcademicYear::where('status',1)->first();
 
-        /**
-         * =>function($query) use($academic_year){
-         *  $query->when(request('academic_year_id'),function($query){
-          *       return   $query->where('academic_year_id',request('academic_year_id'));
-          * },function($query) use($academic_year){
-           *return  $query->where('academic_year_id',$academic_year);
-        *});
-        *}
-         */
-        // return DegreeStudent::with(['semesters','degree_department','program'])->get();
 
-        return Semester::with(['degree_students']) ->get();
+        return DegreeStudent::with(['semesters','degree_department','program'])->get();
 
 
-//         return Destination::addSelect(['last_flight' => Flight::select('name')
-//     ->whereColumn('destination_id', 'destinations.id')
-//     ->orderByDesc('arrived_at')
-//     ->limit(1)
-// ])->get();
      }
 
     /**
@@ -259,14 +244,6 @@ class DegreeStudentController extends Controller
 
                                         }) ->with('degree_department','program')->get();
 
-
-        //  return  $students= DegreeStudent::
-        //                               where('degree_department_id',$department->id)
-
-        //                               ->where('current_year_no',$section->year_no)
-        //                               ->where('current_semester_no',$section->semester_no)
-        //                                ->with('degree_department','program')->get();
-
  }
 
         public function getArrangedStudents(){
@@ -287,7 +264,10 @@ class DegreeStudentController extends Controller
 
                                 $no=$s->pivot->semester_no;
                                 $student['id']=$s->id;
+                                $student['student_id']=$s->student_id;
                                 $student['first_name']=$s->first_name;
+                                $student['last_name']=$s->last_name;
+                                $student['sex']=$s->sex;
                                 $student['year_no']=$s->pivot->year_no;
                                 $student['program']=$s->program;
 
@@ -304,68 +284,9 @@ class DegreeStudentController extends Controller
                     $all[]=$semesters;
 
             }
-        return response()->json(['semesters'=> $all],200);
+        return response()->json($all,200);
       }
       public function new(){
 
-        $semesters=[];
-        $all=[];
-        $semesters1=Semester::with('degree_students')->get();
-
-             // $semester=$semesters1[$i];
-             $no=null;
-             $students=[];
-             foreach ($semesters1 as $semester) {
-
-if ($semester->number ==1) {
-    foreach ($semester->degree_students as $s) {
-
-
-        $no=$s->pivot->semester_no;
-        $student['id']=$s->id;
-        $student['first_name']=$s->first_name;
-        $student['year_no']=$s->pivot->year_no;
-        $students[]=$student;
-
-    }
-    $semesters['semester_no']=$no;
-    $semesters['students']=$students;
-    $all[]=$semesters;
-}else if ($semester->number ==2) {
-    foreach ($semester->degree_students as $s) {
-
-
-        $no=$s->pivot->semester_no;
-        $student['id']=$s->id;
-        $student['first_name']=$s->first_name;
-        $student['year_no']=$s->pivot->year_no;
-        $students[]=$student;
-
-    }
-    $semesters['semester_no']=$no;
-    $semesters['students']=$students;
-    $all[]=$semesters;
-}else if ($semester->number ==3) {
-    foreach ($semester->degree_students as $s) {
-
-
-        $no=$s->pivot->semester_no;
-        $student['id']=$s->id;
-        $student['first_name']=$s->first_name;
-        $student['year_no']=$s->pivot->year_no;
-        $students[]=$student;
-        $semesters['semester_no']=$no;
-        $semesters['students']=$students;
-    }
-
-
-}
-}
-$all[]=$semesters;
-
-
-
- return response()->json(['semesters'=> $all],200);
       }
-
     }

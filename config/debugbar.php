@@ -14,7 +14,7 @@ return [
      |
      */
 
-    'enabled' => env('DEBUGBAR_ENABLED', true),
+    'enabled' => env('DEBUGBAR_ENABLED', 'debugbar.enabled'),
     'except' => [
         'telescope*',
         'horizon*',
@@ -125,7 +125,7 @@ return [
      | in the Messages tab.
      |
      */
-    'error_handler' => false,
+    'error_handler' => true,
 
     /*
      |--------------------------------------------------------------------------

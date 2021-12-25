@@ -9,6 +9,7 @@ use App\Models\DegreeStudent;
 use App\Models\FeeType;
 use App\Models\Semester;
 use App\Models\TvetStudent;
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -97,18 +98,15 @@ class StudentFeeController extends Controller
                               ->unionAll($degree_students_tuition_fee)
                               ->unionAll($degree_students_other_fee);
 
-                         //    ->orderByDesc('paid_date');
-                          // return  $students_all_fee->select('*')->get();
                             $s= request('search_query');
-                            //   ->paginate($per_page);
-                          //  $query = $query1->union($query2);
+
             $querySql = $students_all_fee->toSql();
             $query = DB::table(DB::raw("($querySql ) as a"))
             ->mergeBindings($students_all_fee);
 
             return $query->orderByDesc('paid_date')
                         ->when(request('search_query') ,function($query){
-                            return $query->where('receipt_no', '=',request('search_query'));
+                            return $query->where('student_id', '=',request('search_query'));
                         })
                         ->when(request('payment_type_query') ,function($query){
                             return $query->where('payment_type', '=',request('payment_type_query'));
@@ -122,6 +120,7 @@ class StudentFeeController extends Controller
                         })
                         ->paginate($per_page);
                         // ->get();
+                        Debugbar::info($query);
 
                 }
 
