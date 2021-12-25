@@ -299,6 +299,12 @@ class DegreeStudentController extends Controller
                                 $student['year_no']=$s->pivot->year_no;
                                 $student['program']=$s->program;
                                 $student['status']=$s->status;
+                                $student['department']['id']=$s->degree_department->id;
+                                $student['department']['name']=$s->degree_department->name;
+                                $dep=DegreeDepartment::find($s->degree_department->id);
+                               $student['department']['no_of_year']=$dep->programs()->wherePivot('program_id',$s->program->id)->first()['pivot']['no_of_year'];
+                            //    ->wherePivot('program_id',$s->program->id)->first()->pivot ;
+
 
 
                                  $students[]=$student;

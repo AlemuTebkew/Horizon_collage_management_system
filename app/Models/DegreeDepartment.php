@@ -13,7 +13,8 @@ class DegreeDepartment extends Model
     public $hidden=['created_at','updated_at',];
 
     public function programs(){
-        return $this->belongsToMany(Program::class)->withPivot(['no_of_semester','no_of_year']);
+        return $this->belongsToMany(Program::class)
+        ->withPivot(['no_of_semester','no_of_year','program_id','degree_department_id']);
     }
     public function degree_sections(){
         return $this->hasMany(DegreeSection::class);
