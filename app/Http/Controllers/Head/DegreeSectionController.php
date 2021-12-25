@@ -22,10 +22,15 @@ class DegreeSectionController extends Controller
      */
     public function index()
     {
-        $academic_year=AcademicYear::where('status',1)->first();
+        $academic_year_id=null;
+        if (request()->has('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+        $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
 
         return DegreeSectionResource::collection(DegreeSection::with('degree_department','semester')
-              ->where('academic_year_id',$academic_year->id)->get());
+              ->where('academic_year_id',$academic_year_id)->get());
     }
 
     /**
@@ -109,16 +114,11 @@ class DegreeSectionController extends Controller
         foreach (request('student_ids')  as  $student_id) {
            $sec->degree_students()->attach($student_id);
         }
-        // $new_students=[];
-        // foreach($sec->degree_students as $degree_student){
-        //     if()
-        //   $new_students=  
-        // }
-
+   
         return DegreeSectionStudentResource::collection($sec->degree_students);
 
     }
-  
+
 
 
 

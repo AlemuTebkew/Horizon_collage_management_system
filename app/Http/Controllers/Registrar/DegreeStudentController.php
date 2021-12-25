@@ -29,10 +29,18 @@ class DegreeStudentController extends Controller
     public function index()
     {
         //getting all students
-        $academic_year=AcademicYear::where('status',1)->first();
+        $academic_year_id=null;
+        if (request()->has('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+        $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
 
+        return DegreeStudent::with(['semesters'=>function($query) use($academic_year_id){
+                $query->where('academic_year_id',$academic_year_id);
+        },'degree_department','program'])
 
-        return DegreeStudent::with(['semesters','degree_department','program'])->get();
+                             ->get();
 
 
      }
@@ -248,7 +256,14 @@ class DegreeStudentController extends Controller
  }
 
         public function getArrangedStudents(){
-            $academic_year=AcademicYear::find(request('academic_year_id'));
+
+            $academic_year_id=null;
+            if (request()->has('academic_year_id')) {
+                $academic_year_id=request('academic_year_id');
+            }else{
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+            }
+
 
                $semesters=[];
                $all=[];
@@ -271,6 +286,7 @@ class DegreeStudentController extends Controller
                                 $student['sex']=$s->sex;
                                 $student['year_no']=$s->pivot->year_no;
                                 $student['program']=$s->program;
+                                $student['status']=$s->status;
 
 
                                  $students[]=$student;

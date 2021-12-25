@@ -80,7 +80,7 @@ return [
     |
     */
 
-    'remote_sites_path' => env('DEBUGBAR_REMOTE_SITES_PATH', ''),
+    'remote_sites_path' => env('DEBUGBAR_REMOTE_SITES_PATH', 'http://192.168.1.15:8080/staff/degreefee'),
     'local_sites_path' => env('DEBUGBAR_LOCAL_SITES_PATH', ''),
 
     /*
