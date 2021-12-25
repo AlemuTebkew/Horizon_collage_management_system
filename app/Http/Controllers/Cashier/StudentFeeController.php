@@ -120,7 +120,7 @@ class StudentFeeController extends Controller
                         })
                         ->paginate($per_page);
                         // ->get();
-                        Debugbar::info($query);
+                       // Debugbar::info($query);
 
                 }
 

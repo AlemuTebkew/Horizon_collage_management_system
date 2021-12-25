@@ -17,6 +17,8 @@ class CreateDegreeStudentSemestersTable extends Migration
             $table->id();
             $table->foreignId('degree_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('semester_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+
             $table->string('year_no');
             $table->string('semester_no');
             $table->double('semester_GPA')->default(4.0);
