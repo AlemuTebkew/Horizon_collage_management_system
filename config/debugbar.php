@@ -14,7 +14,7 @@ return [
      |
      */
 
-    'enabled' => env('DEBUGBAR_ENABLED', true),
+    'enabled' => env('DEBUGBAR_ENABLED', 'debugbar.enabled'),
     'except' => [
         'telescope*',
         'horizon*',
@@ -80,7 +80,7 @@ return [
     |
     */
 
-    'remote_sites_path' => env('DEBUGBAR_REMOTE_SITES_PATH', ''),
+    'remote_sites_path' => env('DEBUGBAR_REMOTE_SITES_PATH', 'http://192.168.1.15:8080/staff/degreefee'),
     'local_sites_path' => env('DEBUGBAR_LOCAL_SITES_PATH', ''),
 
     /*
@@ -125,7 +125,7 @@ return [
      | in the Messages tab.
      |
      */
-    'error_handler' => false,
+    'error_handler' => true,
 
     /*
      |--------------------------------------------------------------------------

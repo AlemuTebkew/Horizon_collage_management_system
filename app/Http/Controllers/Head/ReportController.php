@@ -68,7 +68,7 @@ class ReportController extends Controller
         //
     }
     public function getCourseTakenBySemester(Request $request){
-        
+
         $employee=Employee::where('email',request()->user()->user_name)->first();
         $department_head=$employee->manage;
          Course::where('degree_department_id',$department_head->id)->get();
@@ -85,7 +85,7 @@ class ReportController extends Controller
             'cpFee'=>$cp_fee,
              'registrationFee'=>$registration_fee,
              'course'=>$course,
-        ]
+        ],200
         );
 }
     public function getGradeReport(Request $request){
@@ -125,7 +125,7 @@ class ReportController extends Controller
 
 
            $courses[]=$course;
-             
+
          }
         // return $courses;
          $total_credit_hour=$this->totalCreditHour($student);
@@ -165,7 +165,7 @@ class ReportController extends Controller
             //  foreach($courses as $course){
             //      $student
 
-       
+
        }
        return $all_students;
 

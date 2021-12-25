@@ -20,8 +20,18 @@ class DegreeStudentFeeController extends Controller
     {
         $all=[];
         $student=[];
-         $academic_year=AcademicYear::where('status',1)->first();
-         $degreeStudents=DegreeStudent::whereHas('month_payments')
+
+
+        //getting all students
+        $academic_year_id=null;
+        if (request()->has('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+        $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+
+
+        $degreeStudents=DegreeStudent::whereHas('month_payments')
                                      ->with('month_payments')->get();
           foreach ($degreeStudents as  $degreeStudent) {
 
@@ -30,9 +40,11 @@ class DegreeStudentFeeController extends Controller
                  $student['sex']=$degreeStudent->sex;
                  $month_pad=[];
                  $total=0;
-                    foreach ($degreeStudent->month_payments as $month) {
+                  $month_payments=$degreeStudent->month_payments()
+                  ->wherePivot('academic_year_id',$academic_year_id)->get();
+                    foreach ($month_payments as $month) {
                   //    return  $month;
-                        if($month->pivot->academic_year_id == $academic_year->id){
+                        if($month->pivot->academic_year_id == $academic_year_id){
 
                             $month_pad[$month->name] = $month->pivot->receipt_no;
                             $total+=(double)$month->pivot->paid_amount;
@@ -45,8 +57,11 @@ class DegreeStudentFeeController extends Controller
 
            $all[]=$student;
 
+
           }
-         return response()->json( $all);
+        //   $chunks = collect($all)->chunk(2);
+        //  return $chunks->toArray();
+         return response()->json( collect($all)->paginate());
     }
 
     /**
@@ -129,7 +144,7 @@ class DegreeStudentFeeController extends Controller
                     $month_pad['paid_date']= $month_payment->pivot->paid_date;
                     $total+=number_format ($month_payment->pivot->paid_amount);
 
-             
+
                     $total_pads[]= $month_pad;
                     }
                  }

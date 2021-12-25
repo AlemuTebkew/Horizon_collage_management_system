@@ -91,25 +91,25 @@ class Account extends Controller
             ],200);
 
          } elseif ($user->user_type == 'employee') {
+           //  return $user->user_type;
             $employee=Employee::where('email',$user->user_name)->first();
 
             if ($employee->role == 'department head') {
-                if ($employee->manage) {
+
+
                     $token= $user->createToken('auth_token')->plainTextToken;
                     return response()->json([
                         'access_token'=>$token,
-                        'user'=>$employee,
+                        'user'=>$employee->load('manage'),
                     ],200);
-                }else {
-                    return response()->json(['Un Authorized'],401);
-                }
-            }
+
+            }else{
             $token= $user->createToken('auth_token')->plainTextToken;
             return response()->json([
                 'access_token'=>$token,
                 'user'=>$employee,
             ],200);
-
+        }
          }
 
 
