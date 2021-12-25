@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Course\CourseResource;
 use App\Http\Resources\DegreeResult\CourseResultResource;
 use App\Http\Resources\DegreeStudentResource;
+use App\Http\Resources\Semester\RegisteredSemesterResource;
 use App\Http\Resources\StudentSemesterResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
@@ -187,25 +188,30 @@ class DegreeStudentController extends Controller
 
     public function registerStudentForSemester(Request $request){
       $student=DegreeStudent::find($request->student_id);
-      $current_academic_year=AcademicYear::find($request->academic_id);
-       $semester_no=Semester::find($request->semester_id); 
-         $register_semester=$student->semesters()->where('semester_id',$request->semester_id)->first();
-            $x=!$register_semester;
-       if($x){
-        //return 'awsome';
-       // return $student->semesters;
+      $current_academic_year=AcademicYear::find($request->academic_year_id);
+       $semester_no=Semester::find($request->semester_id)->number; 
+       $register_semester=$student->semesters()->where('semester_id',$request->semester_id)->first();
+       
+       if(!$register_semester){
         $student->semesters()->attach($request->semester_id,
         [
         'year_no'=>$request->year_no,
         'semester_no'=>$semester_no,
+        'academic_year_id'=>$request->academic_year_id,
         //'partial_scholarship'=>$request->partial_scholarship,
         'status'=>'waiting'
         ]);
-        return 'eno';
+        $student->current_year_no=$request->year_no;
+        $student->current_semester_no=$request->semester_no;
+        $semester=Semester::find($request->semester_id);
+        return new RegisteredSemesterResource($semester->load('academic_year'),$request->year_no);
+
+        
     }
         else if($register_semester){
          return response()->json('error',400);
         }
+        
        }
       
 
@@ -302,7 +308,8 @@ class DegreeStudentController extends Controller
                                 $student['department']['id']=$s->degree_department->id;
                                 $student['department']['name']=$s->degree_department->name;
                                 $dep=DegreeDepartment::find($s->degree_department->id);
-                               $student['department']['no_of_year']=$dep->programs()->wherePivot('program_id',$s->program->id)->first()['pivot']['no_of_year'];
+                               $student['department']['no_of_year']=$dep->programs()->wherePivot('program_id',$s->program->id)->get()->pivot;
+                              //['pivot']['no_of_year'];
                             //    ->wherePivot('program_id',$s->program->id)->first()->pivot ;
 
 
