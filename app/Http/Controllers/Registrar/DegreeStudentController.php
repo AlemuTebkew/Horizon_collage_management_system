@@ -194,15 +194,61 @@ class DegreeStudentController extends Controller
 
     public function registerStudentForSemester(Request $request){
       $student=DegreeStudent::find($request->student_id);
+       $current_academic_year=AcademicYear::where('is_current',1)->first()->year;
+      // $current_semester=$student->semesters()->where('is_current',1)->get();
+       $semester_no=$student->current_semester_no;
+       $year_no=$student->current_year_no;
+       $program=$student->program->name;
+        $duration=$student->degree_department->programs()->where('program_id',$student->program->id)->first()->pivot->no_of_year;
+       //->where('id',$program->id);
+       if($program=='Regular'){
+           if($semester_no==1){
+               $semester_no+=1;
+           }
+           else if($semester_no==2){
+               
+               if($year_no<$duration){
+                   $semester_no=1;
+                   $year_no+=1;
+                   $current_academic_year+=1;
 
-          //   $semester=Semester::find($request->semester_id);
-      $student->semesters()->attach($request->semester_id,
+
+               }
+           }
+       }
+       else if($program=='Extension'){
+        if($semester_no==1){
+            $semester_no+=1;
+        }
+        else if($semester_no==2){
+            $semester_no+=1;
+
+        }
+        else if($semester_no==3){
+            
+            if($year_no<$duration){
+                $semester_no=1;
+                $year_no+=1;
+                $current_academic_year+=1;
+
+
+
+            }
+        }
+
+       }
+            $current_academic_year_id=AcademicYear::where('year',$current_academic_year)->first()->id;
+            $semester_id=Semester::all()->where('academic_year_id',$current_academic_year_id)
+                              ->where('number',$semester_no)
+                              ->where('program_id',$student->program->id)->first()->id;
+      $student->semesters()->attach($semester_id,
       [
-        'year_no'=>$request->year_no,
-        'semester_no'=>$request->semester_no,
-        'partial_scholarship'=>$request->partial_scholarship,
+        'year_no'=>$year_no,
+        'semester_no'=>$semester_no,
+       // 'partial_scholarship'=>$request->partial_scholarship,
         'status'=>'waiting'
       ]);
+      return $student->semesters()->where('semester_id',$semester_id)->get();
     }
 
     public function getStudentSemesters($degreeStudent_id){

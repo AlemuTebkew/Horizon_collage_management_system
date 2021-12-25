@@ -49,7 +49,9 @@ use Illuminate\Support\Facades\Route;
     Route::get('/active_teachers',[TeacherController::class,'getActiveTeacher']);
     Route::post('/assign_teacher_for_course',[CourseController::class,'assignTeacherForCourse']);
     Route::post('/grade_reports',[ReportController::class,'getGradeReport']);
+    Route::post('/register_student_for_semester',[DegreeStudentController::class,'registerStudentForSemester']);
 
+    
   
     Route::apiResource('/courses',CourseController::class);
 
