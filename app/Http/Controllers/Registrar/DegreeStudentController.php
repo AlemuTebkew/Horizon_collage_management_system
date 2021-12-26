@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Course\CourseResource;
 use App\Http\Resources\DegreeResult\CourseResultResource;
 use App\Http\Resources\DegreeStudentResource;
+use App\Http\Resources\Semester\RegisteredSemesterResource;
 use App\Http\Resources\StudentSemesterResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
@@ -187,62 +188,33 @@ class DegreeStudentController extends Controller
 
     public function registerStudentForSemester(Request $request){
       $student=DegreeStudent::find($request->student_id);
-       $current_academic_year=AcademicYear::where('is_current',1)->first()->year;
-      // $current_semester=$student->semesters()->where('is_current',1)->get();
-       $semester_no=$student->current_semester_no;
-       $year_no=$student->current_year_no;
-       $program=$student->program->name;
-        $duration=$student->degree_department->programs()->where('program_id',$student->program->id)->first()->pivot->no_of_year;
-       //->where('id',$program->id);
-       if($program=='Regular'){
-           if($semester_no==1){
-               $semester_no+=1;
-           }
-           else if($semester_no==2){
+      $current_academic_year=AcademicYear::find($request->academic_year_id);
+       $semester_no=Semester::find($request->semester_id)->number;
+       $register_semester=$student->semesters()->where('semester_id',$request->semester_id)->first();
 
-               if($year_no<$duration){
-                   $semester_no=1;
-                   $year_no+=1;
-                   $current_academic_year+=1;
-
-
-               }
-           }
-       }
-       else if($program=='Extension'){
-        if($semester_no==1){
-            $semester_no+=1;
-        }
-        else if($semester_no==2){
-            $semester_no+=1;
-
-        }
-        else if($semester_no==3){
-
-            if($year_no<$duration){
-                $semester_no=1;
-                $year_no+=1;
-                $current_academic_year+=1;
-
-
-
-            }
-        }
-
-       }
-            $current_academic_year_id=AcademicYear::where('year',$current_academic_year)->first()->id;
-            $semester_id=Semester::all()->where('academic_year_id',$current_academic_year_id)
-                              ->where('number',$semester_no)
-                              ->where('program_id',$student->program->id)->first()->id;
-      $student->semesters()->attach($semester_id,
-      [
-        'year_no'=>$year_no,
+       if(!$register_semester){
+        $student->semesters()->attach($request->semester_id,
+        [
+        'year_no'=>$request->year_no,
         'semester_no'=>$semester_no,
-       // 'partial_scholarship'=>$request->partial_scholarship,
+        'academic_year_id'=>$request->academic_year_id,
+        //'partial_scholarship'=>$request->partial_scholarship,
         'status'=>'waiting'
-      ]);
-      return $student->semesters()->where('semester_id',$semester_id)->get();
+        ]);
+        $student->current_year_no=$request->year_no;
+        $student->current_semester_no=$request->semester_no;
+        $semester=Semester::find($request->semester_id);
+        return new RegisteredSemesterResource($semester->load('academic_year'),$request->year_no);
+
+
     }
+        else if($register_semester){
+         return response()->json('error',400);
+        }
+
+       }
+
+
 
     public function getStudentSemesters($degreeStudent_id){
         $degreeStudent= DegreeStudent::find($degreeStudent_id);
