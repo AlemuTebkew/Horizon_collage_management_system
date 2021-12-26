@@ -20,7 +20,7 @@ class StudentLevelResource extends JsonResource
             'student_id'=>$this->student_id,
             'department'=>$this->department ? $this->department->name:null,
             'program'=>$this->program ? $this->program->name:null,
-            'student_id'=>$this->current_level_no,
+            'current_level_no'=>$this->current_level_no,
             'levels'=>LevelResource::collection($this->levels)
         ];
     }

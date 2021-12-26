@@ -79,15 +79,19 @@ class TvetStudentFeeController extends Controller
     public function show($tvetStudentId)
     {
         $tvetStudent=TvetStudent::find($tvetStudentId);
-        // return $tvetStudent->month_payments;
+        $tss= $tvetStudent->load('month_payments');
         $years=[];
-        foreach($tvetStudent->month_payments as $month){
+        if ($tvetStudent->has('month_payments')) {
+            # code...
+
+        foreach($tss as $month){
             //check through relationship method
             //return $month;
           $academic_year_id=$month->pivot->academic_year_id;
           $academic_year=AcademicYear::find($academic_year_id);
           $years[$academic_year_id]=$academic_year;
         }
+    }
        //return $years;
        $all_pads=[];
        $year_payments=[];

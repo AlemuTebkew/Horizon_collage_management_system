@@ -120,7 +120,6 @@ class StudentFeeController extends Controller
                         })
                         ->paginate($per_page);
                         // ->get();
-                        Debugbar::info($query);
 
                 }
 
@@ -153,8 +152,11 @@ class StudentFeeController extends Controller
               $semesters=$degreeStudent->semesters
                          ->where('academic_year_id',$academic_year->id);
 
-                        //return $semesters;
+                        // return $semesters;
               foreach ($semesters as $s) {
+
+
+                if ($s->has('months')) {
 
 
                   if ($s->pivot->tuition_type == 'monthly' || $s->pivot->tuition_type == null ) {
@@ -166,9 +168,9 @@ class StudentFeeController extends Controller
 
                     $total=0;
                     $total_pad=[];
-                //    return $s->months;
-             //   return $degreeStudent->month_payments ->where('pivot.academic_year_id',$academic_year->id);
-                 foreach ($s->months as $month) {
+                    $months= $s->months;
+
+                foreach ($months as $month) {
                      $month_payments=$degreeStudent->month_payments()
                      ->wherePivot('academic_year_id',$academic_year->id)->get();
                     foreach ($month_payments as $month_payment) {
@@ -215,7 +217,7 @@ class StudentFeeController extends Controller
                     $student['cp'][]=$semester;
                   }
 
-
+                }
               }
 
           return $student;
@@ -389,7 +391,7 @@ class StudentFeeController extends Controller
                 $academic_year=AcademicYear::find(request('academic_year_id'));
 
             }else {
-                $academic_year=AcademicYear::where('status',1)->first();
+                $academic_year=AcademicYear::where('is_current',1)->first();
             }
 
                 $all=[];

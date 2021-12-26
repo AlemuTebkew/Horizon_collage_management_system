@@ -313,7 +313,9 @@ class DegreeStudentController extends Controller
 
                $semesters=[];
                $all=[];
-               $semesters1=Semester::with('degree_students')->get();
+               $semesters1=Semester::with('degree_students')
+               ->where('academic_year_id',$academic_year_id)
+               ->get();
                  for ($i=1; $i <=3 ; $i++) {
                     // $semester=$semesters1[$i];
                     $no=null;
@@ -336,8 +338,23 @@ class DegreeStudentController extends Controller
                                 $student['department']['id']=$s->degree_department->id;
                                 $student['department']['name']=$s->degree_department->name;
                                 $dep=DegreeDepartment::find($s->degree_department->id);
-                               $student['department']['no_of_year']=$dep->programs()->wherePivot('program_id',$s->program->id)->first()['pivot']['no_of_year'];
-                            //    ->wherePivot('program_id',$s->program->id)->first()->pivot ;
+                                // return $dep->programs->where('pivot.program_id',$s->program_id)
+                                // ->first()->pivot->no_of_year;
+
+
+                                if ($dep->has('programs')) {
+
+                                   $a= $dep
+                                    ->programs()
+                                    ->where('program_id',$s->program->id)->first();
+                                       if ($a) {
+                                        $student['department']['no_of_year']=$a->pivot->no_of_year;
+
+                                       }else{
+                                        $student['department']['no_of_year']=null;
+                                       }
+
+                                }
 
 
 
