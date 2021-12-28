@@ -15,9 +15,15 @@ class SemesterController extends Controller
      */
     public function index()
     {
-        $academic_year=AcademicYear::where('status',1)->first();
+        $academic_year_id=null;
+        if (request()->has('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
 
-        return Semester::where('academic_year_id',$academic_year->id)->get();
+
+        return Semester::where('academic_year_id',$academic_year_id)->get();
     }
 
     /**

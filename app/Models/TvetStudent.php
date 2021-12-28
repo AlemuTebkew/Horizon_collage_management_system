@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class TvetStudent extends Model
 {
     use HasFactory;
-    public $fillable=['student_id','first_name','middle_name',
-    'last_name','password','sex','dob',
-    'phone_no','maritial_status', 'emergency_contact_name','emergency_contact_relationship',
-    'emergency_contact_phone_no','EGSSE_result','EHEEE_result',
+    public $fillable=['student_id','first_name','middle_name','batch',
+    'last_name','sex','dob',
+    'phone_no','maritial_status', 'contact_full_name','contact_relationship',
+    'contact_phone_no','contact_tel','contact_office_tel','EGSSE_result','EHEEE_result',
     'birth_address_id','residential_address_id','emergency_address_id',
     'program_id','tvet_department_id','financial_source',
     'no_of_level','current_level_no',
-    'isGraduated','isGraduated','fully_scholarship'
+    'is_graduated','graduated_date','fully_scholarship'
 ];
 
 public $hidden=['password','created_at','updated_at'];
@@ -40,13 +40,16 @@ public function levels(){
 }
 //for payment
 public function month_payments(){
-    return $this->belongsToMany(Month::class,'tvet_student_month')->withPivot(['receipt_no','academic_year_id']);
+    return $this->belongsToMany(Month::class,'tvet_student_month')
+    ->withPivot('receipt_no','academic_year_id','paid_date','paid_amount')
+    ->withTimestamps() ;
 
 }
 
 public function tvet_other_fees(){
 
-    return $this->belongsToMany(FeeType::class,'tvet_other_fees');
+    return $this->belongsToMany(FeeType::class,'tvet_other_fees')
+                ->withTimestamps();
 }
 
 public function tvet_sections(){

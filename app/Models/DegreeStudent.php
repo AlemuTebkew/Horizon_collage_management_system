@@ -9,13 +9,14 @@ class DegreeStudent extends Model
 {
     use HasFactory;
     public $fillable=['student_id','first_name',
-    'last_name','middle_name','password','sex','dob',
-    'phone_no','maritial_status', 'emergency_contact_name','emergency_contact_relationship',
-    'emergency_contact_phone_no','EGSSE_result','EHEEE_result',
+    'last_name','middle_name','sex','dob',
+    'phone_no','residence_office_tel','residence_tel','maritial_status',
+     'contact_full_name','contact_relationship',
+    'contact_tel','contact_phone_no','contact_office_tel','EGSSE_result','EHEEE_result',
     'birth_address_id','residential_address_id','emergency_address_id',
     'program_id','degree_department_id','financial_source',
     'current_semester_no','current_year_no','batch',
-    'employment_profile','isGraduated',
+    'is_graduated','fully_scholarship','graduated_date'
 
 ];
 
@@ -41,21 +42,17 @@ public function program(){
 }
 public function semesters(){
     return $this->belongsToMany(Semester::class)->withPivot(['semester_no','year_no',
-    'semester_GPA','semester_grade_point','semester_credit_hour','semester_avarege','cgpa','tuition_type']);
-}
-// public function semester_payment(){
-//     return $this->hasOne(SemesterPayment::class);
-// }
-
-public function semester_payments(){
-    return $this->belongsToMany(Semester::class,'student_semester_payment')->withPivot(['receipt_no']);
+    'semester_GPA','semester_grade_point','semester_credit_hour','semester_avarege','cgpa','tuition_type'])
+                                            ->withTimestamps();
 }
 
 /*
  *this mothode is for monthly payment not for month
 */
 public function month_payments(){
-    return $this->belongsToMany(Month::class)->withPivot('receipt_no','academic_year_id','paid_date','paid_amount');
+    return $this->belongsToMany(Month::class)
+    ->withPivot('receipt_no','academic_year_id','paid_date','paid_amount')
+    ->withTimestamps();
 }
 public function birth_address(){
     return $this->belongsTo(Address::class,'birth_address_id');

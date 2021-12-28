@@ -45,13 +45,20 @@ class TvetStudentController extends Controller
             'middle_name'=>'required',
             'sex'=>'required',
             'dob'=>'required',
-            'phone_no'=>'required',
-            'maritial_status'=>'required',
-            'emergency_contact_name'=>'required',
+            'phone_no'=>'required|unique:tvet_students',
+
         ]);
 
-        $academic_year=AcademicYear::where('status',1)->first();
+        $academic_year_id=null;
+        if (request()->has('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+        $academic_year=AcademicYear::find($academic_year_id);
+
         $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
+
         $level=Level::find($request->level_id);
         $birth_address=Address::create($request->birth_address);
         $residential_address=Address::create($request->residential_address);
@@ -69,51 +76,17 @@ class TvetStudentController extends Controller
 
 
         $student= TvetStudent::create($data);
+        $student->update(['student_id'=>'HR'.$academic_year->year.$student->id]);
+
         $student->levels()->attach($level->id,
         [
 
             'academic_year_id'=>$academic_year->id,
-            'partial_scholarship'=>$request->partial_scholarship
+            // 'partial_scholarship'=>$request->partial_scholarship
 
         ]);
 
-        $reg_fee_id= FeeType::where('name','Registration Fee')->first()->id;
-        $monthly_fee_id= FeeType::where('name','Monthly Fee')->first()->id;
 
-
-      // return $month_id;
-        foreach ($month_id as $id) {
-
-            $student->month_payments()->attach($id,[
-                'academic_year_id'=>$academic_year->id,
-
-            ]);
-        }
-
-        foreach ($request->tuition_months as $id) {
-
-            $student->month_payments()->updateExistingPivot($id,[
-                'fee_type_id'=>$monthly_fee_id,
-                'academic_year_id'=>$academic_year->id,
-                'receipt_no'=>$request->receipt_no,
-                'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-                'paid_amount'=>$request->tuition_fee,
-                'is_paid'=>1
-
-            ]);
-          //  $student->month_payments->forget($id);
-
-        }
-       // $student->month_payments->forget($this->id);
-
-        $student->tvet_other_fees()->attach($reg_fee_id,[
-            'academic_year_id'=>$academic_year->id,
-            'receipt_no'=>$request->receipt_no,
-            'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-            'paid_amount'=>$request->registration_fee,
-            'is_paid'=>1
-
-        ]);
         DB::commit();
         return $student->load('levels','month_payments');
     } catch (\Exception $e) {
@@ -144,19 +117,67 @@ class TvetStudentController extends Controller
      */
     public function update(Request $request, TvetStudent $tvetStudent)
     {
+        DB::beginTransaction();
+
+        try {
+
         $request->validate([
-            'student_id'=>'required',
             'first_name'=>'required',
             'last_name'=>'required',
+            'middle_name'=>'required',
             'sex'=>'required',
             'dob'=>'required',
             'phone_no'=>'required',
-            'martial_status'=>'required',
-            'emergency_contact_name'=>'required',
 
         ]);
-       $tvetStudent->update($request->all());
-       return $tvetStudent;
+
+        $academic_year_id=null;
+        if (request()->has('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+        $academic_year=AcademicYear::find($academic_year_id);
+
+        $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
+
+        $level=Level::find($request->level_id);
+
+        $birth_address= $tvetStudent->birth_address()->update($request->birth_address);
+        $residential_address= $tvetStudent->contact_address()->update($request->residential_address);
+        $emergency_address=  $tvetStudent->residential_address()->update($request->emergency_address);
+
+        $data=$request->all();
+        // $data['birth_address_id']=$birth_address->id;
+        // $data['residential_address_id']=$residential_address->id;
+        // $data['emergency_address_id']=$emergency_address->id;
+        $data['password']=Hash::make('HR'.$request->last_name);
+        $data['batch']=$academic_year->year;
+        $data['current_level_no']=$level->level_no;
+        $data['dob']=date('Y-m-d',strtotime($request->dob));
+        $data['student_id']='HR'.$academic_year->year.$tvetStudent->id;
+
+
+
+        $tvetStudent->update($data);
+        $tvetStudent->levels()->detach();
+        $tvetStudent->levels()->attach($level->id,
+        [
+
+            'academic_year_id'=>$academic_year->id,
+            // 'partial_scholarship'=>$request->partial_scholarship
+
+        ]);
+
+
+        DB::commit();
+        return $tvetStudent->load('levels','month_payments');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return $e;
+        return response()->json(['can t create student'],501);
+    }
+
     }
 
     /**

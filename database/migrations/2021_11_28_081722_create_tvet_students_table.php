@@ -16,18 +16,22 @@ class CreateTvetStudentsTable extends Migration
         Schema::create('tvet_students', function (Blueprint $table) {
             $table->id();
             $table->string('student_id')->unique()->nullable();
-            $table->string('password');
             $table->string('first_name');
             $table->string('last_name');
             $table->string('sex');
             $table->date('dob');
-            $table->string('phone_no');
-            $table->string('martial_status');
-            $table->string('emergency_contact_name');
-            $table->string('emergency_contact_relationship');
-            $table->string('emergency_contact_phone_no');
-            $table->string('EGSSE_result');
-            $table->string('EHEEE_result');
+            $table->string('phone_no')->nullable();
+            $table->string('residence_tel')->nullable();
+            $table->string('residence_office_tel')->nullable();
+            $table->string('maritial_status')->nullable();
+            $table->string('contact_full_name')->nullable();
+            $table->string('contact_relationship')->nullable();
+            $table->string('contact_tel')->nullable();
+            $table->string('contact_phone_no')->nullable();
+            $table->string('contact_office_tel')->nullable();
+            $table->string('EGSSE_result')->nullable();
+            $table->string('EHEEE_result')->nullable();
+
                  //foreign keys from address table
             $table->foreignId('birth_address_id')->constrained('addresses','id')->cascadeOnDelete()->cascadeOnUpdate();//place_of_birth_address
             $table->foreignId('residential_address_id')->constrained('addresses','id')->cascadeOnDelete()->cascadeOnUpdate();//current_residential_address
@@ -36,7 +40,7 @@ class CreateTvetStudentsTable extends Migration
             $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('tvet_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
-            $table->string('financial_source');
+            $table->string('financial_source')->nullable();
             $table->string('no_of_level');
             $table->string('current_level_no');
             $table->string('batch');
