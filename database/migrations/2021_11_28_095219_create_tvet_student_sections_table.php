@@ -13,7 +13,7 @@ class CreateTvetStudentSectionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('tvet_student_sections', function (Blueprint $table) {
+        Schema::create('tvet_student_section', function (Blueprint $table) {
             $table->id();
             $table->foreignId('tvet_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('tvet_section_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();

@@ -20,8 +20,8 @@ class CreateCocDegreeStudentsTable extends Migration
             $table->foreignId('level_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 
             $table->date('application_date');
-            $table->double('result');
-            $table->string('nature_of_assesment');
+            $table->double('result')->default(0);
+            $table->string('nature_of_assesment')->nullable();
             $table->timestamps();
         });
     }

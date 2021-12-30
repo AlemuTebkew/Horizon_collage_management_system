@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\DegreeSection;
 use App\Models\DegreeStudent;
 use App\Models\Employee;
+use App\Models\Semester;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
 
@@ -50,10 +51,22 @@ class DegreeSectionController extends Controller
         ]);
         $data=$request->all();
         $employee=Employee::where('email',$request->user()->user_name)->first();
-    //   return $employee;
-        $data['degree_department_id']=$employee->manage->id;
+
+       $data['degree_department_id']=$employee->manage->id;
+      $data['semester_no']=Semester::find($request->semester_id)->number;
+      $s=DegreeSection::where('name',$request->name)->where('year_no',$request->year_no)
+                             ->where('semester_id',$request->semester_id)
+                             ->where('degree_department_id',$employee->manage->id)
+                             ->where('academic_year_id',$request->academic_year_id)
+                             ->where('program_id',$request->program_id)
+                             ->first();
+      if (!$s) {
         $ds= DegreeSection::create($data);
-        return new DegreeSectionResource($ds->load('degree_department','semester'));
+        return response()->json(new DegreeSectionResource($ds->load('degree_department','semester')),200) ;
+      }else {
+          return response()->json(['error_message'=>'Section Already Added'],400);
+      }
+
     }
 
     /**
@@ -86,7 +99,7 @@ class DegreeSectionController extends Controller
         //'email',$request->user()->user_name)->first()
         $data=$request->all();
         $employee=Employee::where('email',$request->user()->user_name)->first();
-     // return $employee;
+     // $employee->manage->id;
         $data['degree_department_id']=$employee->manage->id;
         $degreeSection->update($data);
         return new DegreeSectionResource($degreeSection->load('degree_department','semester'));
@@ -114,7 +127,7 @@ class DegreeSectionController extends Controller
         foreach (request('student_ids')  as  $student_id) {
            $sec->degree_students()->attach($student_id);
         }
-   
+
         return DegreeSectionStudentResource::collection($sec->degree_students);
 
     }

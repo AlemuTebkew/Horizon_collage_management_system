@@ -22,13 +22,13 @@ class DegreeStudentFeeController extends Controller
 
         //getting all students
         $academic_year_id=null;
-        if (request()->has('academic_year_id')) {
+        if (request()->filled('academic_year_id')) {
             $academic_year_id=request('academic_year_id');
         }else{
             $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
 
-
+        $academic_year=AcademicYear::find($academic_year_id);
         $degreeStudents=DegreeStudent::whereHas('month_payments',function( $query) use($academic_year_id){
             $query->where('degree_student_month.academic_year_id',$academic_year_id);
         })->with('month_payments')->get();
@@ -44,22 +44,36 @@ class DegreeStudentFeeController extends Controller
                   ->wherePivot('academic_year_id',$academic_year_id)
                   ->orderBy('number')
                   ->get();
-                    foreach ($month_payments as $month) {
-                  //    return  $month;
-                        if($month->pivot->academic_year_id == $academic_year_id){
+                  foreach ($academic_year->months as $month) {
 
-                            $month_pad[$month->name] = $month->pivot->receipt_no;
-                            $total+=(double)$month->pivot->paid_amount;
+                      $month_pad=[];
+                    foreach ($month_payments as $month_payment) {
+                  //    return  $month;
+                        if($month_payment->pivot->academic_year_id == $academic_year_id){
+
+                            if ($month->id == $month_payment->id)  {
+                                $month_pad = $month_payment->pivot->receipt_no;
+                                $total+=(double)$month_payment->pivot->paid_amount;
+                               break;
+                            }else {
+                                $month_pad =null;
+                                break;
+                            }
+
 
                          }
                         }
 
-           $student['total']=$total;
-           $student['pads']=$month_pad;
-
-           $all[]=$student;
 
 
+           $pads[$month->name]=$month_pad;
+
+
+
+            }
+            $student['total']=$total;
+            $student['pads']=$pads;
+            $all[]=$student;
           }
         //   $chunks = collect($all)->chunk(2);
         //  return $chunks->toArray();
@@ -145,6 +159,13 @@ class DegreeStudentFeeController extends Controller
 
                                 $total_pads[]= $month_pad;
                                 break;
+                                }else {
+                                    $month_pad['id']=$month->id;
+                                    $month_pad['name']=$month->name;
+                                    $month_pad['pad']=null;
+                                     $month_pad['paid_date']=null;
+                                     $total_pads[]= $month_pad;
+                                   break;
                                 }
 
                             }

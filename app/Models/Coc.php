@@ -12,17 +12,18 @@ class Coc extends Model
 
     public function degree_students()
     {
-        // return $this->belongsToMany(DegreeStudent::class)
+        return $this->belongsToMany(DegreeStudent::class)
+        ->withPivot(['application_date','result','nature_of_assesment','level_id']);
+        // return $this->morphedByMany(DegreeStudent::class, 'cocable')
         // ->withPivot(['application_date','result','nature_of_assesment']);
-        return $this->morphedByMany(DegreeStudent::class, 'cocable')
-        ->withPivot(['application_date','result','nature_of_assesment']);    }
+     }
 
     public function tvet_students()
     {
-        // return $this->belongsToMany(TvetStudent::class)
+        return $this->belongsToMany(TvetStudent::class)
+        ->withPivot(['application_date','result','nature_of_assesment','level_id']);
+        // return $this->morphedByMany(TvetStudent::class, 'cocable')
         // ->withPivot(['application_date','result','nature_of_assesment']);
-        return $this->morphedByMany(TvetStudent::class, 'cocable')
-        ->withPivot(['application_date','result','nature_of_assesment']);
     }
     public function academic_year(){
         return $this->belongsTo(AcademicYear::class);

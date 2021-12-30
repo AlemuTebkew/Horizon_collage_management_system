@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class StudentSemesterResource extends JsonResource
+class AddedSemesterResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -12,7 +12,6 @@ class StudentSemesterResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array|\Illuminate\Contracts\Support\Arrayable|\JsonSerializable
      */
-
     public function toArray($request)
     {
         return [
@@ -29,7 +28,7 @@ class StudentSemesterResource extends JsonResource
             ,
             'program'=>$this->program ? $this->program->makeVisible('id','name'):null,
             'current_year_number'=>$this->current_year_no,
-            'semesters'=> SemesterResource::collection($this->semesters)
+            'semesters'=> new SemesterResource($this->semesters()->where('number',$this->current_semester_no)->first())
         ];
-        }
+    }
 }

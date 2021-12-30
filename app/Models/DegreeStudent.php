@@ -16,7 +16,7 @@ class DegreeStudent extends Model
     'birth_address_id','residential_address_id','emergency_address_id',
     'program_id','degree_department_id','financial_source',
     'current_semester_no','current_year_no','batch',
-    'is_graduated','fully_scholarship','graduated_date'
+    'is_graduated','fully_scholarship',''
 
 ];
 
@@ -27,9 +27,9 @@ public function getFullNameAttribute(){
 
 
 public function cocs(){
-    // return $this->belongsToMany(DegreeStudent::class)
-    // ->withPivot(['application_date','result','nature_of_assesment']);
-    return $this->morphToMany(Coc::class,'cocable');
+    return $this->belongsToMany(Coc::class)
+    ->withPivot(['application_date','result','nature_of_assesment','level_id']);
+    //return $this->morphToMany(Coc::class,'cocable');
 }
 
 public function degree_other_fees(){
@@ -41,9 +41,9 @@ public function program(){
      return $this->belongsTo(Program::class);
 }
 public function semesters(){
-    return $this->belongsToMany(Semester::class)->withPivot(['semester_no','year_no',
-    'semester_GPA','semester_grade_point','semester_credit_hour','semester_avarege','cgpa','tuition_type'])
-                                            ->withTimestamps();
+    return $this->belongsToMany(Semester::class)
+    ->withPivot(['semester_no','year_no','semester_GPA','semester_grade_point','semester_credit_hour','semester_avarege','cgpa','tuition_type','status'])
+                        ->withTimestamps();
 }
 
 /*
@@ -76,7 +76,7 @@ public function courses(){
 }
 
 public function degree_sections(){
-    return $this->belongsToMany(DegreeSection::class,'degree_sections_students');
+    return $this->belongsToMany(DegreeSection::class,'degree_student_section');
 }
 
 }

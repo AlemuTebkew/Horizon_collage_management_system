@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\DegreeStudentInfo\StudentResource;
+use App\Http\Resources\TvetStudentInfo\StudentResource as TvetStudentInfoStudentResource;
 use App\Models\DegreeStudent;
 use App\Models\Employee;
 use App\Models\Teacher;
@@ -72,23 +74,6 @@ class Account extends Controller
                 'user'=>$teacher,
             ],200);
 
-         }elseif ($user->user_type == 'degree_student') {
-            $degree_student=DegreeStudent::where('student_id',$user->user_name)->first();
-
-            $token= $degree_student->createToken('auth_token')->plainTextToken;
-            return response()->json([
-                'access_token'=>$token,
-                'user'=>$degree_student,
-            ],200);
-
-         } elseif ($user->user_type == 'tvet_student') {
-            $tvet_student=TvetStudent::where('student_id',$user->user_name)->first();
-
-            $token= $tvet_student->createToken('auth_token')->plainTextToken;
-            return response()->json([
-                'access_token'=>$token,
-                'user'=>$tvet_student,
-            ],200);
 
          } elseif ($user->user_type == 'employee') {
            //  return $user->user_type;
@@ -114,6 +99,53 @@ class Account extends Controller
 
 
      }
+
+
+     public function studentLogin(Request $request){
+        $request->validate([
+
+            'user_name'=>'required',
+            'password'=>'required',
+
+        ]);
+        $user=UserLogin::where('user_name',$request->user_name)->first();
+        if (! $user ) {
+            return response()->json([
+                'message'=>' incorrect user_name and password',
+                ]
+               ,404 );
+        }
+        $check=Hash::check($request->password, $user->password);
+        if (! $check ) {
+            return response()->json([
+                'message'=>' incorrect password',
+                ]
+               ,404 );
+        }
+
+       if ($user->user_type == 'degree_student') {
+          $degree_student=DegreeStudent::where('student_id',$user->user_name)->first();
+
+          $token= $user->createToken('auth_token')->plainTextToken;
+        return response()->json([
+            'access_token'=>$token,
+            'role'=>'degree_student',
+            'user'=>new StudentResource($degree_student),
+        ],200);
+
+     } elseif ($user->user_type == 'tvet_student') {
+        $tvet_student=TvetStudent::where('student_id',$user->user_name)->first();
+
+        $token= $user->createToken('auth_token')->plainTextToken;
+        return response()->json([
+            'access_token'=>$token,
+            'role'=>'tvet_student',
+            'user'=>new TvetStudentInfoStudentResource($tvet_student),
+        ],200);
+
+
+     }
+    }
      public function logout(Request $request){
      //  return  $request->user();
          $request->user()->currentAccessToken()->delete();

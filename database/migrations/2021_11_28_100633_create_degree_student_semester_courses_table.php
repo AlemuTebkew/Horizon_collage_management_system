@@ -15,10 +15,10 @@ class CreateDegreeStudentSemesterCoursesTable extends Migration
     {
         Schema::create('student_semester_courses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('degree_student_id')->constrained('degree_student_semesters')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('degree_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('semester_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->double('total_mark');
+            $table->double('total_mark')->nullable();
             $table->string('grade_point')->nullable();
             $table->text('remark')->nullable();
 

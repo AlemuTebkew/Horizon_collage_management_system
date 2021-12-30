@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\TvetStudentInfo;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class StudentLevelResource extends JsonResource
+class StudentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -19,10 +19,6 @@ class StudentLevelResource extends JsonResource
             'name'=>$this->full_name,
             'student_id'=>$this->student_id,
             'sex'=>$this->sex,
-            'department'=>$this->tvet_department->makeHidden('created_at','updated_at','department_head_id','sector') ?? null,
-            'program'=>$this->program ? $this->program->name:null,
-            'current_level_no'=>$this->current_level_no,
-            'levels'=>LevelResource::collection($this->levels)
-        ];
-    }
+            'department'=>$this->tvet_department ? $this->tvet_department->name:null,
+        ];    }
 }

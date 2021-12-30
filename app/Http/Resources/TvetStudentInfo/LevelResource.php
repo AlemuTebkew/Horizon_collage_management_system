@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\TvetStudentInfo;
 
 use App\Models\AcademicYear;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -15,11 +15,11 @@ class LevelResource extends JsonResource
      */
     public function toArray($request)
     {
-        return[
+        return [
             'id'=>$this->id,
+            'level_no'=>$this->level_no,
             'year'=>$this->pivot->academic_year_id ? AcademicYear::find($this->pivot->academic_year_id)->year:null,
             'status'=>$this->pivot->status,
-            'level_no'=>$this->level_no,
         ];
     }
 }

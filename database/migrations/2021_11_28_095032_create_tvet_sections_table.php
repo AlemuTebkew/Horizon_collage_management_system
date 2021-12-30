@@ -15,6 +15,7 @@ class CreateTvetSectionsTable extends Migration
     {
         Schema::create('tvet_sections', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
             $table->foreignId('tvet_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();

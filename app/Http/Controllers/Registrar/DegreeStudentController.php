@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AddedSemesterResource;
 use App\Http\Resources\Course\CourseResource;
 use App\Http\Resources\DegreeResult\CourseResultResource;
 use App\Http\Resources\DegreeStudentResource;
@@ -16,6 +17,7 @@ use App\Models\Employee;
 use App\Models\FeeType;
 use App\Models\Month;
 use App\Models\Semester;
+use App\Models\UserLogin;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -66,6 +68,7 @@ class DegreeStudentController extends Controller
                 'phone_no'=>'required',
 
             ]);
+
             $academic_year_id=null;
             if (request()->filled('academic_year_id')) {
                 $academic_year_id=request('academic_year_id');
@@ -102,6 +105,14 @@ class DegreeStudentController extends Controller
             $student= DegreeStudent::create($data);
             $student->update(['student_id'=>'HR'.$academic_year->year.$student->id]);
 
+             //////////start user login info
+             $login=new UserLogin();
+             $login->user_name=$student->student_id;
+             $login->password=Hash::make($request->last_name.'1234');
+             $login->user_type='degree_student';
+             $login->save();
+            ///////////////////////end user login info
+
             $is_registerd=$student->semesters()->where('semester_id',$request->semester_id)->first();
 
             if(!$is_registerd){
@@ -113,18 +124,66 @@ class DegreeStudentController extends Controller
                  //'partial_scholarship'=>$request->partial_scholarship,
                  'status'=>'waiting'
                  ]);
-
+            //  return $student->semesters;
            } else if($is_registerd){
+                DB::rollBack();
                 return response()->json('error Already Registerd ',400);
              }
 
+           $this->registerStudentForCourses($student,$semester);
            DB::commit();
-            return $student->load('semesters');
+            return response()->json($this->responseData($student,$semester->number,$request->year_no),200);
         } catch (\Exception $e) {
             DB::rollBack();
-           return $e->getMessage();
+            // return $e;
             return response()->json(['can t create student'],400);
         }
+
+    }
+
+
+    private function registerStudentForCourses($student,$semester){
+
+        // $student=DegreeStudent::find($student_id);
+        // $semester=Semester::find($semester_id);
+        $department=DegreeDepartment::find($student->degree_department_id);
+        $courses=$department->courses()->where('semester_no',$semester->number)->pluck('id');
+       return  $student->courses()->attach($courses,['semester_id'=>$semester->id]);
+    }
+    private function responseData($s,$s_no,$y_no){
+     $semester=[];
+     $student=[];
+
+
+     $student['id']=$s->id;
+     $student['student_id']=$s->student_id;
+     $student['first_name']=$s->first_name;
+     $student['last_name']=$s->last_name;
+     $student['sex']=$s->sex;
+     $student['year_no']=$s_no;
+     $student['program']=$s->program;
+     $student['status']='waiting';
+     $student['department']['id']=$s->degree_department->id;
+     $student['department']['name']=$s->degree_department->name;
+     $dep=DegreeDepartment::find($s->degree_department->id);
+
+
+     if ($dep->programs) {
+        $a= $dep
+         ->programs()
+         ->where('program_id',$s->program->id)->first();
+            if ($a) {
+             $student['department']['no_of_year']=$a->pivot->no_of_year;
+
+            }else{
+             $student['department']['no_of_year']=null;
+            }
+     }
+
+     $semester['semester_no']=$s_no;
+     $semester['students']=$student;
+
+     return $semester;
 
     }
 
@@ -148,8 +207,8 @@ class DegreeStudentController extends Controller
      */
     public function update(Request $request, DegreeStudent $degreeStudent)
     {
-        // DB::beginTransaction();
-        // try {
+        DB::beginTransaction();
+        try {
 
             $request->validate([
                 'first_name'=>'required',
@@ -176,7 +235,7 @@ class DegreeStudentController extends Controller
 
            $academic_year=AcademicYear::find($academic_year_id);
            $semester=Semester::find($semester_id);
-            $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
+            // $month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
 
            $birth_address= $degreeStudent->birth_address()->update($request->birth_address);
            $residential_address= $degreeStudent->contact_address()->update($request->residential_address);
@@ -184,10 +243,7 @@ class DegreeStudentController extends Controller
 
 
             $data=$request->all();
-            // $data['birth_address_id']=$birth_address->id;
-            // $data['residential_address_id']=$residential_address->id;
-            // $data['emergency_address_id']=$emergency_address->id;
-            $data['password']=Hash::make('HR'.$request->last_name);
+
             $data['batch']=$academic_year->year;
              $data['current_semester_no']=$semester->number;
              $data['current_year_no']=$request->year_no;
@@ -195,11 +251,22 @@ class DegreeStudentController extends Controller
             $data['student_id']='HR'.$academic_year->year.$degreeStudent->id;
             $degreeStudent->update($data);
 
+                       //////////start user login info
+                      $login= UserLogin::where('user_name',$degreeStudent->student_id)->first();
+                       if (!$login) {
+                         $login=new UserLogin();
+                       }
+                       $login->user_name=$degreeStudent->student_id;
+                       $login->password=Hash::make($request->last_name.'1234');
+                       $login->user_type='degree_student';
+                       $login->save();
+                      ///////////////////////end user login info
+
             $is_registerd=$degreeStudent->semesters;
 
             if($is_registerd){
                  $degreeStudent->semesters()->detach();
-                 $degreeStudent->semesters()->attach($request->semester_id,
+                 $degreeStudent->semesters()->attach($semester->id,
                  [
                  'year_no'=>$request->year_no,
                  'semester_no'=>$semester->number,
@@ -211,14 +278,18 @@ class DegreeStudentController extends Controller
            } else if($is_registerd){
                 return response()->json('error Already Registerd ',400);
              }
-
-            // DB::commit();
-            return $degreeStudent->load('semesters');
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //    return $e;
-        //     return response()->json(['can t create student'],500);
-        // }
+             $courses=$degreeStudent->courses()->where('semester_no',$semester->number);
+             if ($courses) {
+                $degreeStudent->courses()->where('semester_no',$semester->number)->detach();
+                $this->registerStudentForCourses($degreeStudent,$semester);
+             }
+            DB::commit();
+            return response()->json($this->responseData($degreeStudent,$semester->number,$request->year_no),200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+         //  return $e;
+            return response()->json(['can t create student'],400);
+        }
     }
 
     /**
@@ -272,15 +343,14 @@ class DegreeStudentController extends Controller
             return new RegisteredSemesterResource($semester->load('academic_year'),$request->year_no);
 
         } else if($is_registerd ){
-            return response()->json('error',400);
+            return response()->json('error Student Already Registerd ',400);
             }
 
             DB::commit();
-            return response()->json(['succesfully registerd'],200);
+            return response()->json(new AddedSemesterResource($student),200);
             } catch (\Exception $e) {
                 DB::rollBack();
                 return response()->json(['not succesfully registerd'.$e],500);
-
                }
 
     }
@@ -304,9 +374,10 @@ class DegreeStudentController extends Controller
         $student=DegreeStudent::find(request('student_id'));
 
         foreach (request()->courses as $course) {
-             $student->attach($course['id'],[
+             $student->updateExistingPivot($course['id'],[
                  'semester_id'=>$course['semester_id'],
-                 'total_mark'=>$course['total_mark']
+                 'total_mark'=>$course['total_mark'],
+                 'grade_point'=>$this->courseGradePoint($course['cp'],$course['total_mark']),
 
              ]);
 
@@ -357,7 +428,6 @@ class DegreeStudentController extends Controller
                $all=[];
             //    $dep_id=Employee::where('email',request()->user()->user_name)->first()->manage->id;
                $semesters1=Semester::with(['degree_students'=>function($query) {
-                 $query->where('degree_department_id',4);
                }])
                ->where('academic_year_id',$academic_year_id)
                ->get();
@@ -366,7 +436,9 @@ class DegreeStudentController extends Controller
                     $no=null;
                     $students=[];
                     foreach ($semesters1 as $semester) {
-                            $degree_students=$semester->degree_students()->where('degree_department_id',4)->get();
+                            $degree_students=$semester->degree_students()
+                           ->where('academic_year_id',$academic_year_id)
+                            ->get();
 
                         foreach ($degree_students as $s) {
 
@@ -387,8 +459,18 @@ class DegreeStudentController extends Controller
                                 // return $dep->programs->where('pivot.program_id',$s->program_id)
                                 // ->first()->pivot->no_of_year;
 
+                                if ($s->fully_scholarship) {
+                                    $student['scholarship']='fully';
 
-                                if ($dep->has('programs')) {
+                                }else if($s->pivot->partial_scholarship){
+                                    $student['scholarship']='partial';
+
+                                }else {
+                                    $student['scholarship']='none';
+                                }
+
+
+                                if ($dep->programs) {
 
                                    $a= $dep
                                     ->programs()
@@ -399,15 +481,10 @@ class DegreeStudentController extends Controller
                                        }else{
                                         $student['department']['no_of_year']=null;
                                        }
-
                                 }
-
-
-
                                  $students[]=$student;
                             }
                         }
-
 
                     }
                       if ($no) {
@@ -417,33 +494,26 @@ class DegreeStudentController extends Controller
                         $all[]=$semesters;
                     }
 
-
             }
         return response()->json($all,200);
       }
-      public function getSemesterArrangedStudents(Request $request){
+
+      public function getArrangedStudentsByDepartment(Request $request){
 
         $academic_year_id=null;
         if (request()->filled('academic_year_id')) {
             $academic_year_id=request('academic_year_id');
         }else{
-        $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
-
-
-        if ($request->filled('semester_id')) {
-            $semester_id=$request->semester_id;
-       }else {
-           $semester_id=Semester::where('academic_year_id',$academic_year_id)
-           ->where('is_current',1)
-           ->where('program_id',$request->program_id)->first()->id;
-       }
 
            $semesters=[];
            $all=[];
+           $employee=Employee::where('email',request()->user()->user_name)->first();
+           $dep_id= $employee->manage->id;
         //    $dep_id=Employee::where('email',request()->user()->user_name)->first()->manage->id;
-           $semesters1=Semester::with(['degree_students'=>function($query) {
-             $query->where('degree_department_id',4);
+           $semesters1=Semester::with(['degree_students'=>function($query) use($dep_id) {
+             $query->where('degree_department_id',$dep_id);
            }])
            ->where('academic_year_id',$academic_year_id)
            ->get();
@@ -452,7 +522,9 @@ class DegreeStudentController extends Controller
                 $no=null;
                 $students=[];
                 foreach ($semesters1 as $semester) {
-                        $degree_students=$semester->degree_students()->where('degree_department_id',4)->get();
+                        $degree_students=$semester->degree_students()
+                       ->where('academic_year_id',$academic_year_id)
+                        ->where('degree_department_id',$dep_id)->get();
 
                     foreach ($degree_students as $s) {
 
@@ -474,7 +546,7 @@ class DegreeStudentController extends Controller
                             // ->first()->pivot->no_of_year;
 
 
-                            if ($dep->has('programs')) {
+                            if ($dep->programs) {
 
                                $a= $dep
                                 ->programs()
@@ -507,4 +579,38 @@ class DegreeStudentController extends Controller
         }
     return response()->json($all,200);
   }
+
+
+  public function courseGradePoint($credit_hour,$letter_grade){
+    if($letter_grade=='A'|| $letter_grade=='A+'){
+      return  $grade_point=$credit_hour*4;
+    }
+    else if($letter_grade=='A-'){
+        return  $grade_point=$credit_hour*3.75;
+    }
+    else if($letter_grade=='B+'){
+        return  $grade_point=$credit_hour*3.5;
+    }
+    else if($letter_grade=='B'){
+        return  $grade_point=$credit_hour*3;
+    }
+    else if($letter_grade=='B-'){
+        return  $grade_point=$credit_hour*2.75;
+    }
+    else if($letter_grade=='C+'){
+        return $grade_point=$credit_hour*2.5;
+    }
+    else if($letter_grade=='C'){
+        return $grade_point=$credit_hour*2;
+    }
+    else if($letter_grade=='C-'){
+        return $grade_point=$credit_hour*1.75;
+    }
+    else if($letter_grade=='D'){
+        return $grade_point=$credit_hour*1;
+    }
+    else if($letter_grade=='F'){
+        return $grade_point=$credit_hour*0;
+    }
+}
     }

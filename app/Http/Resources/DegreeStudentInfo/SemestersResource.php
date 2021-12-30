@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\DegreeStudentInfo;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class SemesterResource extends JsonResource
+class SemestersResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,13 +15,13 @@ class SemesterResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id'=>$this->id,
             'year'=>$this->academic_year ? $this->academic_year->year:null,
             'start_date'=>$this->start_date,
             'end_date'=>$this->end_date,
-            'status'=>$this->pivot->status,
+            'status'=>$this->status,
             'year_no'=>$this->pivot->year_no,
             'semester_no'=>$this->pivot->semester_no,
-            'GPA'=>$this->pivot->semester_GPA??null
-        ];
-      }
+            'GPA'=>$this->pivot->semester_GPA
+        ];    }
 }

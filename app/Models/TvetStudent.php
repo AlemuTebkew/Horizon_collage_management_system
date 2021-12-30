@@ -23,9 +23,9 @@ public function getFullNameAttribute(){
 }
 
 public function cocs(){
-    // return $this->belongsToMany(TvetStudent::class)
-    // ->withPivot(['application_date','result','nature_of_assesment']);
-    return $this->morphToMany(Coc::class,'cocable');
+    return $this->belongsToMany(Coc::class)
+    ->withPivot(['application_date','result','nature_of_assesment','level_id']);
+    // return $this->morphToMany(Coc::class,'cocable');
 }
 
 public function program(){
@@ -36,7 +36,16 @@ public function tvet_department(){
     return $this->belongsTo(TvetDepartment::class);
 }
 public function levels(){
-    return $this->belongsToMany(Level::class,'tvet_student_level');
+    return $this->belongsToMany(Level::class,'tvet_student_level')
+    ->withPivot('tvet_student_id','academic_year_id','level_id','status');
+
+}
+
+public function modules(){
+    return $this->belongsToMany(Module::class,'student_level_module')
+    ->withPivot('level_id','module_id','total_mark');
+
+
 }
 //for payment
 public function month_payments(){
@@ -53,7 +62,7 @@ public function tvet_other_fees(){
 }
 
 public function tvet_sections(){
-    return $this->belongsToMany(TvetSection::class);
+    return $this->belongsToMany(TvetSection::class,'tvet_student_section');
 }
 public function birth_address(){
     return $this->belongsTo(Address::class,'birth_address_id');

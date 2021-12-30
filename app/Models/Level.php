@@ -13,7 +13,7 @@ class Level extends Model
     public function tvet_departments(){
         return $this->belongsTo(TvetDepartment::class);
     }
-    public function module(){
+    public function modules(){
         return $this->hasMany(Module::class);
     }
     public function tvet_section(){
@@ -21,6 +21,12 @@ class Level extends Model
     }
 
     public function tvet_students(){
-        return $this->belongsToMany(TvetStudent::class,'tvet_student_level');
+        return $this->belongsToMany(TvetStudent::class,'tvet_student_level')
+        ->withPivot('tvet_student_id','academic_year_id','level_id','status');
+        ;
+    }
+
+    public function academic_year(){
+        return $this->belongsTo(AcademicYear::class);
     }
 }

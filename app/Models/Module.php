@@ -23,4 +23,11 @@ public function program(){
 public function teachers(){
     return $this->belongsToMany(Teacher::class);
 }
+
+public function tvet_students(){
+    return $this->belongsToMany(TvetStudent::class,'student_level_module')
+    ->withPivot('level_id','module_id','total_mark');
+
+
+}
 }

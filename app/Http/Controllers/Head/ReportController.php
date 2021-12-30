@@ -70,9 +70,9 @@ class ReportController extends Controller
     public function getCourseTakenBySemester(Request $request){
 
         $employee=Employee::where('email',request()->user()->user_name)->first();
-        $department_head=$employee->manage;
-         Course::where('degree_department_id',$department_head->id)->get();
-          $course=Course::where('degree_department_id',$department_head->id)
+        $department=$employee->manage;
+         Course::where('degree_department_id',$department->id)->get();
+          $course=Course::where('degree_department_id',$department->id)
                             ->where('program_id',$request->program_id)
                             ->where('year_no',$request->year_no)
                             ->where('semester_no',$request->semester_no)->get();
@@ -179,7 +179,7 @@ class ReportController extends Controller
         $semesters=$student->semesters;
         $total_credit_hour=0;
         foreach ($semesters as $semester) {
-            $total_credit_hour+=$semester->semester_credit_hour;
+            $total_credit_hour+=$semester->pivot->semester_credit_hour;
         }
         return $total_credit_hour;
 

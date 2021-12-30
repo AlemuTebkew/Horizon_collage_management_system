@@ -20,7 +20,6 @@ class CreateTvetStudentLevel extends Migration
 
             $table->foreignId('level_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->boolean('is_finished')->default(0);
             $table->boolean('partial_scholarship')->default(0);
             $table->string('status')->nullable();
            // no result column
