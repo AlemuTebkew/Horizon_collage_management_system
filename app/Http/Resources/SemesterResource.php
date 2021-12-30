@@ -15,6 +15,7 @@ class SemesterResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id'=>$this->id,
             'year'=>$this->academic_year ? $this->academic_year->year:null,
             'start_date'=>$this->start_date,
             'end_date'=>$this->end_date,

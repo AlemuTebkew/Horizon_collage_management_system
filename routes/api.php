@@ -39,8 +39,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Route::middleware('auth:sanctum', function (Request $request) {
-  Route::middleware(['auth:sanctum'])->group(function () {
+//////////////////////Authentication
+
+    Route::post('/login',[Account::class,'login']);
+    Route::post('/student_login',[Account::class,'studentLogin']);
+
+   Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::middleware(['admin','dean'])->prefix('api')->group(function () {
 
@@ -63,20 +67,17 @@ use Illuminate\Support\Facades\Route;
 
     Route::apiResource('/courses',CourseController::class);
 
-////////////////////Head Re//////////
+//////////////////// Reistrar Only//////////
 Route::get('/students2',[DegreeStudentController::class,'getArrangedStudentsByDepartment']);
 Route::get('/tvet_students2',[TvetStudentController::class,'getArrangedStudentsByDepartment']);
 
 
 
 
-});
     //----------------Dean related-------------------//
 Route::apiResource('/academic_years',AcademicYearController::class);
 Route::post('/all_academic_years',[AcademicYearController::class,'getAllAcademicYear']);
-
 Route::apiResource('/semesters',SemesterController::class);
-
 Route::apiResource('/degree_departments',DegreeDepartmentController::class);
 Route::apiResource('/tvet_departments',TvetDepartmentController::class);
 Route::apiResource('/programs',ProgramController::class);
@@ -85,32 +86,18 @@ Route::get('/tvet_programs',[ProgramController::class,'getTvetProgram']);
 Route::apiResource('/teachers',TeacherController::class);
 Route::apiResource('/employees',EmployeeController::class);
 Route::get('/department_heads',[EmployeeController::class,'getDepartmentHeads']);
-
-
 Route::apiResource('/modules',ModuleController::class);
 Route::apiResource('/fee_types',FeeTypeController::class);
 Route::post('/assign_degree_department_head', [DegreeDepartmentController::class,'assignDepartmentHead']);
 Route::post('/assign_tvet_department_head', [TvetDepartmentController::class,'assignDepartmentHead']);
-
-
-// });
-
-Route::post('/login',[Account::class,'login']);
-Route::post('/student_login',[Account::class,'studentLogin']);
-
-
-// ----------------Registrar related==========================///////
-Route::apiResource('/degree_students',DegreeStudentController::class);
-// Route::get('/get_degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
-//Route::get('/get_degree_students/{department_Head_id}',[DegreeStudentController::class,'getDegreeStudent']);
-Route::apiResource('/tvet_students',TvetStudentController::class);
-Route::apiResource('/address',AddressController::class);
-Route::apiResource('/months',MonthController::class);
-Route::apiResource('/levels',LevelController::class);
+Route::get('/get_cashiers',[EmployeeController::class,'getCashiers']);
 Route::get('/get_registrars',[EmployeeController::class,'getRegistrars']);
-Route::apiResource('/dash_board',RegistrarDashBoardController::class);
+
+ });
 
 
+
+/////////////////// start Cashier////////////////////////
 Route::apiResource('/degree_student_fees',DegreeStudentFeeController::class);
 Route::apiResource('/tvet_student_fees',TvetStudentFeeController::class);
 Route::get('/students_paid',[StudentFeeController::class,'studentsPaid']);
@@ -119,22 +106,35 @@ Route::post('/add_tuition_payment/{student_id}',[StudentFeeController::class,'ad
 Route::post('/add_other_payment',[StudentFeeController::class,'addOtherPayment']);
 Route::get('/academic_fees',[StudentFeeController::class,'getAcademicFee']);
 
-Route::get('/degree_yearly_arranged_students',[DegreeStudentController::class,'getArrangedStudents']);
-Route::get('/tvet_yearly_arranged_students',[TvetStudentController::class,'getArrangedStudents']);
 
-/////////////////////Head////////////////////
-Route::get('/student_levels/{id}',[TvetStudentController::class,'getStudentLevels']);
-Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudentSemesters']);
-Route::get('/student_semester_courses/{id}',[DegreeStudentController::class,'getStudentSemesterCourses']);
-Route::get('/give_course_result',[DegreeStudentController::class,'giveCourseResult']);
+/////////////////////Head   And  Regi////////////////
+// ----------------Registrar Only==========================///////
+Route::apiResource('/degree_students',DegreeStudentController::class);
+Route::apiResource('/tvet_students',TvetStudentController::class);
+Route::apiResource('/address',AddressController::class);
+Route::apiResource('/months',MonthController::class);
+Route::apiResource('/levels',LevelController::class);
+Route::apiResource('/dash_board',RegistrarDashBoardController::class);
+Route::get('/give_course_result/{id}',[DegreeStudentController::class,'giveCourseResult']);
+Route::get('/give_module_result/{id}',[TvetStudentController::class,'giveModuleResult']);
+Route::post('/degree_yearly_arranged_students',[DegreeStudentController::class,'getArrangedStudents']);
+Route::post('/tvet_yearly_arranged_students',[TvetStudentController::class,'getArrangedStudents']);
+
+//-----------------------Head only----------------------------
 Route::get('/degree_section_students/{section_id}',[DegreeSectionController ::class,'getSectionStudents']);
 Route::post('/add_section_students',[DegreeSectionController ::class,'addStudentsToSection']);
 
+//-----------------Both Head Registrar
+Route::get('/student_levels/{id}',[TvetStudentController::class,'getStudentLevels']);
+Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudentSemesters']);
+Route::get('/semester_courses/{id}',[DegreeStudentController::class,'getStudentSemesterCourses']);
+Route::get('/level_modules/{id}',[TvetStudentController::class,'getStudentLevelModules']);
 
-//------------------------cashier related--------------------------------//
-Route::get('/get_cashiers',[EmployeeController::class,'getCashiers']);
+/////////////////End Head Reg
 
-///////////////Degree Student Info
+///////////////Start Student Info/////////////////////////////
+
+//----------------------Degree Student Info
 Route::get('/degree_my_tuition/{id}',[DegreeStudentInfoController::class,'myTuition']);
 Route::get('/degree_my_course/{id}',[DegreeStudentInfoController::class,'myCourse']);
 Route::get('/degree_my_grade/{id}',[DegreeStudentInfoController::class,'myGrade']);
@@ -142,7 +142,7 @@ Route::get('/degree_my_status/{id}',[DegreeStudentInfoController::class,'myStatu
 Route::get('/degree_my_coc/{id}',[DegreeStudentInfoController::class,'myCoc']);
 Route::get('/degree_my_section/{id}',[DegreeStudentInfoController::class,'mySection']);
 
-///////////////Tvet Student Info
+//--------------------Tvet Student Info
 Route::get('/tvet_my_tuition/{id}',[TvetStudentInfoController::class,'myTuition']);
 Route::get('/tvet_my_course/{id}',[TvetStudentInfoController::class,'myCourse']);
 Route::get('/tvet_my_grade/{id}',[TvetStudentInfoController::class,'myGrade']);
@@ -150,6 +150,7 @@ Route::get('/tvet_my_status/{id}',[TvetStudentInfoController::class,'myStatus'])
 Route::get('/tvet_my_coc/{id}',[TvetStudentInfoController::class,'myCoc']);
 Route::get('/tvet_my_section/{id}',[TvetStudentInfoController::class,'mySection']);
 
+/////////////End Student Info
 Route::fallback(function(){
     return response()->json([
         'message' => 'Page Not Found. If error persists, contact info@website.com'], 404);

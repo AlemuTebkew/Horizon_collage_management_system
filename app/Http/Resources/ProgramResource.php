@@ -15,6 +15,7 @@ class ProgramResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id'=>$this->id,
             'name'=>$this->name,
             'no_of_semester'=>$this->pivot->no_of_semester,
             'no_of_year'=>$this->pivot->no_of_year?$this->pivot->no_of_year:null

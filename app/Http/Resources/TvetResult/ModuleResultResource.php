@@ -14,6 +14,15 @@ class ModuleResultResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+           return [
+            'id'=>$this->id,
+            'code'=>$this->code,
+            'title'=>$this->title,
+            'training_hour'=>$this->training_hour,
+            'department'=>$this->department ? $this->department->makeHidden('created_at','department_head_id','updated_at'):null ,
+            'level'=>$this->level ? $this->level->level_no:null,
+            'total_mark'=> $this->pivot->total_mark ?? null,
+
+        ];;
     }
 }

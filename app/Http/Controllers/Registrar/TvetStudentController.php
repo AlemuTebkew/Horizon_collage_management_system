@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Module\ModuleResource;
 use App\Http\Resources\StudentLevelResource;
+use App\Http\Resources\TvetResult\ModuleResultResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
 use App\Models\DegreeDepartment;
@@ -39,9 +41,9 @@ class TvetStudentController extends Controller
     public function store(Request $request)
     {
 
-        // DB::beginTransaction();
+        DB::beginTransaction();
 
-        // try {
+        try {
 
         $request->validate([
             'first_name'=>'required',
@@ -95,18 +97,19 @@ class TvetStudentController extends Controller
         [
 
             'academic_year_id'=>$academic_year->id,
+            'status'=>'waiting'
             // 'partial_scholarship'=>$request->partial_scholarship
 
         ]);
+        $this->registerStudentForModules($student,$level);
 
+        DB::commit();
         return response()->json($this->responseData($student,$level->level_no),200);
-    //     DB::commit();
-    //     return $student->load('levels','month_payments');
-    // } catch (\Exception $e) {
-    //     DB::rollBack();
-    //     return $e;
-    //     return response()->json(['can t create student'],501);
-    // }
+    } catch (\Exception $e) {
+        DB::rollBack();
+        // return $e;
+        return response()->json(['can t create student'],501);
+    }
 
     }
 
@@ -167,7 +170,6 @@ class TvetStudentController extends Controller
         $data['student_id']='HR'.$academic_year->year.$tvetStudent->id;
 
 
-
         $tvetStudent->update($data);
 
         //////////start user login info
@@ -181,7 +183,11 @@ class TvetStudentController extends Controller
         $login->save();
         ///////////////////////end user login info
 
-        $tvetStudent->levels()->detach();
+        $is_reg=$tvetStudent->levels;
+        if ($is_reg) {
+            $tvetStudent->levels()->detach();
+        }
+
         $tvetStudent->levels()->attach($level->id,
         [
 
@@ -191,7 +197,12 @@ class TvetStudentController extends Controller
 
         ]);
 
+        $modules=$tvetStudent->modules()->where('level_no',$level->level_no)->get();
 
+      if ($modules) {
+        $tvetStudent->modules()->where('level_no',$level->level_no)->detach();
+      }
+     $this->registerStudentForModules($tvetStudent,$level);
         DB::commit();
         return response()->json($this->responseData($tvetStudent,$level->level_no),200);
 
@@ -295,6 +306,27 @@ class TvetStudentController extends Controller
         return new StudentLevelResource($tvetStudent->load('levels'));
     }
 
+    public function getStudentLevelModules($id){
+
+        $student=TvetStudent::find($id);
+        $department=TvetDepartment::find($student->tvet_department_id);
+        $modules=$student->modules()
+                            ->wherePivot('level_id',request('level_id'))
+                            ->get();
+        return response()->json( ModuleResultResource::collection($modules->load('department','program')),200);
+    }
+
+    public function giveModuleResult($id){
+        $student=TvetStudent::find(request($id));
+
+        foreach (request()->modules as $module) {
+             $student->updateExistingPivot($module['id'],[
+                 'total_mark'=>$module['total_mark'],
+
+             ]);
+
+        }
+    }
     public function getArrangedStudents(){
 
         $academic_year_id=null;
@@ -309,10 +341,9 @@ class TvetStudentController extends Controller
         //    $dep_id=Employee::where('email',request()->user()->user_name)->first()->manage->id;
            $levels_=Level::with(['tvet_students'=>function($query) use($academic_year_id) {
                      $query->where('tvet_student_level.academic_year_id',$academic_year_id);
-
-        }])
+                  }])
         //    ->where('academic_year_id',$academic_year_id)
-           ->get();
+                  ->get();
              for ($i=1; $i <=5 ; $i++) {
                 // $semester=$levels[$i];
                 $no=null;
@@ -354,19 +385,13 @@ class TvetStudentController extends Controller
                                 ->where('program_id',$s->program->id)->first();
                                    if ($a) {
                                     $student['department']['no_of_level']=$a->pivot->no_of_level;
-
                                    }else{
                                     $student['department']['no_of_level']=null;
                                    }
-
                             }
-
-
-
                              $students[]=$student;
                         }
                     }
-
 
                 }
                   if ($no) {
@@ -375,8 +400,6 @@ class TvetStudentController extends Controller
                     $levels['students']=$students;
                     $all[]=$levels;
                 }
-
-
         }
     return response()->json($all,200);
     }
@@ -430,7 +453,7 @@ class TvetStudentController extends Controller
                             // return $dep->programs->where('pivot.program_id',$s->program_id)
                             // ->first()->pivot->no_of_year;
 
-// return $dep->programs;
+                        // return $dep->programs;
                             if ($dep->programs) {
 
                                $a= $dep
@@ -442,16 +465,10 @@ class TvetStudentController extends Controller
                                    }else{
                                     $student['department']['no_of_level']=null;
                                    }
-
                             }
-
-
-
                              $students[]=$student;
                         }
                     }
-
-
                 }
                   if ($no) {
                     $levels['level_no']=$no;
@@ -459,8 +476,6 @@ class TvetStudentController extends Controller
                     $levels['students']=$students;
                     $all[]=$levels;
                 }
-
-
         }
     return response()->json($all,200);
     }

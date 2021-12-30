@@ -20,7 +20,7 @@ class CourseResultResource extends JsonResource
             'title'=>$this->title,
             'semester_no'=>$this->semester_no,
             'cp'=>$this->cp,
-            'grade_point2'=>$this->cp*6,
+            // 'grade_point2'=>$this->cp*6,
            // 'department'=>$this->department ? $this->department:null ,
             'year_no'=>$this->year_no,
             'total_mark'=>$this->pivot ? $this->pivot->total_mark:null,
