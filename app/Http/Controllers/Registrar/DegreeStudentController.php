@@ -113,7 +113,7 @@ class DegreeStudentController extends Controller
              $login->save();
             ///////////////////////end user login info
 
-            $is_registerd=$student->semesters()->where('semester_id',$request->semester_id)->first();
+            $is_registerd=$student->semesters()->wherePivot('semester_id',$request->semester_id)->first();
 
             if(!$is_registerd){
                  $student->semesters()->attach($request->semester_id,
@@ -262,10 +262,10 @@ class DegreeStudentController extends Controller
                        $login->save();
                       ///////////////////////end user login info
 
-            $is_registerd=$degreeStudent->semesters;
+            $is_registerd =$degreeStudent->semesters()->wherePivot('semester_id',$semester->id)->first();
 
             if($is_registerd){
-                 $degreeStudent->semesters()->detach();
+                $degreeStudent->semesters()->wherePivot('semester_id',$semester->id)->detach();
                  }
                  $degreeStudent->semesters()->attach($semester->id,
                  [
@@ -276,9 +276,9 @@ class DegreeStudentController extends Controller
                  'status'=>'waiting'
                  ]);
 
-             $courses=$degreeStudent->courses()->where('semester_no',$semester->number)->get();
+             $courses=$degreeStudent->courses()->wherePivot('semester_id',$semester->id)->get();
              if ($courses) {
-                $degreeStudent->courses()->where('semester_no',$semester->number)->detach();
+                $degreeStudent->courses()->wherePivot('semester_id',$semester->id)->detach();
              }
                 $this->registerStudentForCourses($degreeStudent,$semester);
 
@@ -322,10 +322,10 @@ class DegreeStudentController extends Controller
         DB::beginTransaction();
         try {
         $student=DegreeStudent::find($request->student_id);
-        $current_academic_year=AcademicYear::find($request->academic_year_id);
+        // $current_academic_year=AcademicYear::find($request->academic_year_id);
         $semester=Semester::find($request->semester_id);
         $semester_no=$semester->number;
-        $is_registerd =$student->semesters()->where('semester_id',$request->semester_id)->first();
+        $is_registerd =$student->semesters()->wherePivot('semester_id',$request->semester_id)->first();
 
         if(!$is_registerd ){
             $student->semesters()->attach($request->semester_id,
@@ -339,14 +339,15 @@ class DegreeStudentController extends Controller
             $student->current_year_no=$request->year_no;
             $student->current_semester_no=$semester_no;
             $student->save();
-            return new RegisteredSemesterResource($semester->load('academic_year'),$request->year_no);
+         //   return new RegisteredSemesterResource($semester->load('academic_year'));
 
         } else if($is_registerd ){
             return response()->json('error Student Already Registerd ',400);
             }
 
             DB::commit();
-            return response()->json(new AddedSemesterResource($student),200);
+            return response()->json(new AddedSemesterResource($student->semesters()
+            ->wherePivot('semester_id',$semester->id)->first() ),200);
             } catch (\Exception $e) {
                 DB::rollBack();
                 return response()->json(['not succesfully registerd'.$e],500);
@@ -354,6 +355,9 @@ class DegreeStudentController extends Controller
 
     }
 
+    public function addedSemesterStudent(){
+
+    }
 
 
     public function getStudentSemesters($degreeStudent_id){
@@ -367,17 +371,19 @@ class DegreeStudentController extends Controller
         $department=DegreeDepartment::find($student->degree_department_id);
         $courses=$student->courses()
                             ->wherePivot('semester_id',request('semester_id'))
-                            ->get();
+                           ->get();
         return response()->json( CourseResultResource::collection($courses->load('department','program')),200);
     }
 
     public function giveCourseResult($id){
         $student=DegreeStudent::find($id);
-
+            // return request()->courses;
         foreach (request()->courses as $course) {
-             $student->updateExistingPivot($course['id'],[
-                 'total_mark'=>$course['total_mark'],
-                 'grade_point'=>$this->courseGradePoint($course['cp'],$course['total_mark']),
+                        // return $course;
+
+             $student->updateExistingPivot($course->id,[
+                 'total_mark'=>doubleval($course->total_mark),
+                //  'grade_point'=>$this->courseGradePoint($course->cp,$course->total_mark),
 
              ]);
 

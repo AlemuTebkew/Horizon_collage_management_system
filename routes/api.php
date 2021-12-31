@@ -71,13 +71,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/students2',[DegreeStudentController::class,'getArrangedStudentsByDepartment']);
 Route::get('/tvet_students2',[TvetStudentController::class,'getArrangedStudentsByDepartment']);
 
-
+   });
 
 
     //----------------Dean related-------------------//
 Route::apiResource('/academic_years',AcademicYearController::class);
 Route::post('/all_academic_years',[AcademicYearController::class,'getAllAcademicYear']);
-Route::apiResource('/semesters',SemesterController::class);
 Route::apiResource('/degree_departments',DegreeDepartmentController::class);
 Route::apiResource('/tvet_departments',TvetDepartmentController::class);
 Route::apiResource('/programs',ProgramController::class);
@@ -93,8 +92,9 @@ Route::post('/assign_tvet_department_head', [TvetDepartmentController::class,'as
 Route::get('/get_cashiers',[EmployeeController::class,'getCashiers']);
 Route::get('/get_registrars',[EmployeeController::class,'getRegistrars']);
 
- });
+//  });
 
+ Route::apiResource('/semesters',SemesterController::class);
 
 
 /////////////////// start Cashier////////////////////////
@@ -115,8 +115,8 @@ Route::apiResource('/address',AddressController::class);
 Route::apiResource('/months',MonthController::class);
 Route::apiResource('/levels',LevelController::class);
 Route::apiResource('/dash_board',RegistrarDashBoardController::class);
-Route::get('/give_course_result/{id}',[DegreeStudentController::class,'giveCourseResult']);
-Route::get('/give_module_result/{id}',[TvetStudentController::class,'giveModuleResult']);
+Route::post('/give_course_result/{id}',[DegreeStudentController::class,'giveCourseResult']);
+Route::post('/give_module_result/{id}',[TvetStudentController::class,'giveModuleResult']);
 Route::post('/degree_yearly_arranged_students',[DegreeStudentController::class,'getArrangedStudents']);
 Route::post('/tvet_yearly_arranged_students',[TvetStudentController::class,'getArrangedStudents']);
 

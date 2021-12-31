@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AddedLevelResource;
 use App\Http\Resources\Module\ModuleResource;
 use App\Http\Resources\StudentLevelResource;
 use App\Http\Resources\TvetResult\ModuleResultResource;
@@ -183,9 +184,9 @@ class TvetStudentController extends Controller
         $login->save();
         ///////////////////////end user login info
 
-        $is_reg=$tvetStudent->levels;
+        $is_reg=$tvetStudent->levels()->wherePivot('level_id',$level->id)->first();
         if ($is_reg) {
-            $tvetStudent->levels()->detach();
+            $tvetStudent->levels()->wherePivot('level_id',$level->id)->detach();
         }
 
         $tvetStudent->levels()->attach($level->id,
@@ -197,10 +198,10 @@ class TvetStudentController extends Controller
 
         ]);
 
-        $modules=$tvetStudent->modules()->where('level_no',$level->level_no)->get();
+        $modules=$tvetStudent->modules()->wherePivot('level_id',$level->level_id)->get();
 
       if ($modules) {
-        $tvetStudent->modules()->where('level_no',$level->level_no)->detach();
+        $tvetStudent->modules()->wherePivot('level_id',$level->level_id)->detach();
       }
      $this->registerStudentForModules($tvetStudent,$level);
         DB::commit();
@@ -287,17 +288,31 @@ class TvetStudentController extends Controller
 
     public function registerStudentForLevel(Request $request){
 
+        DB::beginTransaction();
+        try {
         $level=Level::find($request->level_id);
         $student= TvetStudent::find($request->student_id);
-        $student->levels()->attach($request->level_id,
-        [
 
-            'academic_year_id'=>$request->academic_year_id,
-            'status'=>'waiting'
+        $is_reg=$student->levels()->wherePivot('level_id',$level->id)->first();
+        if (!$is_reg) {
+            $student->levels()->attach($request->level_id,
+            [
 
-            // 'scholarship'=>$request->scholarship
+                'academic_year_id'=>$request->academic_year_id,
+                'status'=>'waiting'
 
-        ]);
+                // 'scholarship'=>$request->scholarship
+
+            ]);
+           }else {
+            return response()->json('error Student Already Registerd ',400);
+           }
+        DB::commit();
+        return response()->json(new AddedLevelResource($student),200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['not succesfully registerd'.$e],500);
+           }
 
       }
 
