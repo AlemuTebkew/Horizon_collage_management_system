@@ -103,6 +103,7 @@ Route::post('/assign_tvet_department_head', [TvetDepartmentController::class,'as
 Route::get('/get_cashiers',[EmployeeController::class,'getCashiers']);
 Route::get('/get_registrars',[EmployeeController::class,'getRegistrars']);
 
+<<<<<<< HEAD
 Route::get('/employees_account',[UserAccountController::class,'getEmployees']);
 Route::get('/students_account',[UserAccountController::class,'getStudents']);
 
@@ -119,6 +120,10 @@ Route::get('/get_home_departments',[WebsiteController::class,'getDepartments']);
 
 //  });
 
+=======
+//  });
+
+>>>>>>> eb3948b75c5c6dac25b4da1125086c4ec3468f5b
  Route::apiResource('/semesters',SemesterController::class);
 
 
@@ -157,8 +162,13 @@ Route::apiResource('/levels',LevelController::class);
 Route::apiResource('/dash_board',RegistrarDashBoardController::class);
 Route::post('/give_course_result/{id}',[DegreeStudentController::class,'giveCourseResult']);
 Route::post('/give_module_result/{id}',[TvetStudentController::class,'giveModuleResult']);
+<<<<<<< HEAD
 Route::get('/degree_yearly_arranged_students',[DegreeStudentController::class,'getArrangedStudents']);
 Route::get('/tvet_yearly_arranged_students',[TvetStudentController::class,'getArrangedStudents']);
+=======
+Route::post('/degree_yearly_arranged_students',[DegreeStudentController::class,'getArrangedStudents']);
+Route::post('/tvet_yearly_arranged_students',[TvetStudentController::class,'getArrangedStudents']);
+>>>>>>> eb3948b75c5c6dac25b4da1125086c4ec3468f5b
 
 //-----------------------Head only----------------------------
 Route::get('/degree_section_students/{section_id}',[DegreeSectionController ::class,'getSectionStudents']);

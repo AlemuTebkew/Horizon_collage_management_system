@@ -365,7 +365,6 @@ class DegreeStudentController extends Controller
             $this->attachWithMonth($student,$academic_year);
 
             DB::commit();
-
             return response()->json(new AddedSemesterResource($student->semesters()
             ->wherePivot('semester_id',$semester->id)->first() ),200);
             } catch (\Exception $e) {

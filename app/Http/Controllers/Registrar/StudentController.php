@@ -42,6 +42,12 @@ class StudentController extends Controller
             foreach ($all_semester as $semester) {
                     $degree_students=$semester->degree_students()
                    ->where('academic_year_id',$academic_year_id)
+                   ->when(request('department_id'),function($q){
+                      $q->where('degree_department_id',request('department_id'));
+                   })
+                   ->when(request('department_id'),function($q){
+                      $q->where('program_id',request('program_id'));
+                    })
                    ->where('is_graduated',1)
                     ->get();
 
