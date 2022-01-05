@@ -16,19 +16,13 @@ class AddedSemesterResource extends JsonResource
     {
         return [
             'id'=>$this->id,
-            'name'=>$this->full_name,
-            'student_id'=>$this->student_id,
-            'sex'=>$this->sex,
-            'department'=>$this->degree_department->name ??null,
-            'department_duration'=>$this->when($this->degree_department->programs,function(){
-               return $this->degree_department->programs
-               ->where('id',$this->program_id)->first()->pivot->no_of_year ?? null;
-            })
-
-            ,
-            'program'=>$this->program ? $this->program->makeVisible('id','name'):null,
-            'current_year_number'=>$this->current_year_no,
-            'semesters'=> new SemesterResource($this->semesters()->where('number',$this->current_semester_no)->first())
+            'year'=>$this->academic_year ? $this->academic_year->year:null,
+            'start_date'=>$this->start_date,
+            'end_date'=>$this->end_date,
+            'status'=>$this->pivot->status,
+            'year_no'=>$this->pivot->year_no,
+            'semester_no'=>$this->pivot->semester_no,
+            'GPA'=>$this->pivot->semester_GPA??null
         ];
-    }
+}
 }

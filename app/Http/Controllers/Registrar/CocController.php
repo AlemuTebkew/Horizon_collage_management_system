@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
-
+use App\Models\AcademicYear;
 use App\Models\Coc;
 use Illuminate\Http\Request;
 
@@ -15,7 +15,16 @@ class CocController extends Controller
      */
     public function index()
     {
-        return Coc::all();
+        // return request('academic_year_id');
+        $academic_year_id=null;
+        if (request()->filled('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+            return response()->json(['select academic year'],400);
+                   // $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+
+        return response()->json(Coc::where('academic_year_id',$academic_year_id)->get(),200);
     }
 
     /**
@@ -32,10 +41,8 @@ class CocController extends Controller
             'exam_week'=>'required',
             'academic_year_id'=>'required',
 
-
-
         ]);
-      return Coc::create($request->all());
+      return response()->json(Coc::create($request->all()),201);
 
     }
 
@@ -47,7 +54,7 @@ class CocController extends Controller
      */
     public function show(Coc $coc)
     {
-        return $coc;
+        return  $coc;
     }
 
     /**
@@ -68,7 +75,8 @@ class CocController extends Controller
 
 
         ]);
-      return $coc->update($request->all());
+        $coc->update($request->all());
+        return response()->json($coc,200);
     }
 
     /**

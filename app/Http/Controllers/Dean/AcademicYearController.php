@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\DegreeSection;
 use App\Models\DegreeStudent;
 use App\Models\Employee;
+use App\Models\FeeType;
 use App\Models\Semester;
 use Illuminate\Http\Request;
 
@@ -46,7 +47,12 @@ class AcademicYearController extends Controller
        $data['end_date']=date('Y-m-d',strtotime($request->end_date));
 
 
-      return AcademicYear::create($data);
+      $fee_type_id=FeeType::pluck('id');
+      $year= AcademicYear::create($data);
+        if ($year) {
+            $year->fee_types()->attach($fee_type_id);
+        }
+
     }
 
     /**
@@ -92,18 +98,54 @@ class AcademicYearController extends Controller
         $academicYear->delete();
     }
 
+
+    public function getAcademicFee(){
+        $academic_year=null;
+        if (request('academic_year_id')) {
+            $academic_year=AcademicYear::find(request('academic_year_id'));
+
+        }else {
+            $academic_year=AcademicYear::where('is_current',1)->first();
+        }
+
+            $all=[];
+
+           foreach ($academic_year->fee_types as $fee_type) {
+            $fee=[];
+            $fee['id']=$fee_type->id;
+            $fee['name']=$fee_type->name;
+            $fee['amount']=$fee_type->pivot->amount;
+            $all[]=$fee;
+        }
+     return response()->json($all,200);
+    }
+
+
+
+    public function setAcademicFee($year_id){
+
+     $year=AcademicYear::find($year_id);
+
+     $year->fee_types()->updateExistingPivot(request('id'),[
+         'amount'=>request('amount'),
+     ]);
+
+    return response()->json(['message'=>'succesfully set'],200);
+
+    }
+
     public function closeAcademicYear(AcademicYear $academicYear){
       $academicYear->update(['status'=>0,'is_current'=>0]);
     }
     public function getAllAcademicYear($departmentHeadId){
-        $current_academic_year=AcademicYear::where('status',1);
+        $current_academic_year=AcademicYear::where('is_current',1);
         $current_semester=Semester::where('status',1);
 
       return  $department_head=Employee::find($departmentHeadId);
         $department=$department_head->manage();
         $academic_years=AcademicYear::all();
         $all_academic_year=[];
-        foreach ( $academic_years as  $academic_year) { 
+        foreach ( $academic_years as  $academic_year) {
           $all_academic_year[$academic_year->year]=$academic_year->semesters;
         }
         $course=Course::where('department_id',$department->id);

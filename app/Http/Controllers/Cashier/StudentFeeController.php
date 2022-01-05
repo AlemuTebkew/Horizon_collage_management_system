@@ -21,7 +21,7 @@ class StudentFeeController extends Controller
     public function studentsPaid(){
 
 
-        $per_page=request()->has('per_page') ? request('per_page') : 5;
+        $per_page=request()->has('per_page') ? request('per_page') : 7;
 
         $year=null;
         if (request()->filled('year')) {
@@ -29,6 +29,7 @@ class StudentFeeController extends Controller
         }else{
             // $year=AcademicYear::where('is_current',1)->first()->year;
             $year=2021;
+            // $year=1970;
         }
 
       $degree_payment_query=DB::table('degree_student_month')
@@ -115,12 +116,14 @@ class StudentFeeController extends Controller
                               ->unionAll($degree_students_other_fee);
 
 
-
             $querySql = $students_all_fee->toSql();
             $this->query = DB::table(DB::raw("($querySql ) as a"))
             ->mergeBindings($students_all_fee);
 
-            $all_fee= $this->query->orderByDesc('paid_date')
+            $a=DB::table(DB::raw("($querySql ) as a"))
+            ->mergeBindings($students_all_fee);
+
+            $all_fee= $a->orderByDesc('paid_date')
             ->when(request('search_query') ,function($query){
                 return $query->where('student_id', '=',request('search_query'));
             })
@@ -146,7 +149,7 @@ class StudentFeeController extends Controller
                  $day7_sum=  $query1->whereDate('paid_date','>',now()->subDays(7))->sum('paid_amount') ;
                 $hour_sum=  $query1->whereDate('paid_date','>',now()->subHours(24))->sum('paid_amount') ;
 
-                return true;
+                // return true;
                 return response()->json([
                     '24hour'=>$hour_sum,
                      '7day'=>$day7_sum,
@@ -305,7 +308,10 @@ class StudentFeeController extends Controller
             }
 
 
-            return $student;
+            return response()->json($student,200);
+
+        }else {
+            return response()->json('Not Found',400);
         }
 
 
@@ -438,24 +444,5 @@ class StudentFeeController extends Controller
         // DegreeStudent::withCount()
        }
 
-        public function getAcademicFee(){
-            $academic_year=null;
-            if (request('academic_year_id')) {
-                $academic_year=AcademicYear::find(request('academic_year_id'));
 
-            }else {
-                $academic_year=AcademicYear::where('is_current',1)->first();
-            }
-
-                $all=[];
-
-               foreach ($academic_year->fee_types as $fee_type) {
-                $fee=[];
-                $fee['id']=$fee_type->id;
-                $fee['name']=$fee_type->name;
-                $fee['amount']=$fee_type->pivot->amount;
-                $all[]=$fee;
-            }
-         return response()->json($all,200);
-        }
 }

@@ -28,4 +28,9 @@ class DegreeSection extends Model
     public function degree_students(){
         return $this->belongsToMany(DegreeStudent::class,'degree_student_section');
     }
+
+    public function teachers(){
+        return $this->belongsToMany(Teacher::class,'teacher_section_courses')->withPivot('teacher_id','course_id','degree_section_id',
+        'room_no','hours_per_week' ,'period','class_start_date','class_end_date','exam_week');
+    }
 }

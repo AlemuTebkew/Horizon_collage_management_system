@@ -11,7 +11,7 @@ class ExternalCocApplicant extends Model
 
     public $fillable=['first_name','last_name',
     'sex','dob','phone_no',
-    'marital_status','coc_id',
-    'level_id','application_date','result','nature_of_assesment'
+    'maritial_status','coc_id',
+    'level_no','occupation_name','application_date','result','nature_of_assesment'
 ];
 }

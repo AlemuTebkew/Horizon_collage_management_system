@@ -18,11 +18,21 @@ class Teacher extends Model
     public function modules(){
         return $this->belongsToMany(Module::class);
     }
-    
+
     public function courses(){
-        return $this->belongsToMany(Course::class,'teacher_section_courses');
+        return $this->belongsToMany(Course::class,'teacher_section_courses')->withPivot('teacher_id','course_id','degree_section_id',
+                          'room_no','hours_per_week' ,'period','class_start_date','class_end_date','exam_week');
     }
- 
+
+    public function degree_sections(){
+        return $this->belongsToMany(DegreeSection::class,'teacher_section_courses')->withPivot('teacher_id','course_id','degree_section_id',
+        'room_no','hours_per_week' ,'period','class_start_date','class_end_date','exam_week');
+    }
+
+    public function tvet_sections(){
+        return $this->belongsToMany(DegreeSection::class,'teacher_section_courses')->withPivot('teacher_id','module_id','tvet_section_id',
+        'room_no','hours_per_week' ,'period','class_start_date','class_end_date','exam_week');
+    }
     public function course(){
         return $this->belongsTo(Course::class,'teacher_section_courses');
     }

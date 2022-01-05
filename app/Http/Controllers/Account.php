@@ -95,6 +95,11 @@ class Account extends Controller
                 'user'=>$employee,
             ],200);
         }
+         }else {
+            return response()->json([
+                'message'=>' UN Authorized',
+                ]
+               ,404 );
          }
 
 
@@ -144,6 +149,11 @@ class Account extends Controller
         ],200);
 
 
+     }else {
+        return response()->json([
+            'message'=>' UN Authorized',
+            ]
+           ,404 );
      }
     }
      public function logout(Request $request){
@@ -175,6 +185,10 @@ class Account extends Controller
 
         $user->password=$request->new_password;
         $user->save();
+        return response()->json([
+            'message'=>'Successfully  Reset',
+            ]
+           ,200 );
     }
 
 }

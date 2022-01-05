@@ -24,7 +24,7 @@ public function getFullNameAttribute(){
 
 public function cocs(){
     return $this->belongsToMany(Coc::class)
-    ->withPivot(['application_date','result','nature_of_assesment','level_id']);
+    ->withPivot(['application_date','result','nature_of_assesment','level_no','occupation_name']);
     // return $this->morphToMany(Coc::class,'cocable');
 }
 
@@ -37,7 +37,7 @@ public function tvet_department(){
 }
 public function levels(){
     return $this->belongsToMany(Level::class,'tvet_student_level')
-    ->withPivot('tvet_student_id','academic_year_id','level_id','status');
+    ->withPivot('tvet_student_id','academic_year_id','level_id','status','partial_scholarship');
 
 }
 

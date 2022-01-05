@@ -19,12 +19,12 @@ class CreateTeacherSectionModulesTable extends Migration
             $table->foreignId('teacher_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('tvet_section_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('module_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->string('room_no');
-            $table->integer('hours_per_week');
-            $table->string('period');
-            $table->date('class_start_date');
-            $table->date('class_end_date');
-            $table->date('exam_week');
+            $table->string('room_no')->nullable();
+            $table->integer('hours_per_week')->nullable();
+            $table->string('period')->nullable();
+            $table->date('class_start_date')->nullable();
+            $table->date('class_end_date')->nullable();
+            $table->date('exam_week')->nullable();
             $table->timestamps();
         });
     }

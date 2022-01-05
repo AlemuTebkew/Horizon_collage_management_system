@@ -25,4 +25,9 @@ class TvetSection extends Model
     public function tvet_students(){
         return $this->belongsToMany(TvetStudent::class,'tvet_student_section');
     }
+
+    public function teachers(){
+        return $this->belongsToMany(Teacher::class,'teacher_section_modules')->withPivot('teacher_id','module_id','tvet_section_id',
+        'room_no','hours_per_week' ,'period','class_start_date','class_end_date','exam_week');
+    }
 }

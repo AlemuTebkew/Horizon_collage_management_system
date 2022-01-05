@@ -22,7 +22,7 @@ class Level extends Model
 
     public function tvet_students(){
         return $this->belongsToMany(TvetStudent::class,'tvet_student_level')
-        ->withPivot('tvet_student_id','academic_year_id','level_id','status');
+        ->withPivot('tvet_student_id','academic_year_id','level_id','status','partial_scholarship');
         ;
     }
 
