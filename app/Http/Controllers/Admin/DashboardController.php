@@ -18,17 +18,23 @@ class DashboardController extends Controller
         $per_page=request()->has('per_page') ? request('per_page') : 5;
 
         $year=null;
-        if (request()->filled('year')) {
-            $year=request('year');
+        if (request()->filled('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
         }else{
-            // $year=AcademicYear::where('is_current',1)->first()->year;
-            $year=2021;
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+            // $year=2022;
+            // $year=1970;
         }
 
       $degree_payment_query=DB::table('degree_student_month')
                               ->whereNotNull('receipt_no')
-                              ->whereYear('paid_date',$year)
-                              ->select('receipt_no','degree_student_id','paid_date','fee_type_id',DB::raw("SUM(paid_amount) AS amount")
+                              ->where('academic_year_id',$academic_year_id)
+                            //   ->whereYear('paid_date',$year)
+                              ->select('receipt_no','degree_student_id',
+                            //   'paid_date'
+                            DB::raw('DATE(paid_date) AS paid_date')
+
+                              ,'fee_type_id',DB::raw("SUM(paid_amount) AS amount")
                               ,DB::raw("count(receipt_no) AS count"))
                               ->groupBy('receipt_no')
                               ->groupBy('paid_date')
@@ -45,11 +51,15 @@ class DashboardController extends Controller
 
                                     })
                                     ->join('fee_types','fee_types.id','=','fee_type_id')
-                                    ->whereYear('paid_date',$year)
+                                    // ->whereYear('paid_date',$year)
+                                    // ->where('academic_year_id',$academic_year_id)
 
                                     ->select('degree_students.id','student_id',
                                         DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
-                                        'paid_date','receipt_no','amount','fee_types.name AS payment_type')
+                                        // 'paid_date'
+                                        DB::raw('DATE(paid_date) AS paid_date')
+
+                                        ,'receipt_no','amount','fee_types.name AS payment_type')
                                         // ->get()
                                         ;
 
@@ -61,8 +71,12 @@ class DashboardController extends Controller
                                   ->join('degree_other_fees','degree_students.id','=','degree_other_fees.degree_student_id')
                                   ->join('fee_types','fee_types.id','=','degree_other_fees.fee_type_id')
                                   ->whereNotNull('receipt_no')
-                                  ->whereYear('degree_other_fees.paid_date',$year)
-                                  ->select('degree_students.id','student_id',DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),'degree_other_fees.paid_date',
+                                //   ->whereYear('degree_other_fees.paid_date',$year)
+                                  ->where('academic_year_id',$academic_year_id)
+                                  ->select('degree_students.id','student_id',DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
+                                //   'degree_other_fees.paid_date',
+                                  DB::raw('DATE(degree_other_fees.paid_date) AS paid_date'),
+
                                           'degree_other_fees.receipt_no','degree_other_fees.paid_amount as amount','fee_types.name as payment_type')
                                           // ->unionAll($degree_students_tuition_fee)
                                           // ->get()
@@ -72,8 +86,14 @@ class DashboardController extends Controller
 
       $tvet_payment_query=DB::table('tvet_student_month')
                               ->whereNotNull('receipt_no')
-                              ->whereYear('paid_date',$year)
-                              ->select('receipt_no','tvet_student_id','paid_date','fee_type_id',DB::raw("SUM(paid_amount) AS amount") ,DB::raw("count(receipt_no) AS count"))
+                            //   ->whereYear('paid_date',$year)
+                              ->where('academic_year_id',$academic_year_id)
+
+                              ->select('receipt_no','tvet_student_id',
+                            //   'paid_date'
+                            DB::raw('DATE(paid_date) AS paid_date')
+
+                              ,'fee_type_id',DB::raw("SUM(paid_amount) AS amount") ,DB::raw("count(receipt_no) AS count"))
                               ->groupBy('receipt_no')
                               ->groupBy('paid_date')
                               ->groupBy('fee_type_id')
@@ -87,19 +107,29 @@ class DashboardController extends Controller
                                       $join->on('tvet_students.id', '=', 'payment.tvet_student_id');
                                   })
                                   ->join('fee_types','fee_types.id','=','fee_type_id')
-                                  ->whereYear('paid_date',$year)
+                                //   ->whereYear('paid_date',$year)
+                                // ->where('academic_year_id',$academic_year_id)
+
                                   ->select('tvet_students.id','student_id',
                                       DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
-                                      'paid_date','receipt_no','amount','fee_types.name AS payment_type')
-                                      // ->get()
+                                    //   'paid_date'
+                                      DB::raw('DATE(paid_date) AS paid_date')
+
+                                      ,'receipt_no','amount','fee_types.name AS payment_type')
+                                    //   ->get()
                                       ;
 
                $tvet_students_other_fee=DB::table('tvet_students')
                ->join('tvet_other_fees','tvet_students.id','=','tvet_other_fees.tvet_student_id')
                ->join('fee_types','fee_types.id','=','tvet_other_fees.fee_type_id')
                ->whereNotNull('receipt_no')
-               ->whereYear('paid_date',$year)
-               ->select('tvet_students.id','student_id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),'tvet_other_fees.paid_date',
+            //    ->whereYear('paid_date',$year)
+                ->where('tvet_other_fees.academic_year_id',$academic_year_id)
+               ->select('tvet_students.id','student_id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
+               DB::raw('DATE(tvet_other_fees.paid_date) AS paid_date')
+               ,
+
+            //    'tvet_other_fees.paid_date',
                'tvet_other_fees.receipt_no','tvet_other_fees.paid_amount','fee_types.name as payment_type');
 
 
@@ -109,12 +139,12 @@ class DashboardController extends Controller
                               ->unionAll($degree_students_other_fee);
 
 
-
             $querySql = $students_all_fee->toSql();
             $query = DB::table(DB::raw("($querySql ) as a"))
             ->mergeBindings($students_all_fee);
+
              $sum=0;
-             $sum=$query->sum('paid_amount');
+           //  $sum=$query->sum('paid_amount');
 
                 $month_sum=  $query->whereDate('paid_date','>',now()->subMonth())->sum('paid_amount') ;
                  $day7_sum=  $query->whereDate('paid_date','>',now()->subDays(7))->sum('paid_amount') ;
@@ -125,25 +155,57 @@ class DashboardController extends Controller
                     'total'=>$sum,
                     '24hour'=>$hour_sum,
                      '7day'=>$day7_sum,
-                    '$month'=>$month_sum,
+                    'month'=>$month_sum,
                  ],200);
 
             }
 
 
+            public function getDashboardData2(){
+                if (request()->filled('academic_year_id')) {
+                    $academic_year_id=request('academic_year_id');
+                }else{
+                    $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+                }
+
+                $current_academic_year=AcademicYear::find($academic_year_id);
+
+                $dashboard_data=[];
+                $dashboard_data['total_tvet_student']=TvetStudent::whereHas('levels',function($query) use($academic_year_id){
+                     $query->where('academic_year_id',$academic_year_id);
+                    //  ->where('academic_year_id',$academic_year_id);
+                })->where('is_graduated',0)
+                ->count();
+
+                $dashboard_data['total_degree_student']=DegreeStudent::whereHas('semesters',function($query) use($academic_year_id){
+                    $query->where('degree_student_semester.academic_year_id',$academic_year_id);
+                   //  ->where('academic_year_id',$academic_year_id);
+               })->where('is_graduated',0)
+               ->count();
+
+               $dashboard_data['new_degree_student']=DegreeStudent::where('batch',$current_academic_year->year)->count();
+               $dashboard_data['new_tvet_student']=TvetStudent::where('batch',$current_academic_year->year)->count();
+
+                $dashboard_data['tvet_scholarship_students']=TvetStudent::where('fully_scholarship',1)->count();
+                $dashboard_data['degree_scholarship_students']=DegreeStudent::where('fully_scholarship',1)->count();
+
+                return $dashboard_data;
+
+            }
 public function otherWay(){
 
     $year=null;
-    if (request()->filled('year')) {
-        $year=request('year');
+    if (request()->filled('academic_year_id')) {
+        $academic_year_id=request('academic_year_id');
     }else{
-        // $year=AcademicYear::where('is_current',1)->first()->year;
-        $year=2021;
+        $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        // $year=2022;
+        // $year=1970;
     }
     $total=0;
-  $ds=  DegreeStudent::whereHas('month_payments',function($q) use($year){
-        // $q->where('academic_year_id',1);
-        $q->whereYear('paid_date',$year);
+  $ds=  DegreeStudent::whereHas('month_payments',function($q) use($academic_year_id){
+        $q->where('academic_year_id',$academic_year_id);
+        // $q->whereYear('paid_date',$year);
     })
      ->with('month_payments')
      ->get();
@@ -156,9 +218,9 @@ public function otherWay(){
          }
     }
 
-    $dos=  DegreeStudent::whereHas('degree_other_fees',function($q) use($year){
-        // $q->where('academic_year_id',1);
-        $q->whereYear('paid_date',$year);
+    $dos=  DegreeStudent::whereHas('degree_other_fees',function($q) use($academic_year_id){
+        $q->where('academic_year_id',$academic_year_id);
+        // $q->whereYear('paid_date',$year);
 
     })
      ->with('degree_other_fees')
@@ -172,9 +234,9 @@ public function otherWay(){
          }
     }
 
-    $ts=  TvetStudent::whereHas('month_payments',function($q) use($year){
-        // $q->where('academic_year_id',1);
-        $q->whereYear('paid_date',$year);
+    $ts=  TvetStudent::whereHas('month_payments',function($q) use($academic_year_id){
+        $q->where('academic_year_id',$academic_year_id);
+        // $q->whereYear('paid_date',$year);
 
     })
      ->with('month_payments')
@@ -189,9 +251,9 @@ public function otherWay(){
          }
     }
 
-    $tos=  TvetStudent::whereHas('tvet_other_fees',function($q) use($year){
-        // $q->where('academic_year_id',1);
-        $q->whereYear('paid_date',$year);
+    $tos=  TvetStudent::whereHas('tvet_other_fees',function($q) use($academic_year_id){
+        $q->where('academic_year_id',$academic_year_id);
+        // $q->whereYear('paid_date',$year);
     })
      ->with('tvet_other_fees')
      ->get();

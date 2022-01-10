@@ -26,10 +26,10 @@ class DashBoardController extends Controller
            $dashboard_data['new_degree_student']=DegreeStudent::where('batch',$current_academic_year->year)->count();
            $dashboard_data['total_coc']=Coc::count();
            $dashboard_data['new_tvet_student']=TvetStudent::where('batch',$current_academic_year->year)->count();
-           $dashboard_data['tvet_scholarship_students']=TvetStudent::where('fully_scholarship',1)->get();
-           $dashboard_data['degree_scholarship_students']=DegreeStudent::where('fully_scholarship',1)->get();
-           $dashboard_data['regular_teachers']=Teacher::where('type','regular')->get();
-           $dashboard_data['contract_teachers']=Teacher::where('type','contract')->get();
+           $dashboard_data['tvet_scholarship_students']=TvetStudent::where('fully_scholarship',1)->paginate(4);
+           $dashboard_data['degree_scholarship_students']=DegreeStudent::where('fully_scholarship',1)->paginate(4);
+           $dashboard_data['regular_teachers']=Teacher::where('type','regular')->paginate(5);
+           $dashboard_data['contract_teachers']=Teacher::where('type','contract')->paginate(5);
 
             return response()->json(['students'=>  $dashboard_data]);
     }

@@ -134,9 +134,16 @@ class AcademicYearController extends Controller
 
     }
 
+
     public function closeAcademicYear(AcademicYear $academicYear){
       $academicYear->update(['status'=>0,'is_current'=>0]);
     }
+
+
+
+
+
+    
     public function getAllAcademicYear($departmentHeadId){
         $current_academic_year=AcademicYear::where('is_current',1);
         $current_semester=Semester::where('status',1);

@@ -11,7 +11,7 @@ class Employee extends Model
 
 
     public $fillable=['first_name',
-    'last_name','password','email','role','phone_no','status'];
+    'last_name','password','email','role','phone_no','status','sex'];
 
     protected $hidden=['password','created_at','updated_at','status'];
 

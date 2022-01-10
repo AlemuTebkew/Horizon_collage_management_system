@@ -27,16 +27,18 @@ class DegreeStudentFeeController extends Controller
         }else{
             $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
+        $per_page=request()->has('per_page') ? request('per_page') : 4;
 
         $academic_year=AcademicYear::find($academic_year_id);
         $degreeStudents=DegreeStudent::whereHas('month_payments',function( $query) use($academic_year_id){
             $query->where('degree_student_month.academic_year_id',$academic_year_id);
-        })->with('month_payments')->get();
+        })->with('month_payments')->paginate($per_page);
 
           foreach ($degreeStudents as  $degreeStudent) {
 
-                 $student['id']=$degreeStudent->id;
-                 $student['full_name']=$degreeStudent->full_name;
+                $student['id']=$degreeStudent->id;
+                $student['student_id']=$degreeStudent->student_id;
+                $student['full_name']=$degreeStudent->full_name;
                  $student['sex']=$degreeStudent->sex;
                  $month_pad=[];
                  $total=0.0;
@@ -55,20 +57,18 @@ class DegreeStudentFeeController extends Controller
                                 $month_pad = $month_payment->pivot->receipt_no;
                                 $total+=(double)$month_payment->pivot->paid_amount;
                                break;
-                            }else {
-                                $month_pad =null;
-                                break;
-                            }
+                             }
+                             //else {
+                            //     $month_pad =null;
+                            //     break;
+                            // }
 
 
                          }
                         }
 
 
-
            $pads[$month->name]=$month_pad;
-
-
 
             }
             $student['total']=$total;
@@ -77,7 +77,7 @@ class DegreeStudentFeeController extends Controller
           }
         //   $chunks = collect($all)->chunk(2);
         //  return $chunks->toArray();
-         return response()->json( $all);
+         return response()->json( $all,200);
     }
 
     /**
@@ -104,8 +104,9 @@ class DegreeStudentFeeController extends Controller
         $student=[];
         $years=[];
         if ($degreeStudent) {
-            if ($degreeStudent->has('semesters')) {
-                foreach($degreeStudent->semesters as $semester){
+            $semesters=$degreeStudent->semesters;
+            if ($semesters->isEmpty() == false) {
+                foreach($semesters as $semester){
                 $academic_year_id=$semester->academic_year_id;
                 $academic_year=AcademicYear::find($academic_year_id);
                 $years[$academic_year_id]=$academic_year;
@@ -130,6 +131,7 @@ class DegreeStudentFeeController extends Controller
                 $semester=[];
                 $semesters=$degreeStudent->semesters()
                 ->where('semesters.academic_year_id',$y->id)->get();
+                // return $semesters->load('months');
                 foreach ($semesters as  $s) {
                     $semester['id']=$s->id;
                     $semester['semester_no']=$s->number;
@@ -159,14 +161,15 @@ class DegreeStudentFeeController extends Controller
 
                                 $total_pads[]= $month_pad;
                                 break;
-                                }else {
-                                    $month_pad['id']=$month->id;
-                                    $month_pad['name']=$month->name;
-                                    $month_pad['pad']=null;
-                                     $month_pad['paid_date']=null;
-                                     $total_pads[]= $month_pad;
-                                   break;
                                 }
+                                // else {
+                                //     $month_pad['id']=$month->id;
+                                //     $month_pad['name']=$month->name;
+                                //     $month_pad['pad']=null;
+                                //      $month_pad['paid_date']=null;
+                                //      $total_pads[]= $month_pad;
+                                //    break;
+                                // }
 
                             }
 

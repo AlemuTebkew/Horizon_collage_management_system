@@ -29,6 +29,8 @@ public function teacher(){
 
 public function degree_students(){
     return $this->belongsToMany(DegreeStudent::class,'student_semester_courses')
-    ->withPivot('semester_id','total_mark','grade_point');
+    ->withPivot('semester_id','total_mark','grade_point',
+    'from_11','from_12','from_12s','from_25','from_40'
+);
 }
 }

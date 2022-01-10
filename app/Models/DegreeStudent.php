@@ -42,7 +42,8 @@ public function program(){
 }
 public function semesters(){
     return $this->belongsToMany(Semester::class)
-    ->withPivot(['semester_no','year_no','semester_GPA','semester_grade_point','semester_credit_hour','semester_avarege','cgpa','tuition_type','status','partial_scholarship'])
+    ->withPivot(['semester_no','year_no','semester_GPA','semester_grade_point','semester_credit_hour',
+    'semester_avarege','cgpa','tuition_type','status','monthly_cp_fee'])
                         ->withTimestamps();
 }
 
@@ -51,7 +52,7 @@ public function semesters(){
 */
 public function month_payments(){
     return $this->belongsToMany(Month::class)
-    ->withPivot('receipt_no','academic_year_id','paid_date','paid_amount')
+    ->withPivot('receipt_no','academic_year_id','month_id','paid_date','paid_amount','payable_status','fee_type_id')
     ->withTimestamps();
 }
 public function birth_address(){
@@ -70,7 +71,9 @@ public function degree_department(){
 
 public function courses(){
     return $this->belongsToMany(Course::class,'student_semester_courses')
-    ->withPivot('semester_id','total_mark','grade_point');
+    ->withPivot('semester_id','total_mark','grade_point',
+    'from_11','from_12','from_12s','from_25','from_40'
+);
 
 
 }

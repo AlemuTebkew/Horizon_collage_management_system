@@ -26,7 +26,9 @@ public function teachers(){
 
 public function tvet_students(){
     return $this->belongsToMany(TvetStudent::class,'student_level_module')
-    ->withPivot('level_id','module_id','total_mark');
+    ->withPivot('level_id','module_id','total_mark',
+    'from_11','from_12','from_12s','from_25','from_40'
+);
 
 
 }

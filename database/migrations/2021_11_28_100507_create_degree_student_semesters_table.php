@@ -22,12 +22,13 @@ class CreateDegreeStudentSemestersTable extends Migration
             $table->string('year_no');
             $table->string('semester_no');
             $table->double('semester_GPA')->default(4.0);
-            $table->double('semester_credit_hour')->nullable();
+            $table->integer('semester_credit_hour')->nullable();
+            $table->double('monthly_cp_fee')->nullable();
             $table->double('semester_grade_point')->nullable();
             $table->double('semester_average')->nullable();
             $table->double('cgpa')->nullable();
             $table->string('tuition_type')->nullable();
-            $table->boolean('partial_scholarship')->default(0);
+            // $table->boolean('partial_scholarship')->default(0);
             //$table->boolean('approved')->default(0);
             $table->string('status')->nullable();
             $table->timestamps();

@@ -15,9 +15,10 @@ class UserAccountController extends Controller
 
         // $d_s=DegreeStudent::addSelect(['password'=>UserLogin::select('password') ]);
 
-        $per_page=request()->has('per_page') ? request('per_page') : 5;
+        $per_page=request()->has('per_page') ? request('per_page') : 10;
 
         $ds=DB::table('degree_students')
+               ->where('degree_students.is_graduated',0)
                ->join('degree_departments', 'degree_students.degree_department_id' ,'=','degree_departments.id')
                ->join('programs','degree_students.program_id' , '=' ,'programs.id')
                ->select('student_id',DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
@@ -26,15 +27,26 @@ class UserAccountController extends Controller
 
 
             $ts=DB::table('tvet_students')
+            ->where('tvet_students.is_graduated',0)
             ->join('tvet_departments', 'tvet_students.tvet_department_id' ,'=','tvet_departments.id')
             ->join('programs','tvet_students.program_id' , '=' ,'programs.id')
             ->select('student_id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
                'programs.name AS program','tvet_departments.name AS department' );
                $all_student=$ds->unionAll($ts);
-               return   $all_student
-                        ->when(request('search_query') ,function($query){
-                   return $query->where('student_id', '=',request('search_query'));
-               })->paginate($per_page);
+              // return request('search_query');
+            //   where receipt_no = '.request('search_query').'
+            $querySql = $all_student->toSql();
+              if (request('search_query')) {
+                $query1 = DB::table(DB::raw('('.$querySql.' ) as a  where student_id = '.request('search_query').''))
+                ->mergeBindings($all_student);
+
+              }else {
+                $query1 = DB::table(DB::raw('('.$querySql.' ) as a  '))
+                ->mergeBindings($all_student);
+
+            }
+                return $query1
+               ->paginate($per_page);
 
 
          }
@@ -42,12 +54,15 @@ class UserAccountController extends Controller
 
     public function getEmployees(){
 
-        $per_page=request()->has('per_page') ? request('per_page') : 5;
+        $per_page=request()->has('per_page') ? request('per_page') : 10;
 
        return Employee::select('first_name', 'last_name',
                   'phone_no','email','role')
+                  ->where('status',1)
                 ->when(request('search_query') ,function($query){
-                    return $query->where('email', '=',request('search_query'));
+                    $query->where('first_name', 'LIKE','%'.request('search_query').'%')
+                    ->orWhere('last_name', 'LIKE','%'.request('search_query').'%')
+                    ->orWhere('email', 'LIKE','%'.request('search_query').'%') ;
                 }) ->paginate($per_page);
     }
 }

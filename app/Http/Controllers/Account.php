@@ -68,7 +68,7 @@ class Account extends Controller
 
             $teacher=Teacher::where('email',$user->user_name)->first();
 
-            $token= $teacher->createToken('auth_token')->plainTextToken;
+            $token= $user->createToken('auth_token')->plainTextToken;
             return response()->json([
                 'access_token'=>$token,
                 'user'=>$teacher,
@@ -97,7 +97,7 @@ class Account extends Controller
         }
          }else {
             return response()->json([
-                'message'=>' UN Authorized',
+                'message'=>' UN Authorized ...',
                 ]
                ,404 );
          }
@@ -151,7 +151,7 @@ class Account extends Controller
 
      }else {
         return response()->json([
-            'message'=>' UN Authorized',
+            'message'=>' UN Authorized....',
             ]
            ,404 );
      }
@@ -167,7 +167,7 @@ class Account extends Controller
 
     public function changePassword(Request $request){
 
-        $user=UserLogin::where('user_name',$request->user_name);
+        $user=UserLogin::where('user_name',$request->user_name)->first();
         if (! $user ) {
             return response()->json([
                 'message'=>' incorrect user_name and password',
@@ -178,12 +178,12 @@ class Account extends Controller
         $check=Hash::check($request->old_password, $user->password);
         if (! $check ) {
             return response()->json([
-                'message'=>' incorrect password',
+                'message'=>'  incorrect user_name and password',
                 ]
                ,404 );
         }
 
-        $user->password=$request->new_password;
+        $user->password=Hash::make($request->new_password);
         $user->save();
         return response()->json([
             'message'=>'Successfully  Reset',
@@ -191,4 +191,72 @@ class Account extends Controller
            ,200 );
     }
 
+    public function resetStudentPassword(Request $request){
+
+
+        // return $request->user_name;
+         $user=UserLogin::where('user_name',$request->user_name)->first();
+
+        if ($user->user_type == 'degree_student') {
+            $student=DegreeStudent::where('student_id',$request->user_name)->first();
+        }else if ($user->user_type == 'tvet_student') {
+            $student=TvetStudent::where('student_id',$request->user_name)->first();
+        }
+
+
+        if (! $user ) {
+            return response()->json([
+                'message'=>' incorrect user_name and password',
+                ]
+               ,404 );
+        }
+
+        // $check=Hash::check($request->old_password, $user->password);
+        // if (! $check ) {
+        //     return response()->json([
+        //         'message'=>' incorrect password',
+        //         ]
+        //        ,404 );
+        // }
+
+        // $user->password=$;
+        $user->password=Hash::make($student->last_name.'1234');
+        $user->save();
+
+        return response()->json([
+            'message'=>'Successfully  Reset',
+            ]
+           ,200 );
+    }
+
+    public function resetEmployeePassword(Request $request){
+
+        $user=UserLogin::where('user_name',$request->user_name)->first();
+
+        $employee=Employee::where('email',$request->user_name)->first();
+
+
+
+        if (! $user ) {
+            return response()->json([
+                'message'=>' incorrect user_name and password',
+                ]
+               ,404 );
+        }
+
+        // $check=Hash::check($request->old_password, $user->password);
+        // if (! $check ) {
+        //     return response()->json([
+        //         'message'=>' incorrect password',
+        //         ]
+        //        ,404 );
+        // }
+
+        $user->password=Hash::make($employee->last_name.'1234');
+        $user->save();
+        return response()->json([
+            'message'=>'Successfully  Reset',
+            ]
+           ,200 );
+    }
 }

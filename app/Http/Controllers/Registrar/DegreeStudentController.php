@@ -86,7 +86,10 @@ class DegreeStudentController extends Controller
             }
 
            $academic_year=AcademicYear::find($academic_year_id);
-           $semester=Semester::find($semester_id);
+           $cpf_id=FeeType::where('name','CP Fee')->first()->id;
+           $cp_fee=$academic_year->fee_types()->wherePivot('fee_type_id',$cpf_id)->first()->pivot->amount;
+
+          $semester=Semester::find($semester_id);
             //$month_id= $academic_year->months()->select('months.id')->get()->makeHidden('pivot');
 
             $birth_address=Address::create($request->birth_address);
@@ -126,18 +129,25 @@ class DegreeStudentController extends Controller
                  ]);
             //  return $student->semesters;
            } else if($is_registerd){
-                DB::rollBack();
+              //  DB::rollBack();
                 return response()->json('error Already Registerd ',400);
              }
 
-           $this->registerStudentForCourses($student,$semester);
-           $this->attachWithMonth($student,$academic_year);
+          $total_cp= $this->registerStudentForCourses($student,$semester,$request->year_no);
+          $monthly_cp_fee=$total_cp*$cp_fee/$semester->months->count();
+          $student->semesters()->updateExistingPivot($request->semester_id,[
+            'semester_credit_hour'=>$total_cp,
+            'monthly_cp_fee'=>$monthly_cp_fee
+
+          ]);
+
+          $this->attachWithMonth($student,$academic_year);
            DB::commit();
             return response()->json($this->responseData($student,$semester->number,$request->year_no),200);
         } catch (\Exception $e) {
             DB::rollBack();
-            // return $e;
-            return response()->json(['can t create student'],400);
+            //   return $e;
+            return response()->json(['can t create student'.$e],400);
         }
 
     }
@@ -145,24 +155,48 @@ class DegreeStudentController extends Controller
     private function attachWithMonth($student,$ac){
 
 
-     return   $reg= $student->month_payments()->wherePivot('academic_year_id',$ac->id)->first();
-          if (!$reg) {
-            $month_ids=$ac->months->pluck('id');
-            $student->month_payments()->attach($month_ids,['academic_year_id'=>$ac->id]);
-          }
+        $reg= $student->month_payments()->wherePivot('academic_year_id',$ac->id)->first();
+          if (!$reg || empty($reg || $reg=null)) {
+            $months=$ac->months;
 
+            foreach ($months as $month) {
+
+                if ($month->pivot->selected) {
+                    $student->month_payments()->attach($month->id,[
+                        'academic_year_id'=>$ac->id,
+                        'payable_status'=>'payable',
+
+                    ]);
+                }else {
+                    $student->month_payments()->attach($month->id,[
+                        'academic_year_id'=>$ac->id,
+                        'payable_status'=>'unpayable',
+
+                    ]);
+                    }
+            }
+          }
 
 
 
     }
 
-    private function registerStudentForCourses($student,$semester){
+    private function registerStudentForCourses($student,$semester,$year_no){
 
+
+        // return $semester->id;
         // $student=DegreeStudent::find($student_id);
         // $semester=Semester::find($semester_id);
-        $department=DegreeDepartment::find($student->degree_department_id);
-        $courses=$department->courses()->where('semester_no',$semester->number)->pluck('id');
-       return  $student->courses()->attach($courses,['semester_id'=>$semester->id]);
+         $department=DegreeDepartment::find($student->degree_department_id);
+         $courses=$department->courses()
+                    ->where('semester_no',$semester->number)
+                    ->where('year_no',$year_no)
+                    ->get();
+         $course_ids=$courses->pluck('id');
+         $cp=$courses->sum('cp');
+         //$department->courses()->where('semester_no',$semester->number)->sum('cp')
+         $student->courses()->attach($course_ids,['semester_id'=>$semester->id]);
+         return $cp;
     }
     private function responseData($s,$s_no,$y_no){
      $semester=[];
@@ -294,8 +328,8 @@ class DegreeStudentController extends Controller
              if ($courses) {
                 $degreeStudent->courses()->wherePivot('semester_id',$semester->id)->detach();
              }
-                $this->registerStudentForCourses($degreeStudent,$semester);
-                $this->attachWithMonth($degreeStudent,$academic_year);
+             $total_cp= $this->registerStudentForCourses($degreeStudent,$semester,$request->year_no);
+             $this->attachWithMonth($degreeStudent,$academic_year);
 
 
             DB::commit();
@@ -335,10 +369,15 @@ class DegreeStudentController extends Controller
 
     public function registerStudentForSemester(Request $request){
 
+
         DB::beginTransaction();
         try {
         $student=DegreeStudent::find($request->student_id);
         $academic_year=AcademicYear::find($request->academic_year_id);
+
+        $cpf_id=FeeType::where('name','CP Fee')->first()->id;
+        $cp_fee=$academic_year->fee_types()->wherePivot('fee_type_id',$cpf_id)->first()->pivot->amount;
+
         $semester=Semester::find($request->semester_id);
         $semester_no=$semester->number;
         $is_registerd =$student->semesters()->wherePivot('semester_id',$request->semester_id)->first();
@@ -361,15 +400,21 @@ class DegreeStudentController extends Controller
             return response()->json('error Student Already Registerd ',400);
             }
 
-            $this->registerStudentForCourses($student,$semester);
-            $this->attachWithMonth($student,$academic_year);
+            $total_cp= $this->registerStudentForCourses($student,$semester,$request->year_no);
+            $monthly_cp_fee=$total_cp*$cp_fee/$semester->months->count();
+            $student->semesters()->updateExistingPivot($request->semester_id,[
+              'semester_credit_hour'=>$total_cp,
+              'monthly_cp_fee'=>$monthly_cp_fee
+
+            ]);
+             $this->attachWithMonth($student,$academic_year);
 
             DB::commit();
             return response()->json(new AddedSemesterResource($student->semesters()
             ->wherePivot('semester_id',$semester->id)->first() ),200);
             } catch (\Exception $e) {
                 DB::rollBack();
-               // return $e;
+              // return $e;
                 return response()->json(['not succesfully registerd'],500);
                }
 

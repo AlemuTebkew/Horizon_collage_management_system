@@ -2,7 +2,9 @@
 
 namespace App\Exceptions;
 
+use Barryvdh\Debugbar\Facades\Debugbar;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\UnauthorizedException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -13,7 +15,7 @@ class Handler extends ExceptionHandler
      * @var string[]
      */
     protected $dontReport = [
-        //
+
     ];
 
     /**
@@ -35,7 +37,7 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            // Debugbar:: log($this->message);
         });
     }
 }

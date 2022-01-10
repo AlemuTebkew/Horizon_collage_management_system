@@ -20,7 +20,7 @@ class TvetSection extends Model
         return $this->belongsTo(Program::class);
     }
     public function level(){
-        return $this->belongsTo(Program::class);
+        return $this->belongsTo(Level::class);
     }
     public function tvet_students(){
         return $this->belongsToMany(TvetStudent::class,'tvet_student_section');

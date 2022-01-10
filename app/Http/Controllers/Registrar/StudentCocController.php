@@ -112,7 +112,7 @@ class StudentCocController extends Controller
     }
 
     public function getAllStudents(){
-        $per_page=request()->has('per_page') ? request('per_page') : 5;
+        $per_page=request()->has('per_page') ? request('per_page') : 20;
 
         $external=DB::table('external_coc_applicants')
                      ->where('coc_id',request('coc_id'))
@@ -120,8 +120,10 @@ class StudentCocController extends Controller
                           $join->on('external_coc_applicants.coc_id','=' ,'cocs.id')
                           ->where('cocs.id',request('coc_id'));
                       })
-                      ->select(DB::raw("CONCAT(first_name, ' ', last_name) AS full_name"),
+                      ->select('external_coc_applicants.id',DB::raw("CONCAT(first_name, ' ', last_name) AS full_name"),
                       'sex','occupation_name','level_no','result','certificate_no','registration_no');
+        $external=$external->addSelect(DB::raw("'external' as type"));
+        // $data = $data->addSelect();
 
         $degree=DB::table('degree_students')
                         ->join('coc_degree_student' , 'coc_degree_student.degree_student_id' ,'=' ,'degree_students.id')
@@ -131,8 +133,10 @@ class StudentCocController extends Controller
                             $join->on('coc_degree_student.coc_id','=' ,'cocs.id')
                             ->where('cocs.id',request('coc_id'));
                         })
-                        ->select(DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
+                        ->select('degree_students.id',DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
                         'sex','occupation_name','level_no','result','certificate_no','registration_no');
+
+                        $degree=$degree->addSelect(DB::raw("'degree' as type"));
 
        $tvet=DB::table('tvet_students')
                         ->join('coc_tvet_student' , 'coc_tvet_student.tvet_student_id' ,'=' ,'tvet_students.id')
@@ -142,8 +146,10 @@ class StudentCocController extends Controller
                             $join->on('coc_tvet_student.coc_id','=' ,'cocs.id')
                             ->where('cocs.id',request('coc_id'));
                         })
-                         ->select(DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
+                         ->select('tvet_students.id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
                         'sex','occupation_name','level_no','result','certificate_no','registration_no');
+
+                        $tvet=$tvet->addSelect(DB::raw("'tvet' as type"));
 
 
         $all=$external

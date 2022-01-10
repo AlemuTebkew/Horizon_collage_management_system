@@ -13,7 +13,7 @@ class AcademicYear extends Model
     public function tvet_section(){
         return $this->hasMany(TvetSection::class);
     }
-    
+
     public function degree_sections(){
         return $this->hasMany(DegreeSection::class);
     }
@@ -22,7 +22,7 @@ class AcademicYear extends Model
     }
 
     public function months(){
-        return $this->belongsToMany(Month::class);
+        return $this->belongsToMany(Month::class)->withPivot('month_id','academic_year_id','selected');
     }
     public function semesters(){
         return $this->hasMany(Semester::class);

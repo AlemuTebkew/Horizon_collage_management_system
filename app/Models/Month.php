@@ -14,7 +14,8 @@ class Month extends Model
     }
 //students paid for this month
     public function degree_paid_students(){
-        return $this->belongsToMany(DegreeStudent::class)->withPivot('receipt_no','academic_year_id','paid_date','paid_amount');
+        return $this->belongsToMany(DegreeStudent::class)
+        ->withPivot('receipt_no','academic_year_id','month_id','paid_date','paid_amount','payable_status','fee_type_id');
     }
 
     public function tvet_paid_students(){
@@ -22,6 +23,6 @@ class Month extends Model
     }
 
     public function academic_years(){
-        return $this->belongsToMany(AcademicYear::class);
+        return $this->belongsToMany(AcademicYear::class)->withPivot('month_id','academic_year_id','selected');
     }
 }

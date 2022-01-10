@@ -83,7 +83,7 @@ class TvetStudentController extends Controller
 
 
         $student= TvetStudent::create($data);
-        $student->update(['student_id'=>'HR'.$academic_year->year.$student->id]);
+        $student->update(['student_id'=>'HRR'.$academic_year->year.$student->id]);
 
 
         //////////start user login info
@@ -103,17 +103,30 @@ class TvetStudentController extends Controller
 
         ]);
         $this->registerStudentForModules($student,$level);
-
+        $this->attachWithMonth($student,$academic_year);
         DB::commit();
         return response()->json($this->responseData($student,$level->level_no),200);
     } catch (\Exception $e) {
         DB::rollBack();
-        // return $e;
+         return $e;
         return response()->json(['can t create student'],501);
     }
 
     }
 
+
+    private function attachWithMonth($student,$ac){
+
+
+        $reg= $student->month_payments()->wherePivot('academic_year_id',$ac->id)->first();
+          if (!$reg) {
+            $month_ids=$ac->months->pluck('id');
+            $student->month_payments()->attach($month_ids,['academic_year_id'=>$ac->id]);
+          }
+
+
+
+    }
     /**
      * Display the specified resource.
      *
@@ -216,6 +229,7 @@ class TvetStudentController extends Controller
     }
 
 
+
     private function responseData($s,$level_no){
         $level=[];
         $student=[];
@@ -228,22 +242,9 @@ class TvetStudentController extends Controller
         $student['sex']=$s->sex;
         $student['program']=$s->program;
         $student['status']='waiting';
-        $student['department']['id']=$s->degree_department->id;
-        $student['department']['name']=$s->degree_department->name;
-        $dep=DegreeDepartment::find($s->degree_department->id);
+        $student['department']['id']=$s->tvet_department->id;
+        $student['department']['name']=$s->tvet_department->name;
 
-
-        if ($dep->programs) {
-           $a= $dep
-            ->programs()
-            ->where('program_id',$s->program->id)->first();
-               if ($a) {
-                $student['department']['no_of_year']=$a->pivot->no_of_year;
-
-               }else{
-                $student['department']['no_of_year']=null;
-               }
-        }
 
         $level['level_no']=$level_no;
         $level['students']=$student;
@@ -280,6 +281,7 @@ class TvetStudentController extends Controller
 
         // $student=DegreeStudent::find($student_id);
         // $semester=Semester::find($semester_id);
+
         $department=TvetDepartment::find($student->tvet_department_id);
         $modules=$department->modules()->where('level_id',$level->id)->pluck('id');
 
@@ -292,6 +294,7 @@ class TvetStudentController extends Controller
         try {
         $level=Level::find($request->level_id);
         $student= TvetStudent::find($request->student_id);
+        $academic_year=AcademicYear::find($request->academic_year_id);
 
         $is_reg=$student->levels()->wherePivot('level_id',$level->id)->first();
         if (!$is_reg) {
@@ -308,7 +311,8 @@ class TvetStudentController extends Controller
             return response()->json('error Student Already Registerd ',400);
            }
            $this->registerStudentForModules($student,$level);
-        DB::commit();
+           $this->attachWithMonth($student,$academic_year);
+            DB::commit();
         return response()->json(new AddedLevelResource($student),200);
         } catch (\Exception $e) {
             DB::rollBack();

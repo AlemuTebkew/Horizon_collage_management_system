@@ -16,7 +16,9 @@ class Teacher extends Model
     return $this->first_name.' '.$this->last_name;
 }
     public function modules(){
-        return $this->belongsToMany(Module::class);
+        return $this->belongsToMany(Module::class,'teacher_section_modules')->withPivot('teacher_id','module_id','tvet_section_id',
+        'room_no','hours_per_week' ,'period','class_start_date','class_end_date','exam_week',
+     );
     }
 
     public function courses(){
@@ -30,7 +32,7 @@ class Teacher extends Model
     }
 
     public function tvet_sections(){
-        return $this->belongsToMany(DegreeSection::class,'teacher_section_courses')->withPivot('teacher_id','module_id','tvet_section_id',
+        return $this->belongsToMany(TvetSection::class,'teacher_section_modules')->withPivot('teacher_id','module_id','tvet_section_id',
         'room_no','hours_per_week' ,'period','class_start_date','class_end_date','exam_week');
     }
     public function course(){

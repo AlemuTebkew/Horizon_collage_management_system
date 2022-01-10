@@ -27,15 +27,18 @@ class TvetStudentFeeController extends Controller
         }else{
             $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
+        $per_page=request()->has('per_page') ? request('per_page') : 4;
 
-        $tvetStudents=TvetStudent::whereHas('month_payments',function( $query) use($academic_year_id){
+         $tvetStudents=TvetStudent::whereHas('month_payments',function( $query) use($academic_year_id){
             $query->where('tvet_student_month.academic_year_id',$academic_year_id);
-          })->with('month_payments')->get();
+          })->with('month_payments')->paginate($per_page);
 
         if ($tvetStudents) {
           foreach($tvetStudents as $tvtStudent){
 
             $student['id']=$tvtStudent->id;
+            $student['student_id']=$tvtStudent->student_id;
+
             $student['full_name']=$tvtStudent->full_name;
             $student['sex']=$tvtStudent->sex;
             $month_pad=[];
@@ -99,15 +102,16 @@ class TvetStudentFeeController extends Controller
         $tvetStudent=TvetStudent::find($tvetStudentId);
         if ($tvetStudent) {
             $years=[];
-            if ($tvetStudent->has('month_payments')) {
-                foreach($tvetStudent->month_payments as $month){
-                    //check through relationship method
-                    //return $month;
-                $academic_year_id=$month->pivot->academic_year_id;
+            $levels=$tvetStudent->levels;
+            if ($levels->isEmpty() == false) {
+             foreach($levels as $level){
+                $academic_year_id=$level->pivot->academic_year_id;
                 $academic_year=AcademicYear::find($academic_year_id);
                 $years[$academic_year_id]=$academic_year;
                 }
-        }
+            }else {
+                return 'not registerd';
+            }
 
         $student['id']=$tvetStudent->id;
         $student['student_id']=$tvetStudent->student_id;

@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Models\UserLogin;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponser;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class EmployeeController extends Controller
@@ -31,6 +32,9 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
+        try{
+
         $request->validate([
             'first_name'=>'required',
             'last_name'=>'required',
@@ -44,8 +48,15 @@ class EmployeeController extends Controller
         $login->password=Hash::make($request->last_name.'1234');
         $login->user_type='employee';
         $login->save();
-      return Employee::create($request->all());
+      $employee= Employee::create($request->all());
+
+      DB::commit();
+      return response()->json($employee,201);
+  } catch (\Throwable $th) {
+      DB::rollBack();
+     return response()->json('error while creating',$th->getCode());
     }
+ }
 
     /**
      * Display the specified resource.
@@ -67,16 +78,30 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, Employee $employee)
     {
-        $request->validate([
-            'first_name'=>'required',
-            'last_name'=>'required',
-            'email'=>'required',
-            'phone_no'=>'required',
-            'role'=>'required',
+        DB::beginTransaction();
+        try {
 
-        ]);
-        $employee->update($request->all());
-        return $employee;
+            $request->validate([
+                'first_name'=>'required',
+                'last_name'=>'required',
+                'email'=>'required',
+                'phone_no'=>'required',
+                'role'=>'required',
+
+            ]);
+            $user_login=UserLogin::where('user_name',$employee->email)->first();
+            $user_login->user_name=$request->email;
+            $user_login->password=$request->last_name.'1234' ;
+            $user_login->save();
+            $employee->update($request->all());
+
+            DB::commit();
+            return $employee;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+           return response()->json('error while updating',$th->getCode());
+        }
+
     }
 
     /**
@@ -108,6 +133,9 @@ class EmployeeController extends Controller
         return Employee::where('role','registrar')->get();
     }
 
+    public function getDeans(){
+        return Employee::where('role','dean')->get();
+    }
 
 
 }
