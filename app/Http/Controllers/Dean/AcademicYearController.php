@@ -8,8 +8,11 @@ use App\Models\DegreeSection;
 use App\Models\DegreeStudent;
 use App\Models\Employee;
 use App\Models\FeeType;
+use App\Models\Month;
+use App\Models\Program;
 use App\Models\Semester;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AcademicYearController extends Controller
 {
@@ -34,23 +37,141 @@ class AcademicYearController extends Controller
         //year','start_date','end_date','status','is_current
         $request->validate([
             'year'=>'required',
-            'start_date'=>'required',
-            'end_date'=>'required',
+
 
         ]);
-       $ay=AcademicYear::where('status',1)->first();
-       if ($ay) {
-           return response()->json(['close active Academic year before creating']);
-       }
-       $data=$request->all();
-       $data['start_date']=date('Y-m-d',strtotime($request->start_date));
-       $data['end_date']=date('Y-m-d',strtotime($request->end_date));
+
+        try {
+            DB::beginTransaction();
+
+            $ay=AcademicYear::where('is_current',1)->first();
+
+          $academic_year=new AcademicYear();
+          $academic_year->year=$request->year;
+          $academic_year->is_current=1;
+          $academic_year->is_closed=0;
+          $academic_year->save();
+
+          $fee_type_ids=FeeType::pluck('id');
+          $month_ids=Month::pluck('id');
+
+          //attach months to academic year
+   //       $academic_year->months()->attach($month_ids);
+          //end
+
+          //create academic fee
+          if ($ay) {
+            $old_fee=$ay->fee_types;
+            foreach ($old_fee as $old_fee) {
+                $academic_year->fee_types()->attach($old_fee->id,['amount'=>$old_fee->pivot->amount]);
+             }
+
+             $ay->is_current=0;
+             $ay->save();
+          }else {
+            $academic_year->fee_types()->attach($fee_type_ids,['amount'=>0.0]);
+
+          }
 
 
-      $fee_type_id=FeeType::pluck('id');
-      $year= AcademicYear::create($data);
-        if ($year) {
-            $year->fee_types()->attach($fee_type_id);
+          $reg_id=Program::where('name','regular')->where('type','degree')->first()->id;
+          $ext_id=Program::where('name','extension')->where('type','degree')->first()->id;
+
+          //creating regular semesters
+          foreach ($request->regular as  $semester ) {
+
+             $new_s=new Semester();
+             $new_s->start_date=date('Y-m-d',strtotime($semester['start_date']));
+             $new_s->end_date=date('Y-m-d',strtotime($semester['end_date']));
+             $new_s->number=$semester['number'];
+             $new_s->is_closed=0;
+             $new_s->program_id=$reg_id;
+             $new_s->academic_year_id=$academic_year->id;
+
+             if ($semester['number'] == 1) {
+               $new_s->is_current=1;
+             }else{
+              $new_s->is_current=0;
+             }
+             $new_s->save();
+
+             //attaching semester months
+             $month_ids=$semester['months'];
+             $new_s->months()->attach($month_ids);
+             //end
+
+             $activities=$semester['activities'];
+
+             foreach ($activities as $activity) {
+
+                DB::table('degree_calender_activities')->insert([
+                     'date'=>$activity['date'],
+                     'semester_id'=>$new_s->id,
+                     'activity'=>$activity['task']
+                 ]);
+             }
+
+
+
+          }
+
+          //creating extension semesters
+          foreach ($request->extension as $semester) {
+
+             $new_s=new Semester();
+             $new_s->start_date=date('Y-m-d',strtotime($semester['start_date']));
+             $new_s->end_date=date('Y-m-d',strtotime($semester['end_date']));
+             $new_s->number=$semester['number'];
+             $new_s->is_closed=0;
+             $new_s->program_id=$ext_id;
+             $new_s->academic_year_id=$academic_year->id;
+
+             if ($semester['number'] == 1) {
+               $new_s->is_current=1;
+             }else{
+              $new_s->is_current=0;
+             }
+             $new_s->save();
+
+             $month_ids=$semester['months'];
+             $new_s->months()->attach($month_ids);
+             //end
+
+             $activities=$semester['activities'];
+
+             foreach ($activities as $activity) {
+
+                 DB::table('degree_calender_activities')->insert([
+                    'date'=>$activity['date'],
+                    'activity'=>$activity['task'],
+                     'semester_id'=>$new_s->id,
+                 ]);
+
+          }
+        }
+
+          //creating tvet calender
+          foreach ($request->tvet_activities as $activity) {
+            DB::table('tvet_calender_activities')->insert([
+                'date'=>$activity['date'],
+                'activity'=>$activity['task'],
+                'academic_year_id'=> $academic_year->id ,
+             ]);
+          }
+
+
+         DB::table('tvet_calenders')->insert([
+            'start_date'=>date('Y-m-d',strtotime($request->tvet_start_date)),
+            'end_date'=> date('Y-m-d',strtotime($request->tvet_end_date)) ,
+            'academic_year_id'=> $academic_year->id ,
+        ]);
+
+            DB::commit();
+            return response()->json(['Succesfully saved'],201);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['error'=>'data can not be saved'.$th],501);
         }
 
     }
@@ -135,15 +256,48 @@ class AcademicYearController extends Controller
     }
 
 
+    public function getAcademicCalenderActivities(){
+        $academic_year=null;
+        if (request('academic_year_id')) {
+            $academic_year=AcademicYear::find(request('academic_year_id'));
+
+        }else {
+            $academic_year=AcademicYear::where('is_current',1)->first();
+        }
+
+        $reg_id=Program::where('name','regular')->where('type','degree')->first()->id;
+        $ext_id=Program::where('name','extension')->where('type','degree')->first()->id;
+
+        foreach($academic_year->semesters as $semester){
+
+            if($semester->program_id == $reg_id){
+                $regular[]=$semester->load('degree_calender_activities');
+            }else if($semester->program_id == $ext_id){
+                $ext[]=$semester->load('degree_calender_activities');
+
+            }
+
+        }
+        $act['regular']=$regular;
+        $act['extension']=$ext;
+
+        $de['degree'] =  $act;
+        $de['year'] =  $academic_year->year;
+
+        $de['tvet']= $academic_year->tvet_calender_activities;
+
+        return response()->json($de,200);
+
+    }
     public function closeAcademicYear(AcademicYear $academicYear){
-      $academicYear->update(['status'=>0,'is_current'=>0]);
+      $academicYear->update(['is_closed'=>1,'is_current'=>0]);
     }
 
 
 
 
 
-    
+
     public function getAllAcademicYear($departmentHeadId){
         $current_academic_year=AcademicYear::where('is_current',1);
         $current_semester=Semester::where('status',1);

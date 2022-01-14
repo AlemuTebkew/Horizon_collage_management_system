@@ -22,7 +22,7 @@ class CourseResource extends JsonResource
             'type'=>$this->type,
             'semester_no'=>$this->semester_no,
             'cp'=>$this->cp,
-            //'department'=>$this->department ? $this->department:null ,
+            'department'=>$this->department ? $this->department:null ,
             'year_no'=>$this->year_no,
             'program'=>$this->program ? $this->program->name:null,
             'instractor'=>$this->teacher->first() ? $this->teacher->first()->name:null,

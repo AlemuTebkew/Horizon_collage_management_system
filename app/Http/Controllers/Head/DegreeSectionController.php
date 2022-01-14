@@ -13,6 +13,7 @@ use App\Models\Employee;
 use App\Models\Semester;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DegreeSectionController extends Controller
 {
@@ -101,9 +102,21 @@ class DegreeSectionController extends Controller
         $employee=Employee::where('email',$request->user()->user_name)->first();
      // $employee->manage->id;
         $data['degree_department_id']=$employee->manage->id;
-        $degreeSection->update($data);
-        return new DegreeSectionResource($degreeSection->load('degree_department','semester'));
-     // return $degreeSection->update($request->all());
+        $data['semester_no']=Semester::find($request->semester_id)->number;
+        $s=DegreeSection::where('name',$request->name)
+                                ->where('year_no',$request->year_no)
+                               ->where('semester_id',$request->semester_id)
+                               ->where('degree_department_id',$employee->manage->id)
+                               ->where('academic_year_id',$request->academic_year_id)
+                               ->where('program_id',$request->program_id)
+                               ->first();
+        if (!$s) {
+            $degreeSection->update($data);
+            return response()->json(new DegreeSectionResource($degreeSection->load('degree_department','semester')),200) ;
+        }else {
+            return response()->json(['error_message'=>'Section Already Added'],400);
+        }
+
     }
 
     /**
@@ -114,23 +127,25 @@ class DegreeSectionController extends Controller
      */
     public function destroy(DegreeSection $degreeSection)
     {
-        $degreeSection->delete();
-    }
 
-    public function getSectionStudents($section_id){
-        $ds=DegreeSection::find($section_id);
-        return DegreeSectionStudentResource::collection($ds->degree_students);
-    }
+        DB::beginTransaction();
+        try {
 
-    public function addStudentsToSection(){
-        $sec= DegreeSection::find(request('section_id'));
-        foreach (request('student_ids')  as  $student_id) {
-           $sec->degree_students()->attach($student_id);
+            if ($degreeSection->degree_students->isEmpty()) {
+                $degreeSection->delete();
+            }else {
+                return response()->json(['You can not delete'],500);
+
+            }
+            DB::commit();
+            return response()->json(['succesfully deleted'],200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['not succesfully deleted'.$e],500);
+
         }
-
-        return DegreeSectionStudentResource::collection($sec->degree_students);
-
     }
+
 
 
 

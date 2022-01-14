@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dean;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\User;
 use App\Models\UserLogin;
 use Illuminate\Http\Request;
 use App\Traits\ApiResponser;
@@ -124,7 +125,7 @@ class EmployeeController extends Controller
     }
 
     public function getDepartmentHeads(){
-        return Employee::where('role','department head')->get();
+        return Employee::where('role','department_head')->get();
     }
     public function getCashiers(){
         return Employee::where('role','cashier')->get();
@@ -137,5 +138,17 @@ class EmployeeController extends Controller
         return Employee::where('role','dean')->get();
     }
 
+    public function get_notifications($id){
 
+
+        $new= Employee:: find($id)->unReadNotifications;
+        return $new;
+     }
+
+
+      public function mark_as_read($id){
+         $new= Employee::find($id)->unReadNotifications()->delete();
+         //$new->markAsRead();
+         return response()->json([],200);
+      }
 }

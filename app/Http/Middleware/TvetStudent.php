@@ -16,6 +16,11 @@ class TvetStudent
      */
     public function handle(Request $request, Closure $next)
     {
-        return $next($request);
+        if ($request->user()->user_type== 'tvet_student') {
+            return $next($request);
+
+        }else {
+           return response()->json('UN Authorized ',403);
+        }
     }
 }

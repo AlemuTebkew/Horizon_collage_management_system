@@ -17,12 +17,8 @@ class MonthController extends Controller
      */
     public function index()
     {
-        $academic_year=AcademicYear::where('status',1)->first();
 
-        $semesters=Semester::where('academic_year_id',$academic_year->id)
-                            ->where('status',1)->get();
-        // return  $semesters->load('months');
-         return $academic_year->months;
+         return Month::all();
     }
 
     /**

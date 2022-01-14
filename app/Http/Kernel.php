@@ -71,5 +71,9 @@ class Kernel extends HttpKernel
         'tvet_student' => \App\Http\Middleware\TvetStudent::class,
         'degree_student' => \App\Http\Middleware\DegreeStudent::class,
 
+        'tvet_head' => \App\Http\Middleware\TvetHead::class,
+        'degree_head' => \App\Http\Middleware\DegreeHead::class,
+        'cashier' => \App\Http\Middleware\Cashier::class,
+
     ];
 }

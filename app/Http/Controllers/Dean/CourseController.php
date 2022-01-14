@@ -97,26 +97,6 @@ class CourseController extends Controller
     }
     /*
     **/
-    public function getDepartmentCourses(){
-
-        $employee=Employee::where('email',request()->user()->user_name)->first();
-        // return $employee;
-           $department_head=$employee->manage;
-
-
-        return  CourseResource::collection ( Course::where('degree_department_id',$department_head->id)
-        ->with('department','program')->get());
-    }
-    public function getSectionCourses(){
-        $ds=DegreeSection::find(request('section_id'));
-        $semester=Semester::find($ds->semester_id);
-        $courses=Course::where('degree_department_id',$ds->degree_department_id)
-                        ->where('program_id',$ds->program_id)
-                        ->where('year_no',$ds->year_no)
-                        ->where('semester_no',$semester->number)->get();
-     return SectionCourseResource::collection( $courses->load('department','program','teacher'));
-        
-    }
 
     public function assignTeacherForCourse(){
         $ds=DegreeSection::find(request('section_id'));
@@ -134,7 +114,7 @@ class CourseController extends Controller
                 'degree_section_id'=>$ds->id,
             ]);
         }
-        
+
 
         return $teacher->full_name;
     }

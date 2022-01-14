@@ -16,6 +16,10 @@ class Teacher
      */
     public function handle(Request $request, Closure $next)
     {
-        return $next($request);
-    }
+        if ($request->user()->user_type== 'teacher') {
+            return $next($request);
+
+        }else {
+           return response()->json('UN Authorized ',403);
+        }    }
 }

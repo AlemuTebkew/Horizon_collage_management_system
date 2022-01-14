@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\DegreeStudent as ModelsDegreeStudent;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -16,6 +17,12 @@ class DegreeStudent
      */
     public function handle(Request $request, Closure $next)
     {
-        return $next($request);
+       // $user= ModelsDegreeStudent::where('student_id',$request->user()->user_name)->first();
+        if ($request->user()->user_type== 'degree_student') {
+            return $next($request);
+
+        }else {
+           return response()->json('UN Authorized ',403);
+        }
     }
 }

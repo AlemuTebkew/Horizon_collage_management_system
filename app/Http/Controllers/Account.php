@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DegreeStudentInfo\StudentResource;
 use App\Http\Resources\TvetStudentInfo\StudentResource as TvetStudentInfoStudentResource;
+use App\Models\DegreeDepartment;
 use App\Models\DegreeStudent;
 use App\Models\Employee;
 use App\Models\Teacher;
+use App\Models\TvetDepartment;
 use App\Models\TvetStudent;
 use App\Models\UserLogin;
 use Illuminate\Http\Request;
@@ -68,39 +70,78 @@ class Account extends Controller
 
             $teacher=Teacher::where('email',$user->user_name)->first();
 
-            $token= $user->createToken('auth_token')->plainTextToken;
-            return response()->json([
-                'access_token'=>$token,
-                'user'=>$teacher,
-            ],200);
+            if ($teacher->status) {
+                $token= $user->createToken('auth_token')->plainTextToken;
+                return response()->json([
+                    'access_token'=>$token,
+                    'role'=>'teacher',
+                    'user'=>$teacher,
+                ],200);
+                }else {
+                    return response()->json([
+                        'message'=>' Un Authorized',
+                        ]
+                       ,404 );
+                }
 
 
          } elseif ($user->user_type == 'employee') {
            //  return $user->user_type;
             $employee=Employee::where('email',$user->user_name)->first();
 
-            if ($employee->role == 'department head') {
+            if ($employee->status) {
 
+            if ($employee->role == 'department_head') {
+
+
+                $employee->department_role='degree_head';
+                $deg_head=  DegreeDepartment::where('id',$employee->id)->first();
+                $tvet_head=  TvetDepartment::where('id',$employee->id)->first();
+                if ($deg_head) {
+                    $token= $user->createToken('auth_token')->plainTextToken;
+                    return response()->json([
+                        'access_token'=>$token,
+                        // 'department_role'=>'degree_head',
+                        'user'=>$employee->load('manage'),
+                    ],200);
+
+                }else if($tvet_head) {
+                    $employee->department_role='degree_head';
 
                     $token= $user->createToken('auth_token')->plainTextToken;
                     return response()->json([
                         'access_token'=>$token,
+                        'role'=>'tvet_head',
                         'user'=>$employee->load('manage'),
                     ],200);
+                }else {
+                    $token= $user->createToken('auth_token')->plainTextToken;
+                    return response()->json([
+                        'access_token'=>$token,
+                        'role'=>'head',
+                        'user'=>$employee->load('manage'),
+                    ],200);
+                }
 
             }else{
-            $token= $user->createToken('auth_token')->plainTextToken;
-            return response()->json([
-                'access_token'=>$token,
-                'user'=>$employee,
-            ],200);
-        }
-         }else {
+                $token= $user->createToken('auth_token')->plainTextToken;
+                return response()->json([
+                    'access_token'=>$token,
+                    'user'=>$employee,
+                ],200);
+            }
+        }else {
             return response()->json([
                 'message'=>' UN Authorized ...',
                 ]
-               ,404 );
-         }
+                ,404 );
+        }
+     }else {
+        return response()->json([
+            'message'=>' UN Authorized ...',
+            ]
+            ,404 );
+        }
 
 
      }
@@ -130,24 +171,36 @@ class Account extends Controller
 
        if ($user->user_type == 'degree_student') {
           $degree_student=DegreeStudent::where('student_id',$user->user_name)->first();
+           if (!$degree_student->is_graduated) {
 
-          $token= $user->createToken('auth_token')->plainTextToken;
-        return response()->json([
-            'access_token'=>$token,
-            'role'=>'degree_student',
-            'user'=>new StudentResource($degree_student),
-        ],200);
+            $token= $user->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'access_token'=>$token,
+                'role'=>'degree_student',
+                'user'=>new StudentResource($degree_student),
+            ],200);
+
+        }else {
+            return response()->json([
+                'message'=>' UN Authorized ...',
+                ]
+               ,404 );
+         }
 
      } elseif ($user->user_type == 'tvet_student') {
         $tvet_student=TvetStudent::where('student_id',$user->user_name)->first();
 
-        $token= $user->createToken('auth_token')->plainTextToken;
-        return response()->json([
-            'access_token'=>$token,
-            'role'=>'tvet_student',
-            'user'=>new TvetStudentInfoStudentResource($tvet_student),
-        ],200);
+        if (!$tvet_student->is_graduated) {
 
+            $token= $user->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'access_token'=>$token,
+                'role'=>'tvet_student',
+                'user'=>new TvetStudentInfoStudentResource($tvet_student),
+            ],200);
+        }else {
+            return response()->json(['message'=>' UN Authorized ...', ],404 );
+         }
 
      }else {
         return response()->json([
@@ -170,7 +223,7 @@ class Account extends Controller
         $user=UserLogin::where('user_name',$request->user_name)->first();
         if (! $user ) {
             return response()->json([
-                'message'=>' incorrect user_name and password',
+                'message'=>' incorrect old password',
                 ]
                ,404 );
         }
@@ -178,7 +231,7 @@ class Account extends Controller
         $check=Hash::check($request->old_password, $user->password);
         if (! $check ) {
             return response()->json([
-                'message'=>'  incorrect user_name and password',
+                'message'=>'  incorrect old password',
                 ]
                ,404 );
         }
@@ -211,15 +264,6 @@ class Account extends Controller
                ,404 );
         }
 
-        // $check=Hash::check($request->old_password, $user->password);
-        // if (! $check ) {
-        //     return response()->json([
-        //         'message'=>' incorrect password',
-        //         ]
-        //        ,404 );
-        // }
-
-        // $user->password=$;
         $user->password=Hash::make($student->last_name.'1234');
         $user->save();
 
@@ -243,14 +287,6 @@ class Account extends Controller
                 ]
                ,404 );
         }
-
-        // $check=Hash::check($request->old_password, $user->password);
-        // if (! $check ) {
-        //     return response()->json([
-        //         'message'=>' incorrect password',
-        //         ]
-        //        ,404 );
-        // }
 
         $user->password=Hash::make($employee->last_name.'1234');
         $user->save();

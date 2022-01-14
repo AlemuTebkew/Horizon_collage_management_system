@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Employee;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -16,6 +17,12 @@ class Dean
      */
     public function handle(Request $request, Closure $next)
     {
-        return $next($request);
-    }
+        $user= Employee::where('email',$request->user()->user_name)->first();
+        if ($user->role == 'dean') {
+            return $next($request);
+
+        }else {
+           return response()->json('UN Authorized ',403);
+        }
+      }
 }

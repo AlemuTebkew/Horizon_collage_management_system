@@ -45,15 +45,22 @@ class StudentFeeController extends Controller
                               ->groupBy('receipt_no')
                               ->groupBy('paid_date')
                               ->groupBy('fee_type_id')
-                              ->groupBy('degree_student_id');
+                              ->groupBy('degree_student_id')
+                             // ->having('receipt_no',null)
+
+                            //   ->toSql()
+                            ;
                           //  return $q;
 
 
      // $q->join('degree_students','degree_students.id','=','.degree_student_id');
 
     $degree_students_tuition_fee = DB::table('degree_students')
+                                   ->where('degree_students.is_graduated',0)->where('degree_students.fully_scholarship',0)
+
                                     ->joinSub($degree_payment_query, 'payment', function ($join) {
-                                        $join->on('degree_students.id', '=', 'payment.degree_student_id');
+                                        $join->on('degree_students.id', '=', 'payment.degree_student_id')
+                                        ;
 
                                     })
                                     ->join('fee_types','fee_types.id','=','fee_type_id')
@@ -66,6 +73,8 @@ class StudentFeeController extends Controller
                                         DB::raw('DATE(paid_date) AS paid_date')
 
                                         ,'receipt_no','amount','fee_types.name AS payment_type')
+                                        // ->toSql()
+
                                         // ->get()
                                         ;
 
@@ -74,11 +83,13 @@ class StudentFeeController extends Controller
   ///////////////////////
 
       $degree_students_other_fee=DB::table('degree_students')
+                                 ->where('degree_students.is_graduated',0)->where('degree_students.fully_scholarship',0)
                                   ->join('degree_other_fees','degree_students.id','=','degree_other_fees.degree_student_id')
                                   ->join('fee_types','fee_types.id','=','degree_other_fees.fee_type_id')
                                   ->whereNotNull('receipt_no')
                                 //   ->whereYear('degree_other_fees.paid_date',$year)
                                   ->where('academic_year_id',$academic_year_id)
+
                                   ->select('degree_students.id','student_id',DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
                                   'degree_other_fees.paid_date',
                                 //   DB::raw('DATE(degree_other_fees.paid_date) AS paid_date'),
@@ -108,7 +119,8 @@ class StudentFeeController extends Controller
                             //   'paid_date'
                             DB::raw('DATE(paid_date) AS paid_date')
 
-                              ,'fee_type_id',DB::raw("SUM(paid_amount) AS amount") ,DB::raw("count(receipt_no) AS count"))
+                              ,'fee_type_id',DB::raw("SUM(paid_amount) AS amount")
+                              ,DB::raw("count(receipt_no) AS count"))
                               ->groupBy('receipt_no')
                               ->groupBy('paid_date')
                               ->groupBy('fee_type_id')
@@ -118,9 +130,12 @@ class StudentFeeController extends Controller
   //  return $tvet_payment_query;
 
       $tvet_students_tuition_fee = DB::table('tvet_students')
+                                 ->where('tvet_students.is_graduated',0)->where('tvet_students.fully_scholarship',0)
+
                                   ->joinSub($tvet_payment_query, 'payment', function ($join) {
                                       $join->on('tvet_students.id', '=', 'payment.tvet_student_id');
-                                  })
+
+                                    })
                                   ->join('fee_types','fee_types.id','=','fee_type_id')
                                 //   ->whereYear('paid_date',$year)
                                 // ->where('academic_year_id',$academic_year_id)
@@ -132,19 +147,22 @@ class StudentFeeController extends Controller
 
                                       ,'receipt_no','amount','fee_types.name AS payment_type')
                                     //   ->get()
-                                      ;
+                                    // ->toSql()
+                                    ;
 
                $tvet_students_other_fee=DB::table('tvet_students')
+               ->where('tvet_students.is_graduated',0)->where('tvet_students.fully_scholarship',0)
+
                ->join('tvet_other_fees','tvet_students.id','=','tvet_other_fees.tvet_student_id')
                ->join('fee_types','fee_types.id','=','tvet_other_fees.fee_type_id')
                ->whereNotNull('receipt_no')
             //    ->whereYear('paid_date',$year)
-                ->where('tvet_other_fees.academic_year_id',$academic_year_id)
+            ->where('tvet_other_fees.academic_year_id',$academic_year_id)
                ->select('tvet_students.id','student_id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
                DB::raw('DATE(tvet_other_fees.paid_date) AS paid_date')
                ,
             //    'tvet_other_fees.paid_date',
-               'tvet_other_fees.receipt_no','tvet_other_fees.paid_amount','fee_types.name as payment_type');
+               'tvet_other_fees.receipt_no','tvet_other_fees.paid_amount as amount ','fee_types.name as payment_type');
 
 
                if (request('search_query')) {
@@ -181,9 +199,14 @@ class StudentFeeController extends Controller
         $students_all_fee=    $tvet_students_other_fee
                               ->unionAll($tvet_students_tuition_fee)
                               ->unionAll($degree_students_tuition_fee)
-                              ->unionAll($degree_students_other_fee);
+                              ->unionAll($degree_students_other_fee)
+                            //   ->toSql()
+                              ;
 
-        $all_fee= $students_all_fee->paginate($per_page);
+                              $querySql = $students_all_fee->toSql();
+                              $query1 = DB::table(DB::raw('('.$querySql.' ) as a  '))
+                                  ->mergeBindings($students_all_fee);
+        $all_fee= $students_all_fee->orderByDesc('paid_date')->paginate($per_page);
         return response()->json(
                                 $all_fee
                             ,200);
@@ -302,6 +325,7 @@ class StudentFeeController extends Controller
 
         if (request('type') == 'degree') {
             $degreeStudent=DegreeStudent::where('student_id',$student_id)
+                                        ->where('is_graduated',0)->where('fully_scholarship',0)
                                          ->with('semesters','month_payments')
                                          ->first();
             if ($degreeStudent) {
@@ -394,7 +418,9 @@ class StudentFeeController extends Controller
            }
         }else if (request('type') == 'tvet') {
 
-            $tvetStudent=TvetStudent::where('student_id',$student_id)->first();
+            $tvetStudent=TvetStudent::where('student_id',$student_id)
+            ->where('is_graduated',0)->where('fully_scholarship',0)
+            ->first();
             if ($tvetStudent) {
                 $student['id']=$tvetStudent->id;
                 $student['student_id']=$tvetStudent->student_id;
@@ -486,9 +512,13 @@ class StudentFeeController extends Controller
             // }elseif ($request->tuition_type == 'monthly') {
                 $month_amount=(double)$request->amount /count($request->months);
 
+                $st= $student->month_payments()->wherePivot('receipt_no',$request->receipt_no)->first();
+                if ($st) {
+                   return response()->json(['error'=>'Pad Number Already Exist'],201);
+                }else{
                 foreach ($request->months as $id) {
                     $student->month_payments()
-                    ->wherePivot('academic_year_id',$request->academic_year_id)
+                   ->wherePivot('academic_year_id',$request->academic_year_id)
                     ->updateExistingPivot($id,[
                         'fee_type_id'=>$monthly_fee_id,
                         // 'academic_year_id'=>$request->academic_year_id,
@@ -499,18 +529,23 @@ class StudentFeeController extends Controller
 
                     ]);
                 }
-            // }
+                return response()->json($student->load('month_payments'),200);
+            }
 
-            return $student->load('month_payments');
+
         }elseif (request('student_type') == 'tvet') {
 
             $student=TvetStudent::find($student_id);
 
             $month_amount=(double)$request->amount /count($request->months);
 
+            $st= $student->month_payments()->wherePivot('receipt_no',$request->receipt_no)->first();
+            if ($st) {
+               return response()->json(['error'=>'Pad Number Already Exist'],201);
+            }else{
             foreach ($request->months as $id) {
                 $student->month_payments()
-                  ->where('academic_year_id',$request->academic_year_id)
+                  ->wherePivot('academic_year_id',$request->academic_year_id)
                   ->updateExistingPivot($id,[
                     'fee_type_id'=>$monthly_fee_id,
                     // 'academic_year_id'=>$request->academic_year_id,
@@ -522,14 +557,14 @@ class StudentFeeController extends Controller
                 ]);
             }
             return $student->load('month_payments');
-
+        }
         }
      }
 
      public function addOtherPayment(Request $request){
 
 
-        // try {
+        try {
 
             $academic_year_id=null;
             if (request()->filled('academic_year_id')) {
@@ -550,35 +585,49 @@ class StudentFeeController extends Controller
                 // return $request->paid_date;
                 // return date('Y-m-d',strtotime($request->paid_date));
                 $student=DegreeStudent::where('student_id',request('student_id'))->first();
-                $student->degree_other_fees()->attach($request->fee_type_id,[
-                    'academic_year_id'=>$academic_year->id,
-                    'receipt_no'=>$request->receipt_no,
-                    'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-                    'paid_amount'=>$request->amount,
-                    'is_paid'=>1
 
-                ]);
+                $st= $student->degree_other_fees()->wherePivot('receipt_no',$request->receipt_no)->first();
+                if ($st) {
+                   return response()->json(['error'=>'Pad Number Already Exist'],201);
+                }else{
+                    $student->degree_other_fees()->attach($request->fee_type_id,[
+                        'academic_year_id'=>$academic_year->id,
+                        'receipt_no'=>$request->receipt_no,
+                        'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+                        'paid_amount'=>$request->amount,
+                        'is_paid'=>1
 
-                return response()->json('Successfully Added',200);
+                    ]);
+
+                    return response()->json('Successfully Added',200);
+                }
+
             } else if (request('type') == 'tvet') {
                 $student=TvetStudent::where('student_id',request('student_id'))->first();
-                $student->tvet_other_fees()->attach($request->fee_type_id,[
-                    'academic_year_id'=>$academic_year->id,
-                    'receipt_no'=>$request->receipt_no,
-                    'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-                    'paid_amount'=>$request->amount,
-                    'is_paid'=>1
 
-                ]);
+                $st= $student->tvet_other_fees()->wherePivot('receipt_no',$request->receipt_no)->first();
+                if ($st) {
+                   return response()->json(['error'=>'Pad Number Already Exist'],201);
+                }else{
+                    $student->tvet_other_fees()->attach($request->fee_type_id,[
+                        'academic_year_id'=>$academic_year->id,
+                        'receipt_no'=>$request->receipt_no,
+                        'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
+                        'paid_amount'=>$request->amount,
+                        'is_paid'=>1
 
-                return response()->json('Successfully Added',200);
+                    ]);
+
+                    return response()->json('Successfully Added',200);
+                }
+
 
             }
 
 
-        // } catch (\Throwable $th) {
-            return response()->json('not Addeed',500);
-        // }
+        } catch (\Throwable $th) {
+            return response()->json('not Addeed'. $th->getMessage(),500);
+        }
 
 
 

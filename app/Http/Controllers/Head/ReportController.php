@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Head;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\DegreeResult\CourseResultResource;
 use App\Http\Resources\DegreeResult\StudentSemesterResource;
+use App\Models\AcademicYear;
 use App\Models\Course;
 use App\Models\DegreeStudent;
 use App\Models\Employee;
@@ -79,6 +80,8 @@ class ReportController extends Controller
           $fee_type_cp=FeeType::where('name','CP Fee')->first();
           $fee_type_reg=FeeType::where('name','Registration Fee')->first();
 
+        //   $ac_y=AcademicYear::find($request->academic_year_id);
+        //   $ac_y->fee_types->
           $cp_fee= $fee_type_cp->academic_years()->wherePivot('academic_year_id',$request->academic_year_id)->first()->pivot->amount;
           $registration_fee= $fee_type_reg->academic_years()->wherePivot('academic_year_id',$request->academic_year_id)->first()->pivot->amount;
         return response([
@@ -91,10 +94,10 @@ class ReportController extends Controller
     public function getGradeReport(Request $request){
 
        $employee=Employee::where('email',request()->user()->user_name)->first();
-       $courses=Course::where('degree_department_id',request()->degree_department_id)
-       ->where('program_id',request()->program_id)
-       ->where('year_no',request()->year_no)
-       ->where('semester_no',request()->semester_no)->get();
+    //    $courses=Course::where('degree_department_id',request()->degree_department_id)
+    //    ->where('program_id',request()->program_id)
+    //    ->where('year_no',request()->year_no)
+    //    ->where('semester_no',request()->semester_no)->get();
        //return $request->students;
        $all_students=[];
        $student1=[];
@@ -117,10 +120,10 @@ class ReportController extends Controller
             $course['title']=$studentCourse->title;
             $course['semester_no']=$studentCourse->semester_no;
             $course['cp']=$studentCourse->cp;
-            $course['letter_grade']=$studentCourse->pivot->grade_point;
+            $course['letter_grade']=$studentCourse->pivot->letter_grade;
             $course['year_no']=$studentCourse->year_no;
             $course['total_mark']=$studentCourse->pivot->total_mark;
-            $course['grade_point']=$grade_point;
+            $course['grade_point']=$studentCourse->pivot->grade_point;
 
 
 

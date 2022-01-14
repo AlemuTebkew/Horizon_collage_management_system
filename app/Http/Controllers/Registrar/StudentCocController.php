@@ -120,7 +120,7 @@ class StudentCocController extends Controller
                           $join->on('external_coc_applicants.coc_id','=' ,'cocs.id')
                           ->where('cocs.id',request('coc_id'));
                       })
-                      ->select('external_coc_applicants.id',DB::raw("CONCAT(first_name, ' ', last_name) AS full_name"),
+                      ->select('external_coc_applicants.id as student_id',DB::raw("CONCAT(first_name, ' ', last_name) AS full_name"),
                       'sex','occupation_name','level_no','result','certificate_no','registration_no');
         $external=$external->addSelect(DB::raw("'external' as type"));
         // $data = $data->addSelect();
@@ -133,7 +133,7 @@ class StudentCocController extends Controller
                             $join->on('coc_degree_student.coc_id','=' ,'cocs.id')
                             ->where('cocs.id',request('coc_id'));
                         })
-                        ->select('degree_students.id',DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
+                        ->select('degree_students.student_id',DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
                         'sex','occupation_name','level_no','result','certificate_no','registration_no');
 
                         $degree=$degree->addSelect(DB::raw("'degree' as type"));
@@ -146,7 +146,7 @@ class StudentCocController extends Controller
                             $join->on('coc_tvet_student.coc_id','=' ,'cocs.id')
                             ->where('cocs.id',request('coc_id'));
                         })
-                         ->select('tvet_students.id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
+                         ->select('tvet_students.student_id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
                         'sex','occupation_name','level_no','result','certificate_no','registration_no');
 
                         $tvet=$tvet->addSelect(DB::raw("'tvet' as type"));

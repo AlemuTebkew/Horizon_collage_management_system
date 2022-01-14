@@ -21,18 +21,33 @@ class DegreeStudentFeeController extends Controller
 
 
         //getting all students
+
+        $paginated_data=[];
         $academic_year_id=null;
         if (request()->filled('academic_year_id')) {
             $academic_year_id=request('academic_year_id');
         }else{
             $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
-        $per_page=request()->has('per_page') ? request('per_page') : 4;
+        $per_page=request()->has('per_page') ? request('per_page') : 2;
 
         $academic_year=AcademicYear::find($academic_year_id);
-        $degreeStudents=DegreeStudent::whereHas('month_payments',function( $query) use($academic_year_id){
+
+       $degreeStudents=DegreeStudent::whereHas('month_payments',function( $query) use($academic_year_id){
             $query->where('degree_student_month.academic_year_id',$academic_year_id);
-        })->with('month_payments')->paginate($per_page);
+
+       })->with(['month_payments'=>function( $query) use($academic_year_id){
+       $query->where('degree_student_month.academic_year_id',$academic_year_id);
+     }]) ->where('is_graduated',0)->where('fully_scholarship',0)
+
+      ->paginate($per_page);
+
+        $a= $degreeStudents->toArray();
+
+        $paginated_data['current_page']= $a['current_page'];
+        $paginated_data['to']= $a['to'];
+        $paginated_data['from']= $a['from'];
+        $paginated_data['total']= $a['total'];
 
           foreach ($degreeStudents as  $degreeStudent) {
 
@@ -44,20 +59,21 @@ class DegreeStudentFeeController extends Controller
                  $total=0.0;
                   $month_payments=$degreeStudent->month_payments()
                   ->wherePivot('academic_year_id',$academic_year_id)
+                 // ->wherePivot('receipt_no',null)
                   ->orderBy('number')
                   ->get();
-                  foreach ($academic_year->months as $month) {
+                //   foreach ($academic_year->months as $month) {
 
                       $month_pad=[];
                     foreach ($month_payments as $month_payment) {
                   //    return  $month;
                         if($month_payment->pivot->academic_year_id == $academic_year_id){
 
-                            if ($month->id == $month_payment->id)  {
-                                $month_pad = $month_payment->pivot->receipt_no;
+                            // if ($month->id == $month_payment->id)  {
+                                $pads[$month_payment->name]= $month_payment->pivot->receipt_no;
                                 $total+=(double)$month_payment->pivot->paid_amount;
-                               break;
-                             }
+                            //    break;
+                            //  }
                              //else {
                             //     $month_pad =null;
                             //     break;
@@ -65,38 +81,193 @@ class DegreeStudentFeeController extends Controller
 
 
                          }
+
+                        //  $pads[$month_payment->name]=$month_pad;
+
                         }
 
 
-           $pads[$month->name]=$month_pad;
 
-            }
+            // }
             $student['total']=$total;
             $student['pads']=$pads;
             $all[]=$student;
           }
         //   $chunks = collect($all)->chunk(2);
         //  return $chunks->toArray();
-         return response()->json( $all,200);
+        $paginated_data['data']=$all;
+         return response()->json($paginated_data ,200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function filterPaidStudentsByMonth()
     {
-        //
+        $all=[];
+        $student=[];
+
+
+        //getting all students
+        $academic_year_id=null;
+        if (request()->filled('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+        $per_page=request()->has('per_page') ? request('per_page') : 4;
+
+        $academic_year=AcademicYear::find($academic_year_id);
+
+
+            $degreeStudents=DegreeStudent:: whereHas('month_payments',function($query) use($academic_year_id){
+                 $query->where('degree_student_month.academic_year_id',$academic_year_id)
+                ->whereNotNull('degree_student_month.receipt_no')
+                ->where('degree_student_month.month_id',request('month_query'));
+      })->with(['month_payments'=>function( $query) use($academic_year_id){
+        $query->where('degree_student_month.academic_year_id',$academic_year_id);
+    }])->where('is_graduated',0)->where('fully_scholarship',0)
+      ->paginate($per_page);
+
+      $a= $degreeStudents->toArray();
+
+      $paginated_data['current_page']= $a['current_page'];
+      $paginated_data['to']= $a['to'];
+      $paginated_data['from']= $a['from'];
+      $paginated_data['total']= $a['total'];
+
+
+          foreach ($degreeStudents as  $degreeStudent) {
+
+                $student['id']=$degreeStudent->id;
+                $student['student_id']=$degreeStudent->student_id;
+                $student['full_name']=$degreeStudent->full_name;
+                 $student['sex']=$degreeStudent->sex;
+                 $month_pad=[];
+                 $total=0.0;
+                  $month_payments=$degreeStudent->month_payments()
+                  ->wherePivot('academic_year_id',$academic_year_id)
+                 // ->wherePivot('receipt_no',null)
+                  ->orderBy('number')
+                  ->get();
+                //   foreach ($academic_year->months as $month) {
+
+                      $month_pad=[];
+                    foreach ($month_payments as $month_payment) {
+                  //    return  $month;
+                        if($month_payment->pivot->academic_year_id == $academic_year_id){
+
+                            // if ($month->id == $month_payment->id)  {
+                                $pads[$month_payment->name]= $month_payment->pivot->receipt_no;
+                                $total+=(double)$month_payment->pivot->paid_amount;
+                            //    break;
+                            //  }
+                             //else {
+                            //     $month_pad =null;
+                            //     break;
+                            // }
+
+
+                         }
+
+                        //  $pads[$month_payment->name]=$month_pad;
+
+                        }
+
+
+
+            // }
+            $student['total']=$total;
+            $student['pads']=$pads;
+            $all[]=$student;
+          }
+          $paginated_data['data']=$all;
+          return response()->json($paginated_data ,200);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+
+    public function filterUnPaidStudentsByMonth()
+    {
+        $all=[];
+        $student=[];
+
+
+        //getting all students
+        $academic_year_id=null;
+        if (request()->filled('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+        $per_page=request()->has('per_page') ? request('per_page') : 4;
+
+        $academic_year=AcademicYear::find($academic_year_id);
+
+
+            $degreeStudents=DegreeStudent:: whereHas('month_payments',function($query) use($academic_year_id){
+                 $query->where('degree_student_month.academic_year_id',$academic_year_id)
+                ->where('degree_student_month.receipt_no',null)
+                ->where('degree_student_month.month_id',request('month_query'));
+
+      })->with(['month_payments'=>function( $query) use($academic_year_id){
+        $query->where('degree_student_month.academic_year_id',$academic_year_id);
+    }])->where('is_graduated',0)->where('fully_scholarship',0)
+      ->paginate($per_page);
+
+
+      $a= $degreeStudents->toArray();
+
+      $paginated_data['current_page']= $a['current_page'];
+      $paginated_data['to']= $a['to'];
+      $paginated_data['from']= $a['from'];
+      $paginated_data['total']= $a['total'];
+
+
+
+          foreach ($degreeStudents as  $degreeStudent) {
+
+                $student['id']=$degreeStudent->id;
+                $student['student_id']=$degreeStudent->student_id;
+                $student['full_name']=$degreeStudent->full_name;
+                 $student['sex']=$degreeStudent->sex;
+                 $month_pad=[];
+                 $total=0.0;
+                  $month_payments=$degreeStudent->month_payments()
+                  ->wherePivot('academic_year_id',$academic_year_id)
+                 // ->wherePivot('receipt_no',null)
+                  ->orderBy('number')
+                  ->get();
+                //   foreach ($academic_year->months as $month) {
+
+                      $month_pad=[];
+                    foreach ($month_payments as $month_payment) {
+                  //    return  $month;
+                        if($month_payment->pivot->academic_year_id == $academic_year_id){
+
+                            // if ($month->id == $month_payment->id)  {
+                                $pads[$month_payment->name]= $month_payment->pivot->receipt_no;
+                                $total+=(double)$month_payment->pivot->paid_amount;
+                            //    break;
+                            //  }
+                             //else {
+                            //     $month_pad =null;
+                            //     break;
+                            // }
+
+
+                         }
+
+                        //  $pads[$month_payment->name]=$month_pad;
+
+                        }
+
+
+
+            // }
+            $student['total']=$total;
+            $student['pads']=$pads;
+            $all[]=$student;
+          }
+          $paginated_data['data']=$all;
+          return response()->json($paginated_data ,200);
+    }
     public function show($id)
     {
         $degreeStudent=DegreeStudent::find($id);

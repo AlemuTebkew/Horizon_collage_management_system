@@ -20,8 +20,8 @@ class CocController extends Controller
         if (request()->filled('academic_year_id')) {
             $academic_year_id=request('academic_year_id');
         }else{
-            return response()->json(['select academic year'],400);
-                   // $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+           // return response()->json(['select academic year'],400);
+          $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
 
         return response()->json(Coc::where('academic_year_id',$academic_year_id)->get(),200);

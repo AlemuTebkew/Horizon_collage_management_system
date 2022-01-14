@@ -84,12 +84,14 @@ class SectionController extends Controller
             $student['first_name']=$st->first_name;
             $student['last_name']=$st->last_name;
             $student['sex']=$st->sex;
-            $student['from_11']=$st_course->from_11;
-            $student['from_12']=$st_course->from_12;
-            $student['from_12s']=$st_course->from_12s;
-            $student['from_40']=$st_course->from_40;
+            $student['from_5']=$st_course->from_5;
+            $student['from_5s']=$st_course->from_5s;
             $student['from_25']=$st_course->from_25;
+            $student['from_40']=$st_course->from_40;
+            $student['from_25s']=$st_course->from_25s;
             $student['result']=$st_course->total_mark;
+            $student['letter_grade']=$st_course->letter_grade;
+
 
             $students[]=$student;
         }
@@ -103,14 +105,12 @@ class SectionController extends Controller
                 $student['id']=$st->id;
                 $student['student_id']=$st->student_id;
                 $student['first_name']=$st->first_name;
-            $student['last_name']=$st->last_name;
-            $student['sex']=$st->sex;
-            $student['from_11']=$st_module->from_11;
-            $student['from_12']=doubleval($st_module->from_12);
-            $student['from_12s']=doubleval($st_module->from_12s);
-            $student['from_40']=$st_module->from_40;
-            $student['from_25']=$st_module->from_25;
-            $student['result']=$st_module->total_mark;
+                $student['last_name']=$st->last_name;
+                $student['sex']=$st->sex;
+                $student['from_20']=doubleval($st_module->from_20);
+                $student['from_30']=doubleval($st_module->from_30);
+                $student['from_50']=doubleval($st_module->from_50);
+                $student['result']=$st_module->total_mark;
 
             $students[]=$student;
         }
@@ -126,15 +126,18 @@ class SectionController extends Controller
 
         if (request('type') == 'degree') {
             $student=DegreeStudent::find($student_id);
-
+            $letter_grade=$this->calculateLetterGrade(request()->total_mark);
+            $grade_point=$this->courseGradePoint(request('cp'),$letter_grade);
             $student->courses()->updateExistingPivot(request('course_id'),[
-                'from_11'=>request('from_11'),
-                'from_12'=>request('from_12'),
-                'from_12s'=>request('from_12s'),
+
+                'from_5'=>request('from_5'),
+                'from_5s'=>request('from_5s'),
                 'from_25'=>request('from_25'),
+                'from_25s'=>request('from_25s'),
                 'from_40'=>request('from_40'),
                 'total_mark'=>request('total_mark'),
-                'grade_point'=>$this->calculateGrade(request()->total_mark),
+                'letter_grade'=> $letter_grade,
+                 'grade_point'=> $grade_point
 
              ]);
 
@@ -144,11 +147,9 @@ class SectionController extends Controller
             $student=TvetStudent::find($student_id);
 
             $student->modules()->updateExistingPivot(request('course_id'),[
-                'from_11'=>request('from_11'),
-                'from_12'=>request('from_12'),
-                'from_12s'=>request('from_12s'),
-                'from_25'=>request('from_25'),
-                'from_40'=>request('from_40'),
+                'from_20'=>request('from_20'),
+                'from_30'=>request('from_30'),
+                'from_50'=>request('from_50'),
                 'total_mark'=>request('total_mark'),
                 // 'grade_point'=>$this->calculateGrade(request()->total_mark),
 
@@ -162,7 +163,7 @@ class SectionController extends Controller
     }
 
 
-    public function calculateGrade($r){
+    public function calculateLetterGrade($r){
 
         if ($r >= 90) {
             return 'A+';
@@ -172,10 +173,70 @@ class SectionController extends Controller
             return 'A-';
         } else if ($r >= 75) {
             return 'B+';
-        } else if ($r >=50) {
+        } else if ($r >=70) {
+            return 'B';
+        } else if ($r >=65) {
+            return 'B-';
+        } else if ($r >=60) {
             return 'C+';
-        } else if ($r >=30) {
+        } else if ($r >=50) {
+            return 'C';
+        } else if ($r >=45) {
+            return 'C-';
+        } else if ($r >=40) {
             return 'D';
+        } else if ($r < 40) {
+            return 'F';
         }
+    }
+
+    public function courseGradePoint($credit_hour,$letter_grade){
+        if($letter_grade=='A'|| $letter_grade=='A+'){
+          return  $grade_point=$credit_hour*4;
+        }
+        else if($letter_grade=='A-'){
+            return  $grade_point=$credit_hour*3.75;
+        }
+        else if($letter_grade=='B+'){
+            return  $grade_point=$credit_hour*3.5;
+        }
+        else if($letter_grade=='B'){
+            return  $grade_point=$credit_hour*3;
+        }
+        else if($letter_grade=='B-'){
+            return  $grade_point=$credit_hour*2.75;
+        }
+        else if($letter_grade=='C+'){
+            return $grade_point=$credit_hour*2.5;
+        }
+        else if($letter_grade=='C'){
+            return $grade_point=$credit_hour*2;
+        }
+        else if($letter_grade=='C-'){
+            return $grade_point=$credit_hour*1.75;
+        }
+        else if($letter_grade=='D'){
+            return $grade_point=$credit_hour*1;
+        }
+        else if($letter_grade=='F'){
+            return $grade_point=$credit_hour*0;
+        }
+    }
+
+    public function calculateGPA($student,$se){
+
+        $sem_couses=$student->courses()->where('semester_id',$se->id)->get();
+
+        $total_gp=0.0;
+        $total_cp=0.0;
+        foreach ($sem_couses as $course) {
+
+            $total_gp += $course->pivot->grade_point;
+            $total_cp += $course->cp;
+        }
+        $gpa=$total_gp/$total_cp;
+
+        return $gpa;
+
     }
 }

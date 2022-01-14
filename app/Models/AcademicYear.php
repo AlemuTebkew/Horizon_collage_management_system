@@ -10,6 +10,8 @@ class AcademicYear extends Model
     use HasFactory;
 
     public $fillable=['year','start_date','end_date','status','is_current'];
+
+    public $hidden=['created_at','updated_at'];
     public function tvet_section(){
         return $this->hasMany(TvetSection::class);
     }
@@ -30,5 +32,9 @@ class AcademicYear extends Model
     public function fee_types(){
         return $this->belongsToMany(FeeType::class,'academic_fees')
         ->withPivot('fee_type_id','academic_year_id','amount');
+    }
+
+    public function tvet_calender_activities(){
+        return $this->hasMany(TvetCalenderActivity::class,'academic_year_id');
     }
 }

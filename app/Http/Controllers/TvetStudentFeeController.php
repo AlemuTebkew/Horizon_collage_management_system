@@ -27,11 +27,23 @@ class TvetStudentFeeController extends Controller
         }else{
             $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
-        $per_page=request()->has('per_page') ? request('per_page') : 4;
+        $per_page=request()->has('per_page') ? request('per_page') : 2;
 
          $tvetStudents=TvetStudent::whereHas('month_payments',function( $query) use($academic_year_id){
             $query->where('tvet_student_month.academic_year_id',$academic_year_id);
-          })->with('month_payments')->paginate($per_page);
+          })->with(['month_payments'=>function($query) use ($academic_year_id){
+            $query->where('tvet_student_month.academic_year_id',$academic_year_id);
+
+          }])->where('is_graduated',0)->where('fully_scholarship',0)
+           ->paginate($per_page);
+
+           $a= $tvetStudents->toArray();
+
+           $paginated_data['current_page']= $a['current_page'];
+           $paginated_data['to']= $a['to'];
+           $paginated_data['from']= $a['from'];
+           $paginated_data['total']= $a['total'];
+
 
         if ($tvetStudents) {
           foreach($tvetStudents as $tvtStudent){
@@ -62,41 +74,162 @@ class TvetStudentFeeController extends Controller
             $all[]=$student;
             // return $student;
         }
-        return response()->json($all,200);
+        $paginated_data['data']=$all;
+        return response()->json($paginated_data ,200);
      }else {
         return response()->json('no student',404);
     }
 
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'tvet_student_id'=>'required',
-            'academic_fee_id'=>'required',
-            'academic_year_id'=>'required',
-             'month_id'=>'required',
-             'paid_amount'=>'required',
-             'paid_date'=>'required',
-             'receipt_no'=>'required',
-             'is_paid'=>'required',
 
-        ]);
-      return TvetStudentFee::create($request->all());
+
+
+    public function filterPaidStudentsByMonth()
+    {
+
+        $all=[];
+        $student=[];
+
+        //getting all students
+        $academic_year_id=null;
+        if (request()->has('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+        $per_page=request()->has('per_page') ? request('per_page') : 2;
+
+         $tvetStudents=TvetStudent::whereHas('month_payments',function( $query) use($academic_year_id){
+            $query->where('tvet_student_month.academic_year_id',$academic_year_id)
+            ->whereNull('tvet_student_month.receipt_no')
+            ->where('tvet_student_month.month_id',request('month_query'));
+
+
+          })->with(['month_payments'=>function($query) use ($academic_year_id){
+            $query->where('tvet_student_month.academic_year_id',$academic_year_id);
+
+          }])->where('is_graduated',0)->where('fully_scholarship',0)
+           ->paginate($per_page);
+
+           $a= $tvetStudents->toArray();
+
+           $paginated_data['current_page']= $a['current_page'];
+           $paginated_data['to']= $a['to'];
+           $paginated_data['from']= $a['from'];
+           $paginated_data['total']= $a['total'];
+
+
+        if ($tvetStudents) {
+          foreach($tvetStudents as $tvtStudent){
+
+            $student['id']=$tvtStudent->id;
+            $student['student_id']=$tvtStudent->student_id;
+
+            $student['full_name']=$tvtStudent->full_name;
+            $student['sex']=$tvtStudent->sex;
+            $month_pad=[];
+            $total=0;
+            $month_payments=$tvtStudent->month_payments()
+            ->wherePivot('academic_year_id',$academic_year_id)
+            ->orderBy('number')
+            ->get();
+            foreach ($month_payments as $month) {
+
+                if($month->pivot->academic_year_id == $academic_year_id){
+
+                    $month_pad[$month->name] = $month->pivot->receipt_no;
+                    $total+=(double)$month->pivot->paid_amount;
+
+                }
+            }
+            $student['total']=$total;
+            $student['pads']=$month_pad;
+
+            $all[]=$student;
+            // return $student;
+        }
+        $paginated_data['data']=$all;
+        return response()->json($paginated_data ,200);
+     }else {
+        return response()->json('no student',404);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\TvetStudentFee  $tvetStudentFee
-     * @return \Illuminate\Http\Response
-     */
+    }
+
+
+    public function filterUnPaidStudentsByMonth()
+    {
+
+        $all=[];
+        $student=[];
+
+        //getting all students
+        $academic_year_id=null;
+        if (request()->has('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+        $per_page=request()->has('per_page') ? request('per_page') : 2;
+
+         $tvetStudents=TvetStudent::whereHas('month_payments',function( $query) use($academic_year_id){
+            $query->where('tvet_student_month.academic_year_id',$academic_year_id)
+            ->whereNull('tvet_student_month.receipt_no')
+            ->where('tvet_student_month.month_id',request('month_query'));
+
+
+          })->with(['month_payments'=>function($query) use ($academic_year_id){
+            $query->where('tvet_student_month.academic_year_id',$academic_year_id);
+
+          }])->where('is_graduated',0)->where('fully_scholarship',0)
+           ->paginate($per_page);
+
+           $a= $tvetStudents->toArray();
+
+           $paginated_data['current_page']= $a['current_page'];
+           $paginated_data['to']= $a['to'];
+           $paginated_data['from']= $a['from'];
+           $paginated_data['total']= $a['total'];
+
+
+        if ($tvetStudents) {
+          foreach($tvetStudents as $tvtStudent){
+
+            $student['id']=$tvtStudent->id;
+            $student['student_id']=$tvtStudent->student_id;
+
+            $student['full_name']=$tvtStudent->full_name;
+            $student['sex']=$tvtStudent->sex;
+            $month_pad=[];
+            $total=0;
+            $month_payments=$tvtStudent->month_payments()
+            ->wherePivot('academic_year_id',$academic_year_id)
+            ->orderBy('number')
+            ->get();
+            foreach ($month_payments as $month) {
+
+                if($month->pivot->academic_year_id == $academic_year_id){
+
+                    $month_pad[$month->name] = $month->pivot->receipt_no;
+                    $total+=(double)$month->pivot->paid_amount;
+
+                }
+            }
+            $student['total']=$total;
+            $student['pads']=$month_pad;
+
+            $all[]=$student;
+            // return $student;
+        }
+        $paginated_data['data']=$all;
+        return response()->json($paginated_data ,200);
+     }else {
+        return response()->json('no student',404);
+    }
+
+    }
+
     public function show($tvetStudentId)
     {
         $tvetStudent=TvetStudent::find($tvetStudentId);

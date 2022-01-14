@@ -34,6 +34,8 @@ class DashBoardController extends Controller
             return response()->json(['students'=>  $dashboard_data]);
     }
 
+
+
     /**
      * Store a newly created resource in storage.
      *

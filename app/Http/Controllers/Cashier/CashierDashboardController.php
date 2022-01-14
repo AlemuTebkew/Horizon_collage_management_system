@@ -68,6 +68,8 @@ class CashierDashboardController extends Controller
                                   ->whereNotNull('receipt_no')
                                 //   ->whereYear('degree_other_fees.paid_date',$year)
                                   ->where('academic_year_id',$academic_year_id)
+                                  ->where('tvet_students.is_graduated',0)->where('tvet_students.fully_scholarship',0)
+
                                   ->select('degree_students.id','student_id',DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
                                 //   'degree_other_fees.paid_date',
                                   DB::raw('DATE(degree_other_fees.paid_date) AS paid_date'),
@@ -113,6 +115,7 @@ class CashierDashboardController extends Controller
                                   ->join('fee_types','fee_types.id','=','fee_type_id')
                                 //   ->whereYear('paid_date',$year)
                                 // ->where('academic_year_id',$academic_year_id)
+                                ->where('tvet_students.is_graduated',0)->where('tvet_students.fully_scholarship',0)
 
                                   ->select('tvet_students.id','student_id',
                                       DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
@@ -129,6 +132,8 @@ class CashierDashboardController extends Controller
                ->whereNotNull('receipt_no')
             //    ->whereYear('paid_date',$year)
                 ->where('tvet_other_fees.academic_year_id',$academic_year_id)
+                ->where('tvet_students.is_graduated',0)->where('tvet_students.fully_scholarship',0)
+
                ->select('tvet_students.id','student_id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
                DB::raw('DATE(tvet_other_fees.paid_date) AS paid_date')
                ,
@@ -174,7 +179,7 @@ class CashierDashboardController extends Controller
                                          ->whereDate('paid_date','<=',(new Carbon)->now()->endOfDay()->toDateString())
                                          ->get()->sum('amount');
                $w4= $degree_students_other_fee->whereDate('paid_date','>=', (new Carbon())->subDays(7)->startOfDay()->toDateString())
-                                        //  ->whereDate('paid_date','<=',(new Carbon)->now()->endOfDay()->toDateString())
+                                         ->whereDate('paid_date','<=',(new Carbon)->now()->endOfDay()->toDateString())
                                          ->get()->sum('amount');
 
                                          $weak_sum=$w1+$w2+$w3+$w4;
