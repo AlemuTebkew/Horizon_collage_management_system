@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\DegreeDepartment as ResourcesDegreeDepartment;
 use App\Http\Resources\DegreeDepartmentResource;
 use App\Models\DegreeDepartment;
+use App\Models\Employee;
 use App\Models\Program;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -19,7 +20,7 @@ class DegreeDepartmentController extends Controller
      */
     public function index()
     {
-        return  DegreeDepartmentResource::collection(DegreeDepartment::with('programs')->get());
+        return  DegreeDepartmentResource::collection(DegreeDepartment::with('programs','manager')->get());
     }
 
     /**
@@ -31,13 +32,14 @@ class DegreeDepartmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-          //  'name'=>'required|unique:degree_departments',
+            'name'=>'required|unique:degree_departments',
+            'short_name'=>'required|unique:degree_departments',
 
 
         ]);
           // return $request->all();
-//request->only([]);
-      $dp= DegreeDepartment::create(['name'=>$request->name]);
+          //request->only([]);
+      $dp= DegreeDepartment::create(['name'=>$request->name,'short_name'=>$request->short_name]);
 
       foreach ($request->programs as $program) {
            $id=Program::where(function($q1) use ($program){
@@ -50,7 +52,6 @@ class DegreeDepartmentController extends Controller
                         })->first()->id;
             $dp->programs()->attach($id,
             ['no_of_semester'=>$program['no_of_semester'],'no_of_year'=>$program['no_of_year']]);
-
 
       }
 
@@ -115,9 +116,24 @@ class DegreeDepartmentController extends Controller
     public function assignDepartmentHead(Request $request){
       $department=DegreeDepartment::find($request->department_id);
       $department->update(['department_head_id'=>$request->employee_id]);
+
+      $head=Employee::find($request->employee_id);
+      $head->role='degree_head';
+      $head->save();
       return response()->json(new DegreeDepartmentResource($department->load('programs','manager')),200);
 
     }
+
+    public function unAssignDepartmentHead(Request $request){
+        $department=DegreeDepartment::find($request->department_id);
+        $department->update(['department_head_id'=>null]);
+
+        $head=Employee::find($request->employee_id);
+        $head->role='department_head';
+        $head->save();
+        return response()->json(new DegreeDepartmentResource($department->load('programs','manager')),200);
+
+      }
 
     public function getDepartmentsWithPrograms(Request $request){
         $departments=DegreeDepartment::with('programs');

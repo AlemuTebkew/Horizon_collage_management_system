@@ -24,7 +24,8 @@ class CashierDashboardController extends Controller
       $degree_payment_query=DB::table('degree_student_month')
                               ->whereNotNull('receipt_no')
                               ->where('academic_year_id',$academic_year_id)
-                            //   ->whereYear('paid_date',$year)
+
+                              //   ->whereYear('paid_date',$year)
                               ->select('receipt_no','degree_student_id',
                             //   'paid_date'
                             DB::raw('DATE(paid_date) AS paid_date')
@@ -41,6 +42,9 @@ class CashierDashboardController extends Controller
      // $q->join('degree_students','degree_students.id','=','.degree_student_id');
 
     $degree_students_tuition_fee = DB::table('degree_students')
+                                  ->where('degree_students.is_graduated',0)->where('degree_students.fully_scholarship',0)
+                                  ->where('degree_students.deleted_at',null)
+
                                     ->joinSub($degree_payment_query, 'payment', function ($join) {
                                         $join->on('degree_students.id', '=', 'payment.degree_student_id');
 
@@ -68,7 +72,8 @@ class CashierDashboardController extends Controller
                                   ->whereNotNull('receipt_no')
                                 //   ->whereYear('degree_other_fees.paid_date',$year)
                                   ->where('academic_year_id',$academic_year_id)
-                                  ->where('tvet_students.is_graduated',0)->where('tvet_students.fully_scholarship',0)
+                                  ->where('degree_students.is_graduated',0)->where('degree_students.fully_scholarship',0)
+                                  ->where('degree_students.deleted_at',null)
 
                                   ->select('degree_students.id','student_id',DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
                                 //   'degree_other_fees.paid_date',
@@ -116,6 +121,7 @@ class CashierDashboardController extends Controller
                                 //   ->whereYear('paid_date',$year)
                                 // ->where('academic_year_id',$academic_year_id)
                                 ->where('tvet_students.is_graduated',0)->where('tvet_students.fully_scholarship',0)
+                                ->where('tvet_students.deleted_at',null)
 
                                   ->select('tvet_students.id','student_id',
                                       DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
@@ -133,6 +139,7 @@ class CashierDashboardController extends Controller
             //    ->whereYear('paid_date',$year)
                 ->where('tvet_other_fees.academic_year_id',$academic_year_id)
                 ->where('tvet_students.is_graduated',0)->where('tvet_students.fully_scholarship',0)
+                ->where('tvet_students.deleted_at',null)
 
                ->select('tvet_students.id','student_id',DB::raw("CONCAT(tvet_students.first_name, ' ', tvet_students.last_name) AS full_name"),
                DB::raw('DATE(tvet_other_fees.paid_date) AS paid_date')
@@ -201,8 +208,6 @@ class CashierDashboardController extends Controller
                                          ->get()->sum('amount');
 
                                          $day_sum=$d1+$d2+$d3+$d4;
-
-
 
 
 

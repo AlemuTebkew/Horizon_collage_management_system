@@ -9,7 +9,7 @@ class Teacher extends Model
 {
     use HasFactory;
     public $fillable=['first_name',
-    'last_name','password','email','type','phone_no','profession','status'];
+    'last_name','password','email','type','phone_no','qualification','status','gpa'];
 
     public $hidden=['password','created_at','updated_at'];
     public function getFullNameAttribute(){

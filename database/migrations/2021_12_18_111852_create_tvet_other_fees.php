@@ -19,7 +19,7 @@ class CreateTvetOtherFees extends Migration
             $table->foreignId('academic_year_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('fee_type_id')->nullable()->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('receipt_no')->nullable();
-            $table->double('paid_amount')->nullable();
+            $table->double('paid_amount')->default(0.0);
             $table->date('paid_date')->nullable();
             $table->boolean('is_paid')->default(0);
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dean;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicYear;
 use App\Models\FeeType;
 use Illuminate\Http\Request;
 
@@ -27,10 +28,20 @@ class FeeTypeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'=>'required',
+            'name'=>'required|unique:fee_types',
 
         ]);
-     return FeeType::create($request->all());
+
+
+     $fee= FeeType::create($request->all());
+
+
+     $ac_y=AcademicYear::find(request('academic_year_id'));
+     $ac_y->fee_types()->attach($fee->id,[
+         'amount'=>request('amount')
+     ]);
+
+     return response()->json(['id'=>$fee->id,'name'=>$fee->name,'amount'=>request('amount')],201);
     }
 
     /**

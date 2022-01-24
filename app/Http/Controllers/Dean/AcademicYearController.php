@@ -61,8 +61,8 @@ class AcademicYearController extends Controller
 
           //create academic fee
           if ($ay) {
-            $old_fee=$ay->fee_types;
-            foreach ($old_fee as $old_fee) {
+            $old_fees=$ay->fee_types;
+            foreach ($old_fees as $old_fee) {
                 $academic_year->fee_types()->attach($old_fee->id,['amount'=>$old_fee->pivot->amount]);
              }
 
@@ -182,9 +182,37 @@ class AcademicYearController extends Controller
      * @param  \App\Models\AcademicYear  $academicYear
      * @return \Illuminate\Http\Response
      */
-    public function show(AcademicYear $academicYear)
+    public function show(AcademicYear $academic_year)
     {
-        return $academicYear;
+
+
+        $reg_id=Program::where('name','Regular')->where('type','degree')->first()->id;
+        $ext_id=Program::where('name','Extension')->where('type','degree')->first()->id;
+
+        foreach($academic_year->semesters as $semester){
+
+            if($semester->program_id == $reg_id){
+                $regular[]=$semester;
+                $regulara[]=$semester->load('degree_calender_activities')->select('id');
+                $regularm[]=$semester->load('months:id,name');
+            }else if($semester->program_id == $ext_id){
+                $ext[]=$semester;
+                $exta[]=$semester->load('degree_calender_activities');
+               $extm[]=$semester->load('months:id,name');
+
+            }
+
+        }
+        $act['year'] =  $academic_year->year;
+        $act['regulars']=$regular;
+        $act['extensions']=$ext;
+        $act['regularm']=$regularm;
+        $act['extensionm']=$extm;
+        $act['regularsa']=$regulara;
+        $act['extensionsa']=$exta;
+
+        return response()->json($act,200);
+
     }
 
     /**
@@ -289,6 +317,42 @@ class AcademicYearController extends Controller
         return response()->json($de,200);
 
     }
+
+    public function editAcademicYearSemester(){
+
+        $academic_year=null;
+        if (request('academic_year_id')) {
+            $academic_year=AcademicYear::find(request('academic_year_id'));
+
+        }else {
+            $academic_year=AcademicYear::where('is_current',1)->first();
+        }
+
+        $reg_id=Program::where('name','Regular')->where('type','degree')->first()->id;
+        $ext_id=Program::where('name','Extension')->where('type','degree')->first()->id;
+
+        foreach($academic_year->semesters as $semester){
+
+            if($semester->program_id == $reg_id){
+                $regular[]=$semester->load('months','degree_calender_activities');
+
+            }else if($semester->program_id == $ext_id){
+
+                $ext[]=$semester->load('months','degree_calender_activities');
+
+
+            }
+
+        }
+        $act['year'] =  $academic_year->year;
+
+        $act['regular']=$regular;
+        $act['extension']=$ext;
+
+        return response()->json($act,200);
+
+    }
+
     public function closeAcademicYear(AcademicYear $academicYear){
       $academicYear->update(['is_closed'=>1,'is_current'=>0]);
     }

@@ -33,29 +33,40 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
-        DB::beginTransaction();
-        try{
+
 
         $request->validate([
             'first_name'=>'required',
             'last_name'=>'required',
             'email'=>'required|unique:employees',
-            'phone_no'=>'required',
+            'phone_no'=>'required|unique:employees',
             'role'=>'required',
 
         ]);
+
+        DB::beginTransaction();
+        try{
+
         $login=new UserLogin();
         $login->user_name=$request->email;
         $login->password=Hash::make($request->last_name.'1234');
         $login->user_type='employee';
         $login->save();
-      $employee= Employee::create($request->all());
+
+        $em=new Employee();
+        $em->first_name=$request->first_name;
+        $em->last_name=$request->last_name;
+        $em->email=$request->email;
+        $em->phone_no=$request->phone_no;
+        $em->role=$request->role;
+        $em->save();
+     // $employee= Employee::create($request->all());
 
       DB::commit();
-      return response()->json($employee,201);
+      return response()->json($em,201);
   } catch (\Throwable $th) {
       DB::rollBack();
-     return response()->json('error while creating',$th->getCode());
+     return response()->json('error while creating',501);
     }
  }
 
@@ -92,15 +103,16 @@ class EmployeeController extends Controller
             ]);
             $user_login=UserLogin::where('user_name',$employee->email)->first();
             $user_login->user_name=$request->email;
-            $user_login->password=$request->last_name.'1234' ;
+            $user_login->password=Hash::make($request->last_name.'1234') ;
             $user_login->save();
             $employee->update($request->all());
 
             DB::commit();
-            return $employee;
+            return response()->json($employee,200);
+
         } catch (\Throwable $th) {
             DB::rollBack();
-           return response()->json('error while updating',$th->getCode());
+           return response()->json('error while updating',501);
         }
 
     }
@@ -114,18 +126,29 @@ class EmployeeController extends Controller
     public function destroy(Employee $employee)
     {
 
-        if( $employee->delete()) {
-            return $this->successResponse('successfully Deleted ',200);
+        DB::beginTransaction();
+        try {
+            UserLogin::where('user_name',$employee->email)->first()->delete();
+            $employee->delete();
+            DB::commit();
+            return response()->json('Successfully deleted',200);
+            } catch (\Throwable $th) {
+                DB::rollBack();
+                return response()->json('error while saving teacher',501);
         }
-        else{
-            return $this->errorResponse('fail to Delete',501);
-        }
-
 
     }
 
-    public function getDepartmentHeads(){
+    public function getUnAssignedDepartmentHeads(){
         return Employee::where('role','department_head')->get();
+    }
+
+
+    public function getDepartmentHeads(){
+        return Employee::where('role','department_head')
+                         ->orWhere('role','degree_head')
+                         ->orWhere('role','tvet_head')
+                         ->get();
     }
     public function getCashiers(){
         return Employee::where('role','cashier')->get();

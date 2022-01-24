@@ -112,6 +112,15 @@ class StudentController extends Controller
 
     }
 
+    public function removeStudentsFromSection($student_id){
+        $sec= DegreeSection::find(request('section_id'));
+        $sec->degree_students()->detach($student_id);
+
+
+        return response()->json('Succssfully Removed',200);
+
+    }
+
 
     public function sectionSuggestedStudents(){
 
@@ -123,6 +132,11 @@ class StudentController extends Controller
           $students= DegreeStudent::where('degree_department_id',$department->id)
                                          ->where('current_year_no',$section->year_no)
                                          ->where('current_semester_no',$section->semester_no)
+                                         ->whereHave('degree_student_semester',function($q) use($section){
+                                             $q->where('semester_id',$section->id)
+                                               ->where('status','approved');
+                                         })
+
                                          ->whereDoesntHave('degree_sections', function (Builder $query) use($department,$section) {
                                             $query->where('degree_department_id',$department->id)
                                                   ->where('year_no',$section->year_no)
@@ -131,6 +145,7 @@ class StudentController extends Controller
 
                                         }) ->with('degree_department','program')->get();
 
+        return $students;
  }
 
 }

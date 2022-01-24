@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class TvetSection extends Model
 {
     use HasFactory;
-    public $fillable=['tvet_department_id','academic_year_id',
+    public $fillable=['name','tvet_department_id','academic_year_id',
     'program_id','level_id'];
     public function tvet_department(){
         return $this->belongsTo(TvetDepartment::class);

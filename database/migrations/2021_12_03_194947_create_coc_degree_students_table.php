@@ -23,11 +23,11 @@ class CreateCocDegreeStudentsTable extends Migration
             $table->date('application_date')->nullable();
             $table->double('result')->default(0.0);
             $table->string('nature_of_assesment')->nullable();
-            $table->integer('registration_no')->nullable();
+            $table->string('registration_no')->nullable();
 
             $table->string('certificate_no')->nullable();
 
-            $table->timestamps();
+           
         });
     }
 

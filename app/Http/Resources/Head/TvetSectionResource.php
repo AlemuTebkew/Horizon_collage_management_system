@@ -17,9 +17,10 @@ class TvetSectionResource extends JsonResource
         return [
             'id'=>$this->id,
             'name'=>$this->name,
-            'tvet_department'=>$this->tvet_department,
+            'academic_year_id'=>$this->academic_year_id,
+            'tvet_department'=>$this->tvet_department ?? null,
             // 'academic_year'=>new AcademicYearResource($this->academic_year),
-            'level'=>$this->level,
+            'level'=>$this->level ?? null,
             'program'=>$this->program
         ];
     }

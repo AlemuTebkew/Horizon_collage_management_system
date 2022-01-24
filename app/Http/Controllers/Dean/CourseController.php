@@ -98,24 +98,5 @@ class CourseController extends Controller
     /*
     **/
 
-    public function assignTeacherForCourse(){
-        $ds=DegreeSection::find(request('section_id'));
-        $course=Course::find(request('course_id'));
-        $teacher=Teacher::find(request('teacher_id'));
-        $assign=$course->teachers()->where('teacher_id',request()->teacher_id)
-                           ->where('degree_section_id',request()->section_id)->get();
-        if(!$assign) {
-            $teacher->courses()->attach($course->id,[
-                'degree_section_id'=>$ds->id,
-            ]);
-        }
-        else{
-            $teacher->courses()->updateExistingPivot($course->id,[
-                'degree_section_id'=>$ds->id,
-            ]);
-        }
 
-
-        return $teacher->full_name;
-    }
 }

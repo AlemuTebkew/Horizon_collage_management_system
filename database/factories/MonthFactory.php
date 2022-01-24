@@ -14,7 +14,12 @@ class MonthFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'first_name'=>'Tewachew',
+            'last_name'=>'Addis',
+            'phone_no'=>'0912123234',
+            'sex'=>'Male',
+            'role'=>'admin',
+            'email'=>'tewachew@gmail.com',
         ];
     }
 }

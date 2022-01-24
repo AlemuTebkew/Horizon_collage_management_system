@@ -9,7 +9,7 @@ class DegreeDepartment extends Model
 {
     use HasFactory;
 
-    public $fillable=['name','department_head_id',];
+    public $fillable=['name','department_head_id','short_name'];
     public $hidden=['created_at','updated_at',];
 
     public function programs(){
@@ -20,6 +20,9 @@ class DegreeDepartment extends Model
         return $this->hasMany(DegreeSection::class);
     }
 
+    public function degree_students(){
+        return $this->hasMany(DegreeStudent::class);
+    }
     public function courses(){
         return $this->hasMany(Course::class);
     }

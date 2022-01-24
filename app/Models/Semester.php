@@ -15,7 +15,7 @@ class Semester extends Model
 
     public function degree_students(){
         return $this->belongsToMany(DegreeStudent::class)->withPivot(['semester_no','year_no',
-        'semester_GPA','semester_grade_point','semester_credit_hour','semester_avarege','cgpa','tuition_type','status','partial_scholarship']);
+        'semester_GPA','semester_grade_point','semester_credit_hour','semester_average','cgpa','tuition_type','status','legible']);
     }
     public function months(){
         return $this->belongsToMany(Month::class,'semester_months');

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class TvetDepartment extends Model
 {
     use HasFactory;
-    public $fillable=['name','sector','department_head_id'];
+    public $fillable=['name','sector','department_head_id','short_name'];
 
     public function levels(){
         return $this->hasMany(Level::class);
@@ -20,8 +20,12 @@ class TvetDepartment extends Model
         return $this->hasMany(TvetSection::class);
     }
 
+    public function tvet_students(){
+        return $this->hasMany(TvetStudent::class);
+    }
+
     public function programs(){
-        return $this->belongsTo(Program::class,'tvet_department_program');
+        return $this->belongsToMany(Program::class,'tvet_department_program');
     }
 
     public function manager(){

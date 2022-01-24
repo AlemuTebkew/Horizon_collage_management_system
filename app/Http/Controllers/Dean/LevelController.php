@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dean;
 
 use App\Http\Controllers\Controller;
+use App\Models\Employee;
 use App\Models\Level;
 use Illuminate\Http\Request;
 
@@ -73,5 +74,14 @@ class LevelController extends Controller
     public function destroy(Level $level)
     {
         $level->delete();
+    }
+
+    public function getDepartmentLevels(){
+        $employee=Employee::where('email',request()->user()->user_name)->first();
+        // return $employee;
+           $department=$employee->managet;
+           $levels=Level::where('tvet_department_id',$department->id)->get();
+           return response()->json($levels,200);
+
     }
 }

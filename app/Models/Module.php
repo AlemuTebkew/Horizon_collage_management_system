@@ -21,13 +21,15 @@ public function program(){
     return $this->belongsTo(Program::class);
 }
 public function teachers(){
-    return $this->belongsToMany(Teacher::class);
+    return $this->belongsToMany(Teacher::class,'teacher_section_modules')->withPivot('teacher_id','module_id','tvet_section_id',
+    'room_no','hours_per_week' ,'period','class_start_date','class_end_date','exam_week',
+ );
 }
 
 public function tvet_students(){
     return $this->belongsToMany(TvetStudent::class,'student_level_module')
-    ->withPivot('level_id','module_id','total_mark',
-    'from_11','from_12','from_12s','from_25','from_40'
+    ->withPivot('level_id','module_id','total_mark','from_20','from_30','from_50',
+
 );
 
 

@@ -16,6 +16,7 @@ class CreateStudentGalariesTable extends Migration
         Schema::create('student_galaries', function (Blueprint $table) {
             $table->id();
             $table->string('url');
+            
         });
     }
 

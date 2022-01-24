@@ -25,7 +25,7 @@ class WebsiteController extends Controller
 
 
     public function getGalleries(){
-        return response()->json(StudentGalary::paginate()->paginate(4),200);
+        return response()->json(StudentGalary::paginate(4),200);
 
     }
 

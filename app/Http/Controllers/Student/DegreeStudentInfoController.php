@@ -13,6 +13,8 @@ use App\Models\DegreeDepartment;
 use App\Models\DegreeStudent;
 use Illuminate\Http\Request;
 
+use function PHPUnit\Framework\returnSelf;
+
 class DegreeStudentInfoController extends Controller
 {
     public function myTuition(Request $request,$id){
@@ -102,10 +104,10 @@ class DegreeStudentInfoController extends Controller
           $course['title']=$studentCourse->title;
           $course['semester_no']=$studentCourse->semester_no;
           $course['cp']=$studentCourse->cp;
-          $course['letter_grade']=$studentCourse->pivot->grade_point;
+          $course['letter_grade']=$studentCourse->pivot->letter_grade;
           $course['year_no']=$studentCourse->year_no;
           $course['total_mark']=$studentCourse->pivot->total_mark;
-          $course['grade_point']=$grade_point;
+          $course['grade_point']=$studentCourse->pivot->grade_point;
 
          $courses[]=$course;
 
@@ -117,7 +119,25 @@ class DegreeStudentInfoController extends Controller
     public function myStatus(Request $request,$id){
 
         $student=DegreeStudent::find($id);
-        return response()->json(SemestersResource::collection($student->semesters),200);
+
+        $semesters=[];
+        $temp=[];
+        foreach ($student->semesters as $semester) {
+            $temp[]=$semester->id;
+            $seme['id']=$semester->id;
+            $seme['year']=$semester->academic_year ? $semester->academic_year->year:null;
+            $seme['start_date']=$semester->start_date;
+            $seme['end_date']=$semester->end_date;
+            $seme['status']=$semester->pivot->status;
+            $seme['year_no']=$semester->pivot->year_no;
+            $seme['semester_no']=$semester->pivot->semester_no;
+            $seme['GPA']=$semester->pivot->semester_GPA;
+            $seme['CGPA']=$this->calculateCGPA($student,$temp);
+            $semesters[]=$seme;
+
+        }
+        // return response()->json(SemestersResource::collection($student->semesters),200);
+        return response()->json($semesters,200);
     }
 
     public function myCoc(Request $request,$id){
@@ -130,6 +150,7 @@ class DegreeStudentInfoController extends Controller
           $student=DegreeStudent::find($id);
           return response()->json(SectionResource::collection($student->degree_sections),200);
     }
+
 
 
     private function getTotalCp($student,$semester){
@@ -172,5 +193,23 @@ class DegreeStudentInfoController extends Controller
         else if($letter_grade=='F'){
             return $grade_point=$credit_hour*0;
         }
+    }
+
+    public function calculateCGPA($student,$semesters){
+
+        $semesters=$student->semesters()->whereIn('semesters.id',$semesters)->get();
+
+        $total_cp=0.0;
+        $total_point=0.0;
+        foreach ($semesters as $semester) {
+
+            $total_cp += $semester->pivot->semester_credit_hour;
+            $total_point +=$semester->pivot->semester_grade_point;
+
+            // $total_point +=$semester->pivot->semester_credit_hour * $semester->pivot->semester_GPA;
+        }
+
+      return  $cgpa=$total_point/$total_cp;
+
     }
 }

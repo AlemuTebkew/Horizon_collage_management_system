@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Program extends Model
 {
     use HasFactory;
-    public $fillable=['name','type','semesters_in_year'];
+    public $fillable=['name','type',];
 
     protected $hidden=['created_at','updated_at'];
     public function tvet_student(){

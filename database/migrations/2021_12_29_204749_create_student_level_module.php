@@ -21,7 +21,7 @@ class CreateStudentLevelModule extends Migration
             $table->double('from_20')->default(0);
             $table->double('from_30')->default(0);
             $table->double('from_50')->default(0);
-            $table->double('total_mark');
+            $table->double('total_mark')->default(0.0);
             $table->timestamps();
         });
     }

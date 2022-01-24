@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Dean;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\TvetDepartmentResource;
+use App\Models\Employee;
 use App\Models\Level;
 use App\Models\Program;
 use App\Models\TvetDepartment;
@@ -29,12 +30,12 @@ class TvetDepartmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'=>'required',
-            // 'sector'=>'required',
+            'name'=>'required|unique:tvet_departments',
+            'short_name'=>'required|unique:tvet_departments',
 
         ]);
-      $td= TvetDepartment::create(['name'=>$request->name,'sector'=>$request->sector]);
-        $programs=['regular','extension'];
+      $td= TvetDepartment::create(['name'=>$request->name,'sector'=>$request->sector,'short_name'=>$request->short_name]);
+      $programs=['regular','extension'];
       foreach ($programs as $program) {
         $id=Program::where(function($q1) use ($program){
                      $q1->where('name', strtoupper($program))
@@ -54,7 +55,8 @@ class TvetDepartmentController extends Controller
            $l->tvet_department_id=$td->id;
            $l->save();
        }
-       return response()->json($td->load('levels'),200);
+       return new TvetDepartmentResource($td->load('programs','manager'));
+
     }
 
     /**
@@ -101,6 +103,19 @@ class TvetDepartmentController extends Controller
     public function assignDepartmentHead(Request $request){
         $department=TvetDepartment::find($request->department_id);
         $department->update(['department_head_id'=>$request->employee_id]);
+        $head=Employee::find($request->employee_id);
+        $head->role='tvet_head';
+        $head->save();
+        return response()->json(new TvetDepartmentResource($department->load('programs','manager')),200);
+    }
+
+
+    public function unAssignDepartmentHead(Request $request){
+        $department=TvetDepartment::find($request->department_id);
+        $department->update(['department_head_id'=>null]);
+        $head=Employee::find($request->employee_id);
+        $head->role='department_head';
+        $head->save();
         return response()->json(new TvetDepartmentResource($department->load('programs','manager')),200);
     }
 }

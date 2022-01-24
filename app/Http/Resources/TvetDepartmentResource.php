@@ -18,9 +18,12 @@ class TvetDepartmentResource extends JsonResource
 
             'id'=>$this->id,
             'name'=>$this->name,
+            'short_name'=>$this->short_name,
             'sector'=>$this->sector,
             'department_head'=>$this->manager ? $this->manager->full_name:null,
-            'programs'=>$this->programs
+            'head_id'=>$this->manager ? $this->manager->id:null,
+            'programs'=>$this->programs,
+            'levels'=>$this->levels
         ];
     }
 }

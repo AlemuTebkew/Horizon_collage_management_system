@@ -19,7 +19,9 @@ class DegreeDepartmentResource extends JsonResource
         return [
             'id'=>$this->id,
             'name'=>$this->name,
+            'short_name'=>$this->short_name,
             'department_head'=>$this->manager ? $this->manager->full_name:null,
+            'head_id'=>$this->manager ? $this->manager->id:null,
             'programs'=>ProgramResource::collection($this->programs)
         ];
     }

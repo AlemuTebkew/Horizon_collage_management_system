@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\AcademicYear;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AddedLevelResource extends JsonResource
@@ -14,6 +15,11 @@ class AddedLevelResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'id'=>$this->id,
+            'year'=>$this->pivot->academic_year_id ? AcademicYear::find($this->pivot->academic_year_id)->year:null,
+            'status'=>$this->pivot->status,
+            'level_no'=>$this->level_no,
+        ];
     }
 }

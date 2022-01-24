@@ -79,17 +79,6 @@ $degree_students_tuition_fee = DB::table('degree_students')
                                       // ->get()
                                       ;
 
-    //    return $degree_students_other_fee
-
-    //    ->whereDate('paid_date','>=', (new Carbon)->subDays(10)->startOfDay()->toDateString())
-       //  ->whereDate('paid_date','<', strval(2022-01-07))
-    //    ->whereDate('paid_date','<=',(new Carbon)->now()->endOfDay()->toDateString())
-       //  ->get();
-    //    ->where('paid_date','>=',request('search_query') )
-    //    ->where('paid_date','<=',now()->day('Y-m-d') )
-    //    ->get();
-//  return $degree_students_other_fee;
-
   $tvet_payment_query=DB::table('tvet_student_month')
                           ->whereNotNull('receipt_no')
                         //   ->whereYear('paid_date',$year)
@@ -147,9 +136,21 @@ $degree_students_tuition_fee = DB::table('degree_students')
             $allItems = $allItems->concat($tvet_students_tuition_fee->get());
             $allItems = $allItems->concat($degree_students_tuition_fee->get());
             $allItems = $allItems->concat($degree_students_other_fee->get());
-               $allItems= $allItems->sortByDesc('paid_date')->take(10)->values();
 
+              $g= $allItems->groupBy('paid_date',true);
 
+            $all=[];
+            foreach ($g->all() as $k=> $one) {
+                $total=0;
+                foreach ($one as $v) {
+                     $total+=$v->amount;
+                }
+                $grouped['date']= $k;
+                $grouped['total']= $total;
+                $all[]=$grouped;
+            }
+
+            // return $all;
          $m1=   $tvet_students_other_fee ->whereDate('paid_date','>=', (new Carbon())->subDays(30)->startOfDay()->toDateString())
                                      ->whereDate('paid_date','<=',(new Carbon)->now()->endOfDay()->toDateString())
                                      ->get()->sum('amount');
@@ -207,12 +208,10 @@ $degree_students_tuition_fee = DB::table('degree_students')
              '24hour'=>$day_sum,
              '7day'=>$weak_sum,
              'month'=>$month_sum,
-             'all_fee'=>$allItems
+             'all_fee'=>$all
          ],200);
 
 }
-
-
 
 
             public function getDashboardData2(){

@@ -19,7 +19,7 @@ class TvetSectionStudentResource extends JsonResource
             'student_id'=>$this->student_id,
             //'full_name'=>$this->full_name,
             'first_name'=>$this->first_name,
-            'middle_name'=>$this->middle_name,
+            'last_name'=>$this->last_name,
             'sex'=>$this->sex
         ];
     }

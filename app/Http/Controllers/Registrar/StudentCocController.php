@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Registrar;
 
 use App\Http\Controllers\Controller;
+use App\Models\AcademicYear;
 use App\Models\DegreeStudent;
 use App\Models\ExternalCocApplicant;
 use App\Models\TvetStudent;
@@ -17,13 +18,22 @@ class StudentCocController extends Controller
         if (request('type') == 'degree') {
 
             $student=DegreeStudent::where('student_id',$student_id)->first();
+            if (!$student) {
+                return response()->json('Student Not Found',201);
+
+            }
             return response()->json(['id'=>$student->id],200);
 
         }else if (request('type') == 'tvet') {
             $student=TvetStudent::where('student_id',$student_id)->first();
+
+            if (!$student) {
+                return response()->json('Student Not Found',201);
+
+            }
             return response()->json(['id'=>$student->id],200);
         }else {
-            return response()->json('Not Found',404);
+            return response()->json('Student Not Found',201);
         }
     }
 
@@ -183,7 +193,6 @@ $degree=DB::table('degree_students')
            })
            ->select(DB::raw("CONCAT(degree_students.first_name, ' ', degree_students.last_name) AS full_name"),
            'sex','occupation_name','level_no','result','certificate_no','registration_no');
-
 $tvet=DB::table('tvet_students')
            ->join('coc_tvet_student' , 'coc_tvet_student.tvet_student_id' ,'=' ,'tvet_students.id')
            ->where('coc_id',request('coc_id'))
@@ -228,5 +237,72 @@ $tvet=DB::table('tvet_students')
                 ->groupBy('occupation_name')
                 ->groupBy('level_no')->get();
     return response()->json($all,200);
+    }
+
+
+    public function setStudentResult($id){
+
+        if (request('type') == 'external') {
+
+            ExternalCocApplicant::find($id)->update(['result'=>request('result')]);
+        }elseif (request('type') == 'degree') {
+            $student=DegreeStudent::where('student_id',$id)->first();
+
+            $student->cocs()->updateExistingPivot(request('coc_id'),['result'=>request('result')]);
+        }elseif (request('type') == 'tvet') {
+            $student=TvetStudent::where('student_id',$id)->first();
+
+            $student->cocs()->updateExistingPivot(request('coc_id'),['result'=>request('result')]);
+        }else {
+            return response()->json('error while entering',501);
+        }
+
+        return response()->json('successfully added',200);
+    }
+
+
+    public function setStudentCerteficate($id){
+
+        if (request('type') == 'external') {
+
+            ExternalCocApplicant::find($id)->update(['certificate_no'=>request('certificate_no')]);
+        }elseif (request('type') == 'degree') {
+            $student=DegreeStudent::where('student_id',$id)->first();
+
+            $student->cocs()->updateExistingPivot(request('coc_id'),['certificate_no'=>request('certificate_no')]);
+        }elseif (request('type') == 'tvet') {
+            $student=TvetStudent::where('student_id',$id)->first();
+
+            $student->cocs()->updateExistingPivot(request('coc_id'),['certificate_no'=>request('certificate_no')]);
+        }else {
+            return response()->json('error while entering',501);
+        }
+
+        return response()->json('successfully added',200);
+    }
+
+    public function deleteCocStudent($id){
+
+
+        if (request('type') == 'external') {
+
+            ExternalCocApplicant::destroy($id);
+
+        }elseif (request('type') == 'degree') {
+
+
+            $student=DegreeStudent::where('student_id',$id)->first();
+
+            $student->cocs()->where('coc_id',request('coc_id'))->detach();
+        }elseif (request('type') == 'tvet') {
+            $student=TvetStudent::where('student_id',$id)->first();
+
+            $student->cocs()->where('coc_id',request('coc_id'))->detach();
+        }else {
+            return response()->json('error while deleting',501);
+        }
+
+        return response()->json('successfully deleted',200);
+
     }
 }

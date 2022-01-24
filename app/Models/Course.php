@@ -30,7 +30,7 @@ public function teacher(){
 public function degree_students(){
     return $this->belongsToMany(DegreeStudent::class,'student_semester_courses')
     ->withPivot('semester_id','total_mark','grade_point',
-    'from_11','from_12','from_12s','from_25','from_40'
+    'from_5','from_5s','from_25s','from_25','from_40','letter_grade'
 );
 }
 }

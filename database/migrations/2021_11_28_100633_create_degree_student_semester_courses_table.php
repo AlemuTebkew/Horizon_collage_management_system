@@ -24,7 +24,7 @@ class CreateDegreeStudentSemesterCoursesTable extends Migration
             $table->double('from_25s')->default(0);
             $table->double('from_40')->default(0);
             $table->double('total_mark')->default(0);
-            $table->double('grade_point')->nullable();
+            $table->double('grade_point')->default(0);
             $table->string('letter_grade')->nullable();
             $table->text('remark')->nullable();
 

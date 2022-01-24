@@ -9,10 +9,12 @@ use App\Models\Course;
 use App\Models\DegreeSection;
 use App\Models\DegreeStudent;
 use App\Models\Module;
+use App\Models\Semester;
 use App\Models\Teacher;
 use App\Models\TvetSection;
 use App\Models\TvetStudent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SectionController extends Controller
 {
@@ -78,8 +80,13 @@ class SectionController extends Controller
             // $teacher_course=$teacher->courses()->wherePivot('degree_section_id',$section_id)->first();
            foreach ($ds->degree_students as $st) {
 
-            $st_course=$st->courses()->where('course_id',request('course_id'))->first()->pivot;
+            $semester=$st->semesters()->wherePivot('semester_id',$ds->semester_id)->first();
+
+
+
+            $st_course=$st->courses()->wherePivot('course_id',request('course_id'))->first()->pivot;
             $student['id']=$st->id;
+            $student['legible']=$semester->pivot->legible;
             $student['student_id']=$st->student_id;
             $student['first_name']=$st->first_name;
             $student['last_name']=$st->last_name;
@@ -123,11 +130,17 @@ class SectionController extends Controller
 
     public function setResult($student_id){
 
+        DB::beginTransaction();
+
+        try {
 
         if (request('type') == 'degree') {
+
+            $sem_id=DegreeSection::find(request('section_id'))->semester_id;
+            $cp=Course::find(request('course_id'))->cp;
             $student=DegreeStudent::find($student_id);
             $letter_grade=$this->calculateLetterGrade(request()->total_mark);
-            $grade_point=$this->courseGradePoint(request('cp'),$letter_grade);
+            $grade_point=$this->courseGradePoint($cp,$letter_grade);
             $student->courses()->updateExistingPivot(request('course_id'),[
 
                 'from_5'=>request('from_5'),
@@ -137,11 +150,29 @@ class SectionController extends Controller
                 'from_40'=>request('from_40'),
                 'total_mark'=>request('total_mark'),
                 'letter_grade'=> $letter_grade,
-                 'grade_point'=> $grade_point
+                'grade_point'=> $grade_point
 
              ]);
 
-             return response()->json(['Result Set succssfully  '],200);
+
+             $all=$this->calculateGPA($student,$sem_id);
+             $new_gpa=$all[0];
+             $semester_grade_point=$all[1];
+
+              if ($new_gpa == 0.0 || $new_gpa == 0) {
+                    $student->semesters()->updateExistingPivot($sem_id,[
+                        'semester_GPA'=>0.0,
+                    ]);
+                }else {
+                    $student->semesters()->updateExistingPivot($sem_id,[
+                        'semester_GPA'=>$new_gpa,
+                        'semester_grade_point'=> $semester_grade_point
+
+                    ]);
+                }
+
+             DB::commit();
+             return response()->json($letter_grade,200);
 
         }else if(request('type') == 'tvet'){
             $student=TvetStudent::find($student_id);
@@ -154,11 +185,19 @@ class SectionController extends Controller
                 // 'grade_point'=>$this->calculateGrade(request()->total_mark),
 
              ]);
-             return response()->json(['Result Set succssfully  '],200);
+             DB::commit();
+             return response()->json('Result Set succssfully  ',200);
 
             } else {
-            return response()->json(['not succssfull '],404);
+            return response()->json('not succssfull ',404);
         }
+
+
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        return response()->json('not succssfull ',404);
+
+    }
 
     }
 
@@ -215,28 +254,55 @@ class SectionController extends Controller
         else if($letter_grade=='C-'){
             return $grade_point=$credit_hour*1.75;
         }
-        else if($letter_grade=='D'){
+        else if($letter_grade == 'D'){
             return $grade_point=$credit_hour*1;
         }
-        else if($letter_grade=='F'){
+        else if($letter_grade == 'F'){
             return $grade_point=$credit_hour*0;
         }
     }
 
-    public function calculateGPA($student,$se){
+    public function calculateGPA($student,$semester_id){
 
-        $sem_couses=$student->courses()->where('semester_id',$se->id)->get();
+        $sem_couses=$student->courses()->wherePivot('semester_id',$semester_id)->get();
 
         $total_gp=0.0;
         $total_cp=0.0;
         foreach ($sem_couses as $course) {
 
-            $total_gp += $course->pivot->grade_point;
-            $total_cp += $course->cp;
+            if (($course->pivot->grade_point == 0.0  || $course->pivot->grade_point == 0) && $course->pivot->letter_grade != 'F' ) {
+                $total_gp += $course->cp * 4.0;
+
+            }else{
+                $total_gp += $course->pivot->grade_point;
+                // $total_gp += $course->cp * $this->courseGradePoint($course->cp, $course->pivot->letter_grade);
+
+            }
+            $total_cp += doubleval($course->cp);
         }
         $gpa=$total_gp/$total_cp;
 
-        return $gpa;
+        return [$gpa,$total_gp];
+
+    }
+
+    public function calculateSemesterGP(){
+
+    }
+
+    public function calculateCGPA($student){
+
+        $semesters=$student->semesters;
+        $total_cp=0.0;
+        $total_point=0.0;
+        foreach ($semesters as $semester) {
+
+            $total_cp += $semester->pivot->semester_credit_hour;
+            $total_point +=$semester->pivot->semester_grade_point;
+            // $total_point +=$semester->pivot->semester_credit_hour * $semester->pivot->semester_GPA;
+        }
+
+      return  $cgpa=$total_point/$total_cp;
 
     }
 }

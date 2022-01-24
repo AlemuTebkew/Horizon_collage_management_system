@@ -32,6 +32,15 @@ class StudentController extends Controller
 
     }
 
+    public function removeStudentsFromSection($student_id){
+        $sec= TvetSection::find(request('section_id'));
+        $sec->tvet_students()->detach($student_id);
+
+
+        return response()->json('Succssfully Removed',200);
+
+    }
+
     public function sectionSuggestedStudents(){
 
         $dep_head=Employee::where('email',request()->user()->user_name)->first();
@@ -48,6 +57,7 @@ class StudentController extends Controller
 
                                         }) ->with('tvet_department','program')->get();
 
+            return $students;
  }
 
  public function getArrangedStudentsByDepartment(){
@@ -62,7 +72,7 @@ class StudentController extends Controller
        $levels=[];
        $all=[];
        $employee=Employee::where('email',request()->user()->user_name)->first();
-       $dep_id= $employee->manage->id;
+       $dep_id= $employee->managet->id;
     //    $dep_id=Employee::where('email',request()->user()->user_name)->first()->manage->id;
        $levels_=Level::with(['tvet_students'=>function($query) use($dep_id,$academic_year_id) {
           $query->where('tvet_department_id',$dep_id)

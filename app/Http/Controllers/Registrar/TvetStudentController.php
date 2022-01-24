@@ -8,11 +8,11 @@ use App\Http\Resources\StudentLevelResource;
 use App\Http\Resources\TvetResult\ModuleResultResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
-use App\Models\DegreeDepartment;
 use App\Models\Employee;
 use App\Models\FeeType;
 use App\Models\Level;
 use App\Models\Month;
+use App\Models\Program;
 use App\Models\TvetDepartment;
 use App\Models\TvetStudent;
 use App\Models\UserLogin;
@@ -86,11 +86,10 @@ class TvetStudentController extends Controller
         $data['current_level_no']=$level->level_no;
         $data['dob']=date('Y-m-d',strtotime($request->dob));
 
+       $student= TvetStudent::create($data);
 
-
-        $student= TvetStudent::create($data);
-        $student->update(['student_id'=>'HRR'.$academic_year->year.$student->id]);
-
+       $id=$this->generateStudentId($student);
+       $student->update(['student_id',$id]);
 
         //////////start user login info
         $login=new UserLogin();
@@ -121,10 +120,10 @@ class TvetStudentController extends Controller
             //notifcation to registrar to approve
 
             $users=Employee::where('role','registrar')->get();
-            $data['student_id']=$student->id;
-            $data['level_id']=$level->id;
-            $data['type']='tvet';
-            Notification::send($users,new UnApprovedStudents($data));
+            $info['student_id']=$student->id;
+            $info['level_id']=$level->id;
+            $info['type']='tvet';
+            Notification::send($users,new UnApprovedStudents($info));
 
         DB::commit();
 
@@ -143,15 +142,67 @@ class TvetStudentController extends Controller
 
     }
 
+    public function generateStudentId($student){
+        //    //  ---------start student ID generation
+
+        $academic_year_id=null;
+        if (request()->filled('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+            $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+
+       $academic_year=AcademicYear::find($academic_year_id);
+
+
+      $dep=TvetDepartment::find($student->tvet_department_id);
+      $program=Program::find($student->program_id)->name;
+
+      $p_short=null;
+      if (str_starts_with($program,'R') || str_starts_with($program,'r')) {
+          $p_short='R';
+      }elseif (str_starts_with($program,'E') || str_starts_with($program,'e')) {
+          $p_short='E';
+      }
+
+     $year_short= substr($academic_year->year,2);
+      $no_of_st= $dep->tvet_students()->withTrashed()
+                                     ->where('batch',$academic_year->year)->count()+1;
+
+      if ($no_of_st <= 9) {
+          $student_id='HC'.$p_short.$dep->short_name.'00'.$no_of_st.'/'.$year_short;
+
+      }elseif ($no_of_st <= 99) {
+          $student_id='HC'.$p_short.$dep->short_name.'0'.$no_of_st.'/'.$year_short;
+
+      }elseif ($no_of_st <= 999) {
+          $student_id='HC'.$p_short.$dep->short_name.$no_of_st.'/'.$year_short;
+
+      }
+       //---------end student id generation
+      return $student_id;
+    }
+
 
     private function attachWithMonth($student,$ac){
 
 
         $reg= $student->month_payments()->wherePivot('academic_year_id',$ac->id)->first();
-          if (!$reg) {
-            $month_ids=$ac->months->pluck('id');
-            $student->month_payments()->attach($month_ids,['academic_year_id'=>$ac->id]);
-          }
+        if (!$reg || empty($reg || $reg=null)) {
+
+        $months=Month::pluck('id');
+
+        foreach ($months as $month) {
+
+
+                $student->month_payments()->attach($month,[
+                    'academic_year_id'=>$ac->id,
+
+                ]);
+
+
+        }
+    }
 
 
 
@@ -312,7 +363,7 @@ class TvetStudentController extends Controller
         // $semester=Semester::find($semester_id);
 
         $department=TvetDepartment::find($student->tvet_department_id);
-        $modules=$department->modules()->where('level_id',$level->id)->pluck('id');
+       $modules=$department->modules()->where('level_id',$level->id)->pluck('id');
 
          $student->modules()->attach($modules,['level_id'=>$level->id]);
     }
@@ -333,8 +384,6 @@ class TvetStudentController extends Controller
                 'academic_year_id'=>$request->academic_year_id,
                 'status'=>'waiting'
 
-                // 'scholarship'=>$request->scholarship
-
             ]);
             $student->current_level_no=$level->level_no;
             $student->save();
@@ -347,13 +396,15 @@ class TvetStudentController extends Controller
            //sending notification to registrar for approval of student
 
             $users=Employee::where('role','registrar')->get();
-            $data['student_id']=$student->id;
-            $data['level_id']=$level->id;
-            $data['type']='tvet';
-            Notification::send($users,new UnApprovedStudents($data));
+            $info['student_id']=$student->id;
+            $info['level_id']=$level->id;
+            $info['type']='tvet';
+            Notification::send($users,new UnApprovedStudents($info));
 
             DB::commit();
-        return response()->json(new AddedLevelResource($student),201);
+            return response()->json(new AddedLevelResource($student->levels()
+                                         ->wherePivot('level_id',$level->id)->first()),201);
+            //  return response()->json(new AddedLevelResource($student),201);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['not succesfully registerd'.$e],500);

@@ -29,7 +29,7 @@ class Coc extends Model
     public function degree_students()
     {
         return $this->belongsToMany(DegreeStudent::class)
-        ->withPivot(['application_date','result','nature_of_assesment','level_no','occupation_name']);
+        ->withPivot(['application_date','result','nature_of_assesment','level_no','occupation_name','certificate_no']);
         // return $this->morphedByMany(DegreeStudent::class, 'cocable')
         // ->withPivot(['application_date','result','nature_of_assesment']);
      }
@@ -37,7 +37,7 @@ class Coc extends Model
     public function tvet_students()
     {
         return $this->belongsToMany(TvetStudent::class)
-        ->withPivot(['application_date','result','nature_of_assesment','level_no','occupation_name']);
+        ->withPivot(['application_date','result','nature_of_assesment','level_no','occupation_name','certificate_no']);
         // return $this->morphedByMany(TvetStudent::class, 'cocable')
         // ->withPivot(['application_date','result','nature_of_assesment']);
     }

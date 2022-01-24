@@ -44,7 +44,7 @@ class StudentPaymentController extends Controller{
                           //  return $q;
 
 
-     // $q->join('degree_students','degree_students.id','=','.degree_student_id');
+        // $q->join('degree_students','degree_students.id','=','.degree_student_id');
 
       $degree_students_tuition_fee = DB::table('degree_students')
                                     ->joinSub($degree_payment_query, 'payment', function ($join) {
@@ -64,9 +64,9 @@ class StudentPaymentController extends Controller{
                                         // ->get()
                                         ;
 
-      // return $degree_students_tuition_fee;
+         // return $degree_students_tuition_fee;
 
-  ///////////////////////
+        ///////////////////////
 
       $degree_students_other_fee=DB::table('degree_students')
                                   ->join('degree_other_fees','degree_students.id','=','degree_other_fees.degree_student_id')
@@ -84,7 +84,7 @@ class StudentPaymentController extends Controller{
                                           // ->get()
                                           ;
 
-  //  return $degree_students_other_fee;
+         //  return $degree_students_other_fee;
 
       $tvet_payment_query=DB::table('tvet_student_month')
                               ->whereNotNull('receipt_no')
@@ -102,7 +102,7 @@ class StudentPaymentController extends Controller{
                               ->groupBy('tvet_student_id')
                               // ->get()
                               ;
-  //  return $tvet_payment_query;
+        //  return $tvet_payment_query;
 
       $tvet_students_tuition_fee = DB::table('tvet_students')
                                   ->joinSub($tvet_payment_query, 'payment', function ($join) {
@@ -143,7 +143,7 @@ class StudentPaymentController extends Controller{
                               ->unionAll($degree_students_tuition_fee)
                               ->unionAll($degree_students_other_fee);
 
-
+            // union all doesnit remove duplicates
             $querySql = $students_all_fee->toSql();
             if (request('search_query')) {
                 $query1 = DB::table(DB::raw('('.$querySql.' ) as a  where receipt_no = '.request('search_query').''))
@@ -170,7 +170,118 @@ class StudentPaymentController extends Controller{
 
         }
 
-        public function deletePayment($id){
+
+
+        public function getDailyPaidAmount(){
+
+
+            // return request('search_query');
+
+            $per_page=request()->has('per_page') ? request('per_page') : 5;
+
+
+            if (request()->filled('academic_year_id')) {
+                $academic_year_id=request('academic_year_id');
+            }else{
+                $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+                // $year=2022;
+                // $year=1970;
+            }
+
+          $degree_payment_query=DB::table('degree_student_month')
+                                  ->whereNotNull('receipt_no')
+                                  ->where('academic_year_id',$academic_year_id)
+
+                                //   ->crossJoin('tvet_student_month')
+                                //   ->crossJoin('degree_other_fees')
+                                //   ->crossJoin('tvet_other_fees')
+                                  ->select(
+                                //   'paid_date'
+                                DB::raw('DATE(paid_date) AS paid_date')
+
+                                  ,DB::raw("SUM(paid_amount) AS amount")
+                                 )
+                                  ->groupBy('paid_date')
+                                ;
+
+                                $tvet_payment_query=DB::table('tvet_student_month')
+                                ->whereNotNull('receipt_no')
+                                ->where('academic_year_id',$academic_year_id)
+
+                              //   ->crossJoin('tvet_student_month')
+                              //   ->crossJoin('degree_other_fees')
+                              //   ->crossJoin('tvet_other_fees')
+                                ->select(
+                              //   'paid_date'
+                              DB::raw('DATE(paid_date) AS paid_date')
+
+                                ,DB::raw("SUM(paid_amount) AS amount")
+                               )
+                                ->groupBy('paid_date')
+                              ;
+                              //  return $q;
+
+
+                              $degree_other_query=DB::table('degree_other_fees')
+                              ->whereNotNull('receipt_no')
+                              ->where('academic_year_id',$academic_year_id)
+
+                            //   ->crossJoin('tvet_student_month')
+                            //   ->crossJoin('degree_other_fees')
+                            //   ->crossJoin('tvet_other_fees')
+                              ->select(
+                            //   'paid_date'
+                            DB::raw('DATE(paid_date) AS paid_date')
+
+                              ,DB::raw("SUM(paid_amount) AS amount")
+                             )
+                              ->groupBy('paid_date')
+                            ;
+                            $tvet_other_query=DB::table('tvet_other_fees')
+                            ->whereNotNull('receipt_no')
+                            ->where('academic_year_id',$academic_year_id)
+
+                          //   ->crossJoin('tvet_student_month')
+                          //   ->crossJoin('degree_other_fees')
+                          //   ->crossJoin('tvet_other_fees')
+                            ->select(
+                          //   'paid_date'
+                          DB::raw('DATE(paid_date) AS paid_date')
+
+                            ,DB::raw("SUM(paid_amount) AS amount")
+                           )
+                            ->groupBy('paid_date')
+                          ;
+                              $students_all_fee=
+                                $tvet_payment_query
+                              ->unionAll($degree_payment_query)
+                              ->unionAll($tvet_other_query)
+                              ->unionAll($degree_other_query)
+                            ;
+
+            // union all doesnit remove duplicates
+            $querySql = $students_all_fee->toSql();
+
+                $query1 = DB::table(DB::raw('('.$querySql.' ) as a '))
+                ->select('paid_date',DB::raw("SUM(amount) AS daily_amount"))
+                ->groupBy('paid_date')->orderByDesc('paid_date')
+                ->mergeBindings($students_all_fee);
+
+
+
+            $all_fee= $query1->paginate($per_page);
+
+                    return response()->json(
+                         $all_fee
+                    ,200);
+
+
+            }
+
+
+
+
+    public function deletePayment($id){
 
             $academic_year_id=null;
             if (request()->filled('academic_year_id')) {
@@ -181,7 +292,6 @@ class StudentPaymentController extends Controller{
 
 
            if (request('type') == 'dm') {
-
 
            return  DB::table('degree_student_month')
              ->where('degree_student_id',$id)

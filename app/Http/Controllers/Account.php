@@ -91,60 +91,43 @@ class Account extends Controller
 
             if ($employee->status) {
 
-            if ($employee->role == 'department_head') {
+                 if ($employee->role == 'degree_head') {
 
-
-                $employee->department_role='degree_head';
-                $deg_head=  DegreeDepartment::where('id',$employee->id)->first();
-                $tvet_head=  TvetDepartment::where('id',$employee->id)->first();
-                if ($deg_head) {
                     $token= $user->createToken('auth_token')->plainTextToken;
                     return response()->json([
                         'access_token'=>$token,
-                        // 'department_role'=>'degree_head',
                         'user'=>$employee->load('manage'),
                     ],200);
 
-                }else if($tvet_head) {
-                    $employee->department_role='degree_head';
+                }else if ($employee->role == 'tvet_head') {
 
                     $token= $user->createToken('auth_token')->plainTextToken;
                     return response()->json([
                         'access_token'=>$token,
-                        'role'=>'tvet_head',
-                        'user'=>$employee->load('manage'),
+                        'user'=>$employee->load('managet'),
                     ],200);
                 }else {
                     $token= $user->createToken('auth_token')->plainTextToken;
                     return response()->json([
                         'access_token'=>$token,
-                        'role'=>'head',
-                        'user'=>$employee->load('manage'),
+                        'user'=>$employee,
                     ],200);
                 }
 
-            }else{
-                $token= $user->createToken('auth_token')->plainTextToken;
-                return response()->json([
-                    'access_token'=>$token,
-                    'user'=>$employee,
-                ],200);
-            }
-        }else {
+          }else {
             return response()->json([
                 'message'=>' UN Authorized ...',
                 ]
                 ,404 );
-        }
-     }else {
+            }
+      }else {
         return response()->json([
             'message'=>' UN Authorized ...',
             ]
             ,404 );
         }
 
-
-     }
+      }
 
 
      public function studentLogin(Request $request){

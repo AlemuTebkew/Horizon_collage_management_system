@@ -3,10 +3,12 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TvetStudent extends Model
 {
     use HasFactory;
+    use SoftDeletes;
     public $fillable=['student_id','first_name','middle_name','batch',
     'last_name','sex','dob',
     'phone_no','maritial_status', 'contact_full_name','contact_relationship',
@@ -24,7 +26,7 @@ public function getFullNameAttribute(){
 
 public function cocs(){
     return $this->belongsToMany(Coc::class)
-    ->withPivot(['application_date','result','nature_of_assesment','level_no','occupation_name']);
+    ->withPivot(['application_date','result','nature_of_assesment','level_no','occupation_name','certificate_no']);
     // return $this->morphToMany(Coc::class,'cocable');
 }
 
@@ -43,7 +45,7 @@ public function levels(){
 
 public function modules(){
     return $this->belongsToMany(Module::class,'student_level_module')
-    ->withPivot('level_id','module_id','total_mark','from_11','from_12','from_12s','from_25','from_40'
+    ->withPivot('level_id','module_id','total_mark','from_20','from_30','from_50',
 );
 
 
@@ -51,7 +53,7 @@ public function modules(){
 //for payment
 public function month_payments(){
     return $this->belongsToMany(Month::class,'tvet_student_month')
-    ->withPivot('receipt_no','academic_year_id','paid_date','paid_amount')
+    ->withPivot('receipt_no','academic_year_id','paid_date','paid_amount','month_id')
     ->withTimestamps() ;
 
 }
@@ -71,8 +73,8 @@ public function birth_address(){
 public function residential_address(){
     return $this->belongsTo(Address::class,'residential_address_id');
 }
-public function contact_address(){
-    return $this->belongsTo(Address::class,'contact_address_id');
+public function emergency_address(){
+    return $this->belongsTo(Address::class,'emergency_address_id');
 }
 
 

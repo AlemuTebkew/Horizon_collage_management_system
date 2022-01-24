@@ -35,7 +35,7 @@ class ModuleController extends Controller
 
         ]);
       $module= Module::create($request->all());
-      return response()->json([new ModuleResource($module->load('department','program')),200]);
+      return response()->json(new ModuleResource($module->load('department','program')),200);
 
     }
 
@@ -83,4 +83,6 @@ class ModuleController extends Controller
     {
         $module->delete();
     }
+
+
 }

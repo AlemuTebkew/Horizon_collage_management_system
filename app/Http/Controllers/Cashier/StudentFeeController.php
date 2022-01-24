@@ -334,6 +334,7 @@ class StudentFeeController extends Controller
                  $student['id']=$degreeStudent->id;
                  $student['student_id']=$degreeStudent->student_id;
                  $student['full_name']=$degreeStudent->full_name;
+                 $student['sex']=$degreeStudent->sex;
                  $student['department']=$degreeStudent->degree_department->name;
                  $student['program']=$degreeStudent->program->name;
                  $student['year_no']=$degreeStudent->current_year_no;
@@ -347,6 +348,9 @@ class StudentFeeController extends Controller
                         // return $semesters;
               foreach ($semesters as $s) {
 
+                 $total_cp=$degreeStudent->courses()->wherePivot('semester_id',$s->id)->sum('cp');
+
+                 $monthly_cp_fee=($total_cp*$cp_fee)/$s->months->count();
 
                 if ($s->months->isEmpty() == false) {
 
@@ -355,7 +359,7 @@ class StudentFeeController extends Controller
                     $semester['id']=$s->id;
                     $semester['semester_no']=$s->number;
                     $semester['tution_type']=$s->pivot->tuition_type;
-                    $semester['monthly_cp_fee']=$s->pivot->monthly_cp_fee;
+                    $semester['monthly_cp_fee']=$monthly_cp_fee;
 
                     $total=0;
                     $total_pad=[];
@@ -425,6 +429,7 @@ class StudentFeeController extends Controller
                 $student['id']=$tvetStudent->id;
                 $student['student_id']=$tvetStudent->student_id;
                 $student['full_name']=$tvetStudent->full_name;
+                $student['sex']=$tvetStudent->sex;
                 $student['department']=$tvetStudent->tvet_department->name;
                 $student['program']=$tvetStudent->program->name;
                 $student['level_no']=$tvetStudent->current_level_no;
@@ -479,41 +484,30 @@ class StudentFeeController extends Controller
     public function addTuitionPayment(Request $request,$student_id){
 
 
+        DB::beginTransaction();
+        try {
+            //code...
+
             $cp_fee_id= FeeType::where('name','CP Fee')->first()->id;
             $monthly_fee_id= FeeType::where('name','Monthly Fee')->first()->id;
 
             if (request('student_type') == 'degree') {
 
             $student=DegreeStudent::find($student_id);
-            $semester=Semester::find($request->semester_id);
-            $student->semesters()->updateExistingPivot($semester->id,
-            [
-                'tuition_type'=>$request->tuition_type,
+            if (! $student) {
+                return response()->json(['error'=>'Student Not Found'],201);
 
-            ]);
-            // if ($request->tuition_type == 'cp') {
+            }
+              $semester=Semester::find($request->semester_id);
+              $month_amount=(double)$request->amount /count($request->months);
 
-            //      $month_amount=doubleval($request->amount)/count($request->months);
-            //     foreach ($semester->months as $month) {
+              $tvt= DB::table('tvet_student_month')->where('receipt_no',$request->receipt_no)->first();
+              $degree=  DB::table('degree_student_month')->where('receipt_no',$request->receipt_no)->first();
+              $to=  DB::table('tvet_other_fees')->where('receipt_no',$request->receipt_no)->first();
+              $do=  DB::table('degree_other_fees')->where('receipt_no',$request->receipt_no)->first();
+              //  $st= $student->month_payments()->wherePivot('receipt_no',$request->receipt_no)->first();
 
-            //         $student->month_payments()
-            //         ->wherePivot('academic_year_id',$request->academic_year_id)
-            //         ->updateExistingPivot($month->id,[
-            //             'fee_type_id'=>$cp_fee_id,
-            //             'academic_year_id'=>$request->academic_year_id,
-            //             'receipt_no'=>$request->receipt_no,
-            //             'paid_amount'=>$month_amount,
-            //             'paid_date'=>date('Y-m-d',strtotime($request->paid_date)),
-            //             'is_paid'=>1
-
-            //         ]);
-            //     }
-
-            // }elseif ($request->tuition_type == 'monthly') {
-                $month_amount=(double)$request->amount /count($request->months);
-
-                $st= $student->month_payments()->wherePivot('receipt_no',$request->receipt_no)->first();
-                if ($st) {
+              if ($tvt || $degree || $to || $do) {
                    return response()->json(['error'=>'Pad Number Already Exist'],201);
                 }else{
                 foreach ($request->months as $id) {
@@ -529,18 +523,53 @@ class StudentFeeController extends Controller
 
                     ]);
                 }
-                return response()->json($student->load('month_payments'),200);
-            }
+
+
+          $m_ids=$semester->months->pluck('id');
+          $un_paid=  $student->month_payments()->wherePivot('academic_year_id',$request->academic_year_id)
+                                 ->wherePivot('receipt_no',null)
+                                  ->whereIn('months.id',$m_ids)
+                                 ->count();
+
+
+                if ($un_paid == 0) {
+                    $student->semesters()->updateExistingPivot($semester->id,
+                    [
+                        'legible'=>1,
+
+                    ]);
+                }else {
+                    $student->semesters()->updateExistingPivot($semester->id,
+                    [
+                        'legible'=>0,
+
+                    ]);
+                }
+                $student->semesters()->updateExistingPivot($semester->id,
+                [
+                    'tuition_type'=>$request->tuition_type,
+
+                ]);
+                DB::commit();
+                return response()->json('Successfully Added',200);
+         }
 
 
         }elseif (request('student_type') == 'tvet') {
 
             $student=TvetStudent::find($student_id);
+            if (! $student) {
+                return response()->json(['error'=>'Student Not Found'],201);
 
+            }
             $month_amount=(double)$request->amount /count($request->months);
 
-            $st= $student->month_payments()->wherePivot('receipt_no',$request->receipt_no)->first();
-            if ($st) {
+            $tvt= DB::table('tvet_student_month')->where('receipt_no',$request->receipt_no)->first();
+            $degree=  DB::table('degree_student_month')->where('receipt_no',$request->receipt_no)->first();
+            $to=  DB::table('tvet_other_fees')->where('receipt_no',$request->receipt_no)->first();
+            $do=  DB::table('degree_other_fees')->where('receipt_no',$request->receipt_no)->first();
+            //  $st= $student->month_payments()->wherePivot('receipt_no',$request->receipt_no)->first();
+              if ($tvt || $degree || $to || $do) {
                return response()->json(['error'=>'Pad Number Already Exist'],201);
             }else{
             foreach ($request->months as $id) {
@@ -556,9 +585,17 @@ class StudentFeeController extends Controller
 
                 ]);
             }
-            return $student->load('month_payments');
+            DB::commit();
+            return response()->json('Successfully Added',200);
+         }
         }
-        }
+
+
+     } catch (\Throwable $th) {
+        DB::rollBack();
+        return response()->json($th,501);
+
+    }
      }
 
      public function addOtherPayment(Request $request){
@@ -586,8 +623,16 @@ class StudentFeeController extends Controller
                 // return date('Y-m-d',strtotime($request->paid_date));
                 $student=DegreeStudent::where('student_id',request('student_id'))->first();
 
-                $st= $student->degree_other_fees()->wherePivot('receipt_no',$request->receipt_no)->first();
-                if ($st) {
+                if (! $student) {
+                    return response()->json(['error'=>'Student Not Found'],201);
+
+                }
+                $tvt= DB::table('tvet_student_month')->where('receipt_no',$request->receipt_no)->first();
+                $degree=  DB::table('degree_student_month')->where('receipt_no',$request->receipt_no)->first();
+                $to=  DB::table('tvet_other_fees')->where('receipt_no',$request->receipt_no)->first();
+                $do=  DB::table('degree_other_fees')->where('receipt_no',$request->receipt_no)->first();
+                //  $st= $student->month_payments()->wherePivot('receipt_no',$request->receipt_no)->first();
+                  if ($tvt || $degree || $to || $do) {
                    return response()->json(['error'=>'Pad Number Already Exist'],201);
                 }else{
                     $student->degree_other_fees()->attach($request->fee_type_id,[
@@ -605,8 +650,16 @@ class StudentFeeController extends Controller
             } else if (request('type') == 'tvet') {
                 $student=TvetStudent::where('student_id',request('student_id'))->first();
 
-                $st= $student->tvet_other_fees()->wherePivot('receipt_no',$request->receipt_no)->first();
-                if ($st) {
+                if (! $student) {
+                    return response()->json(['error'=>'Student Not Found'],201);
+
+                }
+                $tvt= DB::table('tvet_student_month')->where('receipt_no',$request->receipt_no)->first();
+                $degree=  DB::table('degree_student_month')->where('receipt_no',$request->receipt_no)->first();
+                $to=  DB::table('tvet_other_fees')->where('receipt_no',$request->receipt_no)->first();
+                $do=  DB::table('degree_other_fees')->where('receipt_no',$request->receipt_no)->first();
+                //  $st= $student->month_payments()->wherePivot('receipt_no',$request->receipt_no)->first();
+                  if ($tvt || $degree || $to || $do) {
                    return response()->json(['error'=>'Pad Number Already Exist'],201);
                 }else{
                     $student->tvet_other_fees()->attach($request->fee_type_id,[

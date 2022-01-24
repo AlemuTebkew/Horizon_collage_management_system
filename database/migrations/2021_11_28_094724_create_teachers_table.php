@@ -18,10 +18,10 @@ class CreateTeachersTable extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->string('email')->unique();
-            $table->string('password')->nullable();
             $table->string('type');
             $table->string('phone_no')->unique();
-            $table->string('profession');
+            $table->double('gpa');
+            $table->string('qualification');
             $table->boolean('status')->default(1);
 
             $table->timestamps();

@@ -88,19 +88,24 @@ class RegistrarDashboardController extends Controller
             $dashboard_data['active_month']= Carbon::now()->monthName;
 
 
+            $tcoc=$dcoc=$excoc=0;
        $dashboard_data['total_coc']=Coc::where('academic_year_id',$academic_year_id)->count();
-      $coc_id=Coc::latest()->first()->id;
-       $dcoc=DegreeStudent::whereHas('cocs',function($query) use($coc_id){
-        $query->where('coc_id',$coc_id);
-    }) ->count();
+      $coc=Coc::latest()->first();
+      if ($coc) {
+        $dcoc=DegreeStudent::whereHas('cocs',function($query) use($coc){
+            $query->where('coc_id',$coc->id);
+        }) ->count();
 
-    $tcoc=TvetStudent::whereHas('cocs',function($query) use($coc_id){
-        $query->where('coc_id',$coc_id);
-    }) ->count();
+        $tcoc=TvetStudent::whereHas('cocs',function($query) use($coc){
+            $query->where('coc_id',$coc->id);
+        }) ->count();
 
-    $excoc=ExternalCocApplicant::where('coc_id',$coc_id)->count();
+        $excoc=ExternalCocApplicant::where('coc_id',$coc->id)->count();
 
-       $dashboard_data['current_coc_students']=$dcoc+$tcoc+$excoc;
+           $dashboard_data['current_coc_students']=$dcoc+$tcoc+$excoc;
+
+          }
+
 
 
         return response()->json($dashboard_data);

@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Head\TvetSectionResource;
 use App\Http\Resources\Head\TvetSectionStudentResource;
+use App\Models\AcademicYear;
 use App\Models\Employee;
+use App\Models\Level;
 use Illuminate\Support\Facades\DB;
 
 class TvetSectionController extends Controller
@@ -19,7 +21,17 @@ class TvetSectionController extends Controller
      */
     public function index()
     {
-        return TvetSection::all();
+      
+
+        $academic_year_id=null;
+        if (request()->has('academic_year_id')) {
+            $academic_year_id=request('academic_year_id');
+        }else{
+        $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+        }
+
+        return TvetSectionResource::collection(TvetSection::with('tvet_department','level')
+              ->where('academic_year_id',$academic_year_id)->get());
     }
 
     /**
@@ -35,14 +47,17 @@ class TvetSectionController extends Controller
             'tvet_department_id'=>'required',
             'academic_year_id'=>'required',
             'program_id'=>'required',
-             'level_id'=>'required',
+             'level_no'=>'required',
 
         ]);
         $data=$request->all();
+        $level=Level::where('tvet_department_id',$request->tvet_department_id)
+                        ->where('level_no',$request->level_no)->first();
         $employee=Employee::where('email',$request->user()->user_name)->first();
 
-       $data['tvet_department_id']=$employee->managet->id;
-    //   $data['semester_no']=Semester::find($request->semester_id)->number;
+        $data['tvet_department_id']=$employee->managet->id;
+        $data['level_id']=$level->id;
+        //   $data['semester_no']=Semester::find($request->semester_id)->number;
       $s=TvetSection::where('name',$request->name)
                              ->where('level_id',$request->level_id)
                              ->where('tvet_department_id',$employee->managet->id)
@@ -51,7 +66,7 @@ class TvetSectionController extends Controller
                              ->first();
       if (!$s) {
         $ts= TvetSection::create($data);
-        return response()->json(new TvetSectionResource($ts->load('tvet_department','level','program')),200) ;
+        return response()->json(new TvetSectionResource($ts->load('tvet_department','level','program')),201) ;
       }else {
           return response()->json(['error_message'=>'Section Already Added'],400);
       }
@@ -82,14 +97,17 @@ class TvetSectionController extends Controller
             'tvet_department_id'=>'required',
             'academic_year_id'=>'required',
             'program_id'=>'required',
-             'level_id'=>'required',
+             'level_no'=>'required',
 
         ]);
         $data=$request->all();
         $employee=Employee::where('email',$request->user()->user_name)->first();
+        $level=Level::where('tvet_department_id',$request->tvet_department_id)
+        ->where('level_no',$request->level_no)->first();
 
        $data['tvet_department_id']=$employee->managet->id;
-    //   $data['semester_no']=Semester::find($request->semester_id)->number;
+       $data['level_id']=$level->id;
+
       $s=TvetSection::where('name',$request->name)
                              ->where('level_id',$request->level_id)
                              ->where('tvet_department_id',$employee->managet->id)
