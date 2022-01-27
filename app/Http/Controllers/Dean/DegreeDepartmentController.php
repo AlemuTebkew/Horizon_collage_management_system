@@ -32,14 +32,18 @@ class DegreeDepartmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'=>'required|unique:degree_departments',
-            'short_name'=>'required|unique:degree_departments',
+            'name'=>'required',
+            'short_name'=>'required',
 
 
         ]);
-          // return $request->all();
-          //request->only([]);
-      $dp= DegreeDepartment::create(['name'=>$request->name,'short_name'=>$request->short_name]);
+
+        $c= DegreeDepartment::where('name',$request->name)->first();
+        $c1= DegreeDepartment::where('short_name',$request->short_name)->first();
+        if ($c || $c1) {
+            return response()->json('The department name or short name',202);
+        }
+         $dp= DegreeDepartment::create(['name'=>$request->name,'short_name'=>$request->short_name]);
 
       foreach ($request->programs as $program) {
            $id=Program::where(function($q1) use ($program){
@@ -80,9 +84,17 @@ class DegreeDepartmentController extends Controller
     {
         $request->validate([
             'name'=>'required',
-
+            'short_name'=>'required',
         ]);
-        $degreeDepartment->update(['name'=>$request->name]);
+        $c= DegreeDepartment::where('name',$request->name)
+                       ->where('name','!=',$degreeDepartment->name)->first();
+        $c1= DegreeDepartment::where('short_name',$request->short_name)
+                    ->where('name','!=',$degreeDepartment->short_name)->first();
+        if ($c || $c1) {
+            return response()->json('The department name or short name',202);
+        }
+
+        $degreeDepartment->update(['name'=>$request->name,'short_name'=>$request->short_name]);
 
         foreach ($request->programs as $program) {
           $id=Program::where(function($q1) use ($program){

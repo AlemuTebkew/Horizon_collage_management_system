@@ -27,30 +27,47 @@ class HeadDashboardController extends Controller
 
         $dashboard_data=[];
 
+
+
         $employee=Employee::where('email',request()->user()->user_name)->first();
 
         $degree_department=DegreeDepartment::find($employee->manage->id);
 
-
-
-
-            $dashboard_data['total_degree_student']=DegreeStudent::whereHas('semesters',function($query) use($academic_year_id){
+        $dashboard_data['total_degree_student']=DegreeStudent::whereHas('semesters',function($query) use($academic_year_id){
                 $query->where('degree_student_semester.academic_year_id',$academic_year_id);
                //  ->where('academic_year_id',$academic_year_id);
-           })->where('is_graduated',0)
-             ->where('degree_department_id',$degree_department->id)
-           ->count();
+          })->where('is_graduated',0)
+            ->where('degree_department_id',$degree_department->id)
+            ->count();
 
-           $dashboard_data['new_degree_student']=DegreeStudent::whereHas('semesters',function($query) use($academic_year_id){
+
+            $dashboard_data['total_degree_extension_student']=DegreeStudent::whereHas('semesters',function($query) use($academic_year_id){
+                $query->where('degree_student_semester.academic_year_id',$academic_year_id);
+               //  ->where('academic_year_id',$academic_year_id);
+          })->whereHas('program',function($query) use($academic_year_id){
+            $query->where('programs.name','extension');
+           //  ->where('academic_year_id',$academic_year_id);
+          })->where('is_graduated',0)
+            ->where('degree_department_id',$degree_department->id)
+            ->count();
+
+          $dashboard_data['total_degree_regular_student']=DegreeStudent::whereHas('semesters',function($query) use($academic_year_id){
+                $query->where('degree_student_semester.academic_year_id',$academic_year_id);
+               //  ->where('academic_year_id',$academic_year_id);
+          })->whereHas('program',function($query) use($academic_year_id){
+            $query->where('programs.name','regular');
+           //  ->where('academic_year_id',$academic_year_id);
+          }) ->where('is_graduated',0)
+            ->where('degree_department_id',$degree_department->id)
+            ->count();
+
+        $dashboard_data['new_degree_student']=DegreeStudent::whereHas('semesters',function($query) use($academic_year_id){
             $query->where('degree_student_semester.academic_year_id',$academic_year_id);
 
-           })->where('is_graduated',0)
-                  -> where('batch',$current_academic_year->year)
-                  ->where('degree_department_id',$degree_department->id)
-
-                  ->count();
-
-
+         })->where('is_graduated',0)
+           -> where('batch',$current_academic_year->year)
+           ->where('degree_department_id',$degree_department->id)
+           ->count();
 
     return response()->json($dashboard_data,200);
     }
@@ -69,24 +86,44 @@ class HeadDashboardController extends Controller
         $dashboard_data=[];
 
         $employee=Employee::where('email',request()->user()->user_name)->first();
-
         $tvet_department=TvetDepartment::find($employee->managet->id);
         $dashboard_data['total_tvet_student']=TvetStudent::whereHas('levels',function($query) use($academic_year_id){
             $query->where('academic_year_id',$academic_year_id);
            //  ->where('academic_year_id',$academic_year_id);
        })->where('is_graduated',0)
-       ->where('tvet_department_id',$tvet_department->id)
+         ->where('tvet_department_id',$tvet_department->id)
+         ->count();
 
-       ->count();
+
+         $dashboard_data['total_tvet_regular_student']=TvetStudent::whereHas('levels',function($query) use($academic_year_id){
+            $query->where('academic_year_id',$academic_year_id);
+           //  ->where('academic_year_id',$academic_year_id);
+        })  ->whereHas('program',function($query) use($academic_year_id){
+            $query->where('programs.name','regular');
+        //  ->where('academic_year_id',$academic_year_id);
+        })->where('is_graduated',0)
+            ->where('tvet_department_id',$tvet_department->id)
+            ->count();
+
+         $dashboard_data['total_tvet_extension_student']=TvetStudent::whereHas('levels',function($query) use($academic_year_id){
+            $query->where('academic_year_id',$academic_year_id);
+           //  ->where('academic_year_id',$academic_year_id);
+        })  ->whereHas('program',function($query) use($academic_year_id){
+            $query->where('programs.name','extension');
+        //  ->where('academic_year_id',$academic_year_id);
+        })->where('is_graduated',0)
+            ->where('tvet_department_id',$tvet_department->id)
+            ->count();
+
 
       $dashboard_data['new_tvet_student']=TvetStudent::whereHas('levels',function($query) use($academic_year_id){
        $query->where('tvet_student_level.academic_year_id',$academic_year_id);
       //  ->where('academic_year_id',$academic_year_id);
       })->where('is_graduated',0)
-      ->where('tvet_department_id',$tvet_department->id)
-      ->where('batch',$current_academic_year->year)->count();
+        ->where('tvet_department_id',$tvet_department->id)
+        ->where('batch',$current_academic_year->year)
+        ->count();
 
       return response()->json($dashboard_data,200);
-
     }
 }

@@ -132,7 +132,13 @@ class DegreeStudentInfoController extends Controller
             $seme['year_no']=$semester->pivot->year_no;
             $seme['semester_no']=$semester->pivot->semester_no;
             $seme['GPA']=$semester->pivot->semester_GPA;
-            $seme['CGPA']=$this->calculateCGPA($student,$temp);
+            if($semester->pivot->semester_GPA == 0 || $semester->pivot->semester_GPA == 0.0){
+                $seme['CGPA']=0;
+
+            }else{
+                $seme['CGPA']=$this->calculateCGPA($student,$temp);
+
+            }
             $semesters[]=$seme;
 
         }
@@ -150,8 +156,6 @@ class DegreeStudentInfoController extends Controller
           $student=DegreeStudent::find($id);
           return response()->json(SectionResource::collection($student->degree_sections),200);
     }
-
-
 
     private function getTotalCp($student,$semester){
         $courses=Course::where('degree_department_id',$student->degree_department_id)

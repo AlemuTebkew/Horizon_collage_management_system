@@ -39,7 +39,7 @@ public function tvet_department(){
 }
 public function levels(){
     return $this->belongsToMany(Level::class,'tvet_student_level')
-    ->withPivot('tvet_student_id','academic_year_id','level_id','status','partial_scholarship');
+    ->withPivot('tvet_student_id','academic_year_id','level_id','status','partial_scholarship','legible');
 
 }
 

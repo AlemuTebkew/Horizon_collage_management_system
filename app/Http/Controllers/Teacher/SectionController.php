@@ -13,6 +13,7 @@ use App\Models\Semester;
 use App\Models\Teacher;
 use App\Models\TvetSection;
 use App\Models\TvetStudent;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -108,6 +109,32 @@ class SectionController extends Controller
 
             // $teacher_module=$teacher->modules()->wherePivot('tvet_section_id',$section_id)->first();
             foreach ($ts->tvet_students as $st) {
+
+
+                $m_name=(new Carbon())->monthName;
+                $un_paid=  $st->month_payments()->wherePivot('academic_year_id',$ts->academic_year_id)
+                                       ->wherePivot('receipt_no',null)
+                                        ->whereIn('months.name',$m_name)->first();
+
+
+                      if (!$un_paid) {
+                          $st->levels()->updateExistingPivot($ts->level_id,
+                          [
+                              'legible'=>1,
+
+                          ]);
+
+                          $student['legible']=1;
+
+                      }else {
+                          $st->levels()->updateExistingPivot($ts->level_id,
+                          [
+                              'legible'=>0,
+
+                          ]);
+                          $student['legible']=0;
+                      }
+
                $st_module=$st->modules()->where('module_id',request('course_id'))->first()->pivot;
                 $student['id']=$st->id;
                 $student['student_id']=$st->student_id;
@@ -276,11 +303,11 @@ class SectionController extends Controller
             }else{
                 $total_gp += $course->pivot->grade_point;
                 // $total_gp += $course->cp * $this->courseGradePoint($course->cp, $course->pivot->letter_grade);
-
             }
             $total_cp += doubleval($course->cp);
         }
         $gpa=$total_gp/$total_cp;
+
 
         return [$gpa,$total_gp];
 

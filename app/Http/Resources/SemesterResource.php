@@ -17,6 +17,7 @@ class SemesterResource extends JsonResource
         return [
             'id'=>$this->id,
             'year'=>$this->academic_year ? $this->academic_year->year:null,
+            'academic_year_id'=>$this->academic_year ? $this->academic_year->id:null,
             'start_date'=>$this->start_date,
             'end_date'=>$this->end_date,
             'status'=>$this->pivot->status,

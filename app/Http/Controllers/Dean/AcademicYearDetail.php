@@ -28,11 +28,11 @@ class AcademicYearDetail extends Controller
         foreach($academic_year->semesters as $semester){
 
             if($semester->program_id == $reg_id){
-                $regular[]=$semester->load('months','degree_calender_activities');
+                $regular[]=$semester->load(['months:id','degree_calender_activities']);
 
             }else if($semester->program_id == $ext_id){
 
-                $ext[]=$semester->load('months','degree_calender_activities');
+                $ext[]=$semester->load('months:id','degree_calender_activities');
 
 
             }
@@ -101,39 +101,37 @@ class AcademicYearDetail extends Controller
     public function updateSemesterActivities(Request $request){
 
 
-        foreach ($request->semesters as  $semester ) {
+        DB::beginTransaction();
+        try {
+            foreach ($request->semesters as  $semester ) {
 
-            $new_s= Semester::find($semester['semester_id']);
-              //attaching semester months
-              $activities=$semester['activities'];
+                // $new_s= Semester::find($semester['semester_id']);
+                  DB::table('degree_calender_activities')
+                  ->where('semester_id', $semester['semester_id'])->delete();
+                  $activities=$semester['activities'];
+                  foreach ($activities as $activity) {
+                     DB::table('degree_calender_activities')
+                     ->insert($activity);
+                  }
 
-              foreach ($activities as $activity) {
+             }
 
-                 DB::table('degree_calender_activities')
-                 ->where('id', $activity['id'])
-                 ->update([
-                      'date'=>$activity['date'],
-                      'semester_id'=>$new_s->id,
-                      'activity'=>$activity['task']
-                  ]);
-              }
+                 //creating tvet calender
 
+              $st= DB::table('tvet_calender_activities')
+                 ->where('academic_year_id',$request->academic_year_id)
+                 ->delete();
 
-              //end
-         }
+                 foreach ($request->tvet_activities as $activity) {
+                    DB::table('tvet_calender_activities')
+                    ->insert($activity);
+                  }
 
-             //creating tvet calender
-             foreach ($request->tvet_activities as $activity) {
-                DB::table('tvet_calender_activities')
-                ->where('id', $activity['id'])
-                ->update([
-                    'date'=>$activity['date'],
-                    'activity'=>$activity['task'],
-                    'academic_year_id'=> $activity['academic_year_id'] ,
-                 ]);
-              }
+             return response()->json('successfully updated',200);
+        } catch (\Throwable $th) {
+            return response()->json('not updated',500);
 
+        }
 
-         return response()->json('successfully updated',200);
     }
 }

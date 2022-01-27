@@ -34,8 +34,13 @@ class ModuleController extends Controller
             'tvet_department_id'=>'required',
 
         ]);
+
+        $c= Module::where('code',$request->code)->first();
+        if ($c) {
+        return response()->json('The same code number',202);
+        }
       $module= Module::create($request->all());
-      return response()->json(new ModuleResource($module->load('department','program')),200);
+      return response()->json(new ModuleResource($module->load('department','program')),201);
 
     }
 
@@ -68,6 +73,12 @@ class ModuleController extends Controller
             'tvet_department_id'=>'required',
 
         ]);
+
+        $c= Module::where('code',$request->code)
+        ->where('code','!=', $module->code)->first();
+        if ($c) {
+        return response()->json('The same code number',202);
+        }
        $module->update($request->all());
        return response()->json(new ModuleResource($module->load('department','program')),200);
 
@@ -81,7 +92,10 @@ class ModuleController extends Controller
      */
     public function destroy(Module $module)
     {
-        $module->delete();
+       if ($module->delete()) {
+        return response()->json('successfully delete',200);
+
+       }
     }
 
 

@@ -132,8 +132,8 @@ class StudentController extends Controller
           $students= DegreeStudent::where('degree_department_id',$department->id)
                                          ->where('current_year_no',$section->year_no)
                                          ->where('current_semester_no',$section->semester_no)
-                                         ->whereHave('degree_student_semester',function($q) use($section){
-                                             $q->where('semester_id',$section->id)
+                                         ->whereHas('semesters',function(Builder $q) use($section){
+                                             $q->where('semester_id',$section->semester_id)
                                                ->where('status','approved');
                                          })
 

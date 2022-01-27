@@ -123,6 +123,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         Route::apiResource('/about_us',AboutUsController::class);
         Route::apiResource('/social_links',SocialLinkController::class);
 
+                //////////////acaademic year detail and edit
+        Route::get('/edit_academic_year',[AcademicYearDetail::class,'editAcademicYearDetail']);
+        Route::put('/update_semester',[AcademicYearDetail::class,'updateSemester']);
+        Route::put('/update_semester_month',[AcademicYearDetail::class,'updateSemesterMonth']);
+        Route::put('/update_semester_activity',[AcademicYearDetail::class,'updateSemesterActivities']);
+
         //----------------End Dean Functionality-------------------//
 
     });
@@ -152,19 +158,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
     Route::middleware(['tvet_head'])->group(function () {
 
-    /////-------------------tvet head
-    Route::get('/tvet_department_students',[TvetHeadStudentController::class,'getArrangedStudentsByDepartment']);
-    Route::apiResource('/tvet_sections',TvetSectionController::class);
-    Route::get('/tvet_section_students/{section_id}',[TvetHeadStudentController ::class,'getSectionStudents']);
-    Route::post('/tvet_add_section_students',[TvetHeadStudentController ::class,'addStudentsToSection']);
-    Route::get('/tvet_section_suggested_students',[TvetHeadStudentController::class,'sectionSuggestedStudents']);
-    Route::get('/section_modules',[TvetHeadModuleController::class,'getSectionModules']);
-    Route::post('/assign_teacher_for_module',[TvetHeadModuleController::class,'assignTeacherForModule']);
-    Route::post('/tvet_grade_reports',[TvetHeadReportController::class,'getGradeReport']);
-    Route::get('/department_modules',[TvetHeadModuleController::class,'getDepartmentModules']);
-    Route::post('/tvet_remove_section_students/{id}',[TvetHeadStudentController ::class,'removeStudentsFromSection']);
-    Route::post('/get_module_by_level',[TvetHeadReportController::class,'getModuleTakenByLevel']);
-    Route::get('/department_levels',[LevelController::class,'getDepartmentLevels']);
+        /////-------------------tvet head
+        Route::get('/tvet_department_students',[TvetHeadStudentController::class,'getArrangedStudentsByDepartment']);
+        Route::apiResource('/tvet_sections',TvetSectionController::class);
+        Route::get('/tvet_section_students/{section_id}',[TvetHeadStudentController ::class,'getSectionStudents']);
+        Route::post('/tvet_add_section_students',[TvetHeadStudentController ::class,'addStudentsToSection']);
+        Route::get('/tvet_section_suggested_students',[TvetHeadStudentController::class,'sectionSuggestedStudents']);
+        Route::get('/section_modules',[TvetHeadModuleController::class,'getSectionModules']);
+        Route::post('/assign_teacher_for_module',[TvetHeadModuleController::class,'assignTeacherForModule']);
+        Route::post('/tvet_grade_reports',[TvetHeadReportController::class,'getGradeReport']);
+        Route::get('/department_modules',[TvetHeadModuleController::class,'getDepartmentModules']);
+        Route::post('/tvet_remove_section_students/{id}',[TvetHeadStudentController ::class,'removeStudentsFromSection']);
+        Route::post('/get_module_by_level',[TvetHeadReportController::class,'getModuleTakenByLevel']);
+        Route::get('/department_levels',[LevelController::class,'getDepartmentLevels']);
 
     });
 
@@ -183,22 +189,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         //---------------------- End Cashier Functionality-----------------//
     });
     Route::post('/logout',[Account::class,'logout']);
-
     Route::get('/degree_students_by_department',[DegreeStudentController::class,'getDegreeStudentsByDepartment']);
-
-
     Route::apiResource('/courses',CourseController::class);
-
 
     //----------------Start Dean Functionality-------------------//
     Route::apiResource('/teachers',TeacherController::class);
     Route::apiResource('/employees',EmployeeController::class);
     Route::get('/department_heads',[EmployeeController::class,'getDepartmentHeads']);
     Route::get('/unassigned_department_heads',[EmployeeController::class,'getUnAssignedDepartmentHeads']);
-
     Route::apiResource('/modules',ModuleController::class);
     Route::get('/get_deans',[EmployeeController::class,'getDeans']);
-
 
 
 // ----------------Start Registrar Functionality==========================///////
@@ -241,7 +241,7 @@ Route::post('/give_module_result/{id}',[TvetStudentController::class,'giveModule
 Route::get('/degree_yearly_arranged_students',[DegreeStudentController::class,'getArrangedStudents']);
 Route::get('/tvet_yearly_arranged_students',[TvetStudentController::class,'getArrangedStudents']);
 Route::post('/degree_approve',[StudentApprovalController::class,'approveDegreeStudent']);
-Route::post('/make_legible_student/{id}',[StudentApprovalController::class,'makeStudentLegibleForResult']);
+Route::post('/change_result_entry_state/{id}',[StudentApprovalController::class,'makeDegreeStudentLegibleForResult']);
 
 Route::post('/tvet_approve',[StudentApprovalController::class,'approveTvetStudent']);
 Route::get('/notifications/{id}',[EmployeeController::class,'get_notifications']);
@@ -267,7 +267,9 @@ Route::get('/student_semesters/{id}',[DegreeStudentController::class,'getStudent
 Route::get('/semester_courses/{id}',[DegreeStudentController::class,'getStudentSemesterCourses']);
 Route::get('/level_modules/{id}',[TvetStudentController::class,'getStudentLevelModules']);
 Route::post('/register_student_for_level',[TvetStudentController::class,'registerStudentForLevel']);
+Route::put('/update_student_for_level/{id}',[TvetStudentController::class,'updateStudentForLevel']);
 Route::post('/register_student_for_semester',[DegreeStudentController::class,'registerStudentForSemester']);
+Route::put('/update_student_for_semester/{id}',[DegreeStudentController::class,'updateStudentForSemester']);
 
 //-----------------------End Head Functionality only----------------------------
 
@@ -330,7 +332,6 @@ Route::post('/teacher_set_result/{id}',[SectionController::class,'setResult']);
     Route::get('/other_fee_types',[FeeTypeController::class,'']);
     Route::apiResource('/semesters',SemesterController::class);
 
-    Route::get('/edit_academic_year',[AcademicYearDetail::class,'editAcademicYearDetail']);
 
     //------------------Userside Website related--------------------//
 

@@ -38,14 +38,19 @@ class CourseController extends Controller
             'code'=>'required',
             'title'=>'required',
             'type'=>'required',
-             'year_no'=>'required',
+            'year_no'=>'required',
             'semester_no'=>'required',
             'degree_department_id'=>'required',
             'program_id'=>'required',
 
         ]);
+
+       $c= Course::where('code',$request->code)->first();
+        if ($c) {
+            return response()->json('The same code number',202);
+        }
       $courses=  Course::create($request->all());
-      return response()->json(new CourseResource($courses->load('department','program')),200);
+      return response()->json(new CourseResource($courses->load('department','program')),201);
     }
 
 
@@ -79,9 +84,13 @@ class CourseController extends Controller
             'program_id'=>'required',
 
         ]);
+        $c= Course::where('code',$request->code)
+                   ->where('code','!=', $course->code)->first();
+        if ($c) {
+            return response()->json('The same code number',202);
+        }
        $course->update($request->all());
        return response()->json(new CourseResource($course->load('department','program')),200);
-
 
     }
 
@@ -93,7 +102,10 @@ class CourseController extends Controller
      */
     public function destroy(Course $course)
     {
-        $course->delete();
+
+        if ($course->delete()) {
+           return response()->json('successfully delete',200);
+        }
     }
     /*
     **/

@@ -115,7 +115,7 @@ class DegreeStudentController extends Controller
 
             $student= DegreeStudent::create($data);
             $generated_id=$this->generateStudentId($student);
-            $student->update('student_id',$generated_id);
+            $student->update(['student_id'=>$generated_id]);
 
              //////////start user login info
              $login=new UserLogin();
@@ -445,23 +445,24 @@ class DegreeStudentController extends Controller
             // $degreeStudent->birth_address()->delete();
             // $degreeStudent->contact_address()->delete();
             // $degreeStudent->emergency_address()->delete();
-          $seme=  $degreeStudent->semesters()->where('semesters.id',request('semester_id'))->first();
-            if ($degreeStudent->current_year_no ==1 && $degreeStudent->current_semester_no == 1 && $seme->pivot->status == 'waiting' ) {
-                # code...
+            $seme=  $degreeStudent->semesters()->wherePivot('semester_id',request('semester_id'))->first();
+            if ( ($degreeStudent->current_year_no == 1) && ($degreeStudent->current_semester_no == 1) && ($seme->pivot->status == 'waiting' )) {
 
-            $degreeStudent->month_payments()->detach();
-            $degreeStudent->semesters()->where('semesters.id',request('semester_id'))->detach();
-            $degreeStudent->courses()->detach();
-            $degreeStudent->degree_sections()->detach();
-            UserLogin::where('user_name',$degreeStudent->student_id)->first()->delete();
-            $degreeStudent->delete();
+                $degreeStudent->month_payments()->detach();
+                $degreeStudent->semesters()->where('semesters.id',request('semester_id'))->detach();
+                $degreeStudent->courses()->detach();
+                $degreeStudent->degree_sections()->detach();
+                UserLogin::where('user_name',$degreeStudent->student_id)->first()->delete();
+                $degreeStudent->delete();
 
-            DB::commit();
-            return response()->json(['succesfully deleted'],200);
+                DB::commit();
+                return response()->json('succesfully deleted',200);
+            }else{
+
             }
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['not succesfully deleted'.$e],500);
+            return response()->json('not succesfully deleted'.$e,500);
 
         }
     }
@@ -526,6 +527,86 @@ class DegreeStudentController extends Controller
                }
 
     }
+
+
+    public function updateStudentForSemester(Request $request,$id){
+
+
+        DB::beginTransaction();
+        try {
+
+            if (request('old_year_no') == request('year_no')) {
+                if (request('old_semester_id') == request('semester_id')) {
+                    return response()->json(['error' =>'Student Already Registerd '],200);
+
+                 }
+            }
+            $student=DegreeStudent::find($id);
+            $academic_year=AcademicYear::find($request->academic_year_id);
+
+            $cpf_id=FeeType::where('name','CP Fee')->first()->id;
+            $cp_fee=$academic_year->fee_types()->wherePivot('fee_type_id',$cpf_id)->first()->pivot->amount;
+
+            $semester=Semester::find($request->semester_id);
+            $semester_no=$semester->number;
+
+            //detach student from old semester
+
+            $student->semesters()->wherePivot('semester_id',$request->old_semester_id)->detach();
+            $student->courses()->wherePivot('semester_id',$request->old_semester_id)->detach();
+            $succ= DB::table('notifications')->whereJsonContains('data',['student_id'=>$id])
+                                ->whereJsonContains('data',['semester_id'=>request('old_semester_id')])->delete();
+               ///  ---------end detach
+            $is_registerd =$student->semesters()->wherePivot('semester_id',$request->semester_id)->first();
+            if(!$is_registerd || $is_registerd==null || empty($is_registerd )){
+                $student->semesters()->attach($request->semester_id,
+                [
+                'year_no'=>$request->year_no,
+                'semester_no'=>$semester_no,
+                'academic_year_id'=>$request->academic_year_id,
+                //'partial_scholarship'=>$request->partial_scholarship,
+                'status'=>'waiting'
+                ]);
+                $student->current_year_no=$request->year_no;
+                $student->current_semester_no=$semester_no;
+                $student->save();
+            //   return new RegisteredSemesterResource($semester->load('academic_year'));
+
+            } else if($is_registerd ){
+                return response()->json(['error'=> 'Student Already Registerd '],200);
+                }
+
+
+                $total_cp= $this->registerStudentForCourses($student,$semester,$request->year_no);
+                $monthly_cp_fee=$total_cp*$cp_fee/$semester->months->count();
+                $student->semesters()->updateExistingPivot($request->semester_id,[
+                'semester_credit_hour'=>$total_cp,
+                'monthly_cp_fee'=>$monthly_cp_fee
+
+                ]);
+                $this->attachWithMonth($student,$academic_year);
+
+                //notifcation to registrar to approve
+
+                $users=Employee::where('role','registrar')->get();
+                $info['student_id']=$student->id;
+                $info['semester_id']=$semester->id;
+                $info['type']='degree';
+                Notification::send($users,new UnApprovedStudents($info));
+
+                DB::commit();
+                return response()->json(new AddedSemesterResource($student->semesters()
+                ->wherePivot('semester_id',$semester->id)->first() ),201);
+
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+              // return $e;
+                return response()->json(['not succesfully registerd'],500);
+               }
+
+    }
+
 
     public function getStudentSemesters($degreeStudent_id){
         $degreeStudent= DegreeStudent::find($degreeStudent_id);
@@ -621,6 +702,7 @@ class DegreeStudentController extends Controller
                                 $student['year_no']=$s->pivot->year_no;
                                 $student['program']=$s->program;
                                 $student['status']=$s->pivot->status;
+                                $student['legible']=$s->pivot->legible;
                                 $student['department']['id']=$s->degree_department->id;
                                 $student['department']['name']=$s->degree_department->name;
                                 $dep=DegreeDepartment::find($s->degree_department->id);

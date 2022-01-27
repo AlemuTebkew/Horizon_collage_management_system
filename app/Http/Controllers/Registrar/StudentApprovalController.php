@@ -55,8 +55,7 @@ class StudentApprovalController extends Controller
         $student=DegreeStudent::find($id);
         $student->semesters()->updateExistingPivot(request('semester_id'),
         [
-            'legible'=>1,
-
+            'legible'=>request('legible'),
         ]);
     }
 

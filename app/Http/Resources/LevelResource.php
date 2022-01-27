@@ -18,6 +18,7 @@ class LevelResource extends JsonResource
         return[
             'id'=>$this->id,
             'year'=>$this->pivot->academic_year_id ? AcademicYear::find($this->pivot->academic_year_id)->year:null,
+            'academic_year_id'=>$this->pivot->academic_year_id ? $this->pivot->academic_year_id:null,
             'status'=>$this->pivot->status,
             'level_no'=>$this->level_no,
         ];

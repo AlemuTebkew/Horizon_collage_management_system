@@ -20,8 +20,8 @@ class StudentCocResource extends JsonResource
             'year'=>$this->academic_year->year ?? null,
             'registration_date'=>$this->pivot->application_date,
             'exam_date'=>$this->exam_week,
-            'occupation'=>Level::find($this->pivot->level_id)->occupation_name ?? null,
-            'level'=>Level::find($this->pivot->level_id)->level_no ?? null,
+            'occupation'=>$this->pivot->occupation_name ?? null,
+            'level'=>$this->pivot->level_no ?? null,
             'result'=>$this->pivot->result ?? null,
         ];
     }

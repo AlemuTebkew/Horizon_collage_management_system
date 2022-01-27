@@ -9,7 +9,7 @@ class Month extends Model
 {
     use HasFactory;
     public $fillable=['code',];
-    public $hidden=['created_at,updated_at'];
+    public $hidden=['created_at','updated_at','pivot'];
     public function semesters(){
         return $this->belongsToMany(Semester::class,'semester_months');
     }

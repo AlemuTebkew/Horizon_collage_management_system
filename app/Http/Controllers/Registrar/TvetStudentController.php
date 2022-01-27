@@ -89,7 +89,7 @@ class TvetStudentController extends Controller
        $student= TvetStudent::create($data);
 
        $id=$this->generateStudentId($student);
-       $student->update(['student_id',$id]);
+       $student->update(['student_id'=>$id]);
 
         //////////start user login info
         $login=new UserLogin();
@@ -261,7 +261,7 @@ class TvetStudentController extends Controller
         $data['batch']=$academic_year->year;
         $data['current_level_no']=$level->level_no;
         $data['dob']=date('Y-m-d',strtotime($request->dob));
-        $data['student_id']='HR'.$academic_year->year.$tvetStudent->id;
+      //  $data['student_id']='HR'.$academic_year->year.$tvetStudent->id;
 
 
         $tvetStudent->update($data);
@@ -412,7 +412,64 @@ class TvetStudentController extends Controller
 
       }
 
-      public function getStudentLevels( $tvetStudent_id){
+   public function updateStudentForLevel(Request $request,$id){
+
+    DB::beginTransaction();
+    try {
+
+        if (request('old_level_id') == request('level_id')) {
+            return response()->json(['error' =>'Student Already Registerd '],200);
+
+         }else {
+
+        $level=Level::find($request->level_id);
+        $student= TvetStudent::find($id);
+        $academic_year=AcademicYear::find($request->academic_year_id);
+
+        $is_registerd=$student->levels()->wherePivot('level_id',$level->id)->first();
+      if(!$is_registerd || $is_registerd==null || empty($is_registerd )){
+        $student->levels()->attach($request->level_id,
+        [
+            'academic_year_id'=>$request->academic_year_id,
+            'status'=>'waiting'
+        ]);
+        $student->current_level_no=$level->level_no;
+        $student->save();
+       }else {
+        return response()->json(['error' =>'Student Already Registerd '],200);
+       }
+     //  $old_level=Level::find($request->old_level_id);
+
+      $succ= DB::table('notifications')->whereJsonContains('data',['student_id'=>$id])
+                              ->whereJsonContains('data',['level_id'=>$request->old_level_id])->delete();
+
+     $student->levels()->wherePivot('level_id',$request->old_level_id)->detach();
+     $student->modules()->wherePivot('level_id',$request->old_level_id)->detach();
+
+       $this->registerStudentForModules($student,$level);
+       $this->attachWithMonth($student,$academic_year);
+
+       //sending notification to registrar for approval of student
+
+        $users=Employee::where('role','registrar')->get();
+        $info['student_id']=$student->id;
+        $info['level_id']=$level->id;
+        $info['type']='tvet';
+        Notification::send($users,new UnApprovedStudents($info));
+
+        DB::commit();
+        return response()->json(new AddedLevelResource($student->levels()
+                                     ->wherePivot('level_id',$level->id)->first()),201);
+        //  return response()->json(new AddedLevelResource($student),201);
+
+    }
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['not succesfully registerd'.$e],500);
+       }
+   }
+
+      public function getStudentLevels($tvetStudent_id){
         $tvetStudent= TvetStudent::find($tvetStudent_id);
         return new StudentLevelResource($tvetStudent->load('levels'));
     }
@@ -472,6 +529,7 @@ class TvetStudentController extends Controller
                         if ($level_no == $level->level_no) {
 
                             $no=$level->level_no;
+                            $student['legible']=$s->pivot->legible;
                             $student['level_id']=$level->id;
                             $student['id']=$s->id;
                             $student['student_id']=$s->student_id;

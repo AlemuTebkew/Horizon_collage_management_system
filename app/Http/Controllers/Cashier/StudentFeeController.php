@@ -585,6 +585,7 @@ class StudentFeeController extends Controller
 
                 ]);
             }
+
             DB::commit();
             return response()->json('Successfully Added',200);
          }

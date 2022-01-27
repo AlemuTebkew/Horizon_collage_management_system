@@ -11,7 +11,7 @@ class Semester extends Model
     public $fillable=['number','academic_year_id',
     'program_id','start_date','end_date','status','is_current'];
 
-    public $hidden=['created_at','updated_at'];
+    public $hidden=['created_at','updated_at','pivot'];
 
     public function degree_students(){
         return $this->belongsToMany(DegreeStudent::class)->withPivot(['semester_no','year_no',
