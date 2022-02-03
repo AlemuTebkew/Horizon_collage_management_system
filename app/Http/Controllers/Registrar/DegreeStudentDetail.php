@@ -17,13 +17,12 @@ class DegreeStudentDetail extends Controller
 {
     public function getStudentInfoToEdit($id){
 
-        $student=DegreeStudent::withTrashed()->findOrFail($id);
+        $student=DegreeStudent::findOrFail($id);
         return response()->json($student->load(['birth_address','emergency_address','residential_address','degree_department','program']),200);
     }
 
 
     public function updateStudentPersonalInfo(Request $request, $id){
-
 
         DB::beginTransaction();
         try {

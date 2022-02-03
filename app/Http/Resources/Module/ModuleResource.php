@@ -21,6 +21,7 @@ class ModuleResource extends JsonResource
             'training_hour'=>$this->training_hour,
             'department'=>$this->department ? $this->department->makeHidden('created_at','department_head_id','updated_at'):null ,
             'level'=>$this->level ? $this->level->level_no:null,
+            'level_id'=>$this->level ? $this->level->id:null,
         ];
     }
 }

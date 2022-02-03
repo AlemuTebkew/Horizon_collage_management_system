@@ -35,6 +35,13 @@ class TvetStudentFeeController extends Controller
             $query->where('tvet_student_month.academic_year_id',$academic_year_id);
 
           }])->where('is_graduated',0)->where('fully_scholarship',0)
+          ->when(request('search_id'),function($query){
+
+            $query->where('student_id','LIKE','%'.request('search_id').'%')
+                ->orWhere('first_name','LIKE','%'.request('search_id').'%')
+                ->orWhere('middle_name','LIKE','%'.request('search_id').'%')
+                ->orWhere('last_name','LIKE','%'.request('search_id').'%');
+          })
            ->paginate($per_page);
 
            $a= $tvetStudents->toArray();
@@ -102,7 +109,7 @@ class TvetStudentFeeController extends Controller
 
          $tvetStudents=TvetStudent::whereHas('month_payments',function( $query) use($academic_year_id){
             $query->where('tvet_student_month.academic_year_id',$academic_year_id)
-            ->whereNull('tvet_student_month.receipt_no')
+            ->where('tvet_student_month.receipt_no',null)
             ->where('tvet_student_month.month_id',request('month_query'));
 
 
@@ -112,7 +119,7 @@ class TvetStudentFeeController extends Controller
           }])->where('is_graduated',0)->where('fully_scholarship',0)
            ->paginate($per_page);
 
-           $a= $tvetStudents->toArray();
+           $a= clone $tvetStudents->toArray();
 
            $paginated_data['current_page']= $a['current_page'];
            $paginated_data['to']= $a['to'];
@@ -120,7 +127,7 @@ class TvetStudentFeeController extends Controller
            $paginated_data['total']= $a['total'];
 
 
-        if ($tvetStudents) {
+        if (!$tvetStudents->isEmpty()) {
           foreach($tvetStudents as $tvtStudent){
 
             $student['id']=$tvtStudent->id;
@@ -250,6 +257,7 @@ class TvetStudentFeeController extends Controller
         $student['student_id']=$tvetStudent->student_id;
         $student['full_name']=$tvetStudent->full_name;
         $student['department']=$tvetStudent->tvet_department->name;
+        $student['sex']=$tvetStudent->sex;
         $student['program']=$tvetStudent->program->name;
         $student['level_no']=$tvetStudent->current_level_no;
 

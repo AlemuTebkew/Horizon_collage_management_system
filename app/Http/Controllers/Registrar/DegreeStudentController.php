@@ -10,6 +10,7 @@ use App\Http\Resources\Semester\RegisteredSemesterResource;
 use App\Http\Resources\StudentSemesterResource;
 use App\Models\AcademicYear;
 use App\Models\Address;
+use App\Models\Course;
 use App\Models\DegreeDepartment;
 use App\Models\DegreeSection;
 use App\Models\DegreeStudent;
@@ -20,6 +21,7 @@ use App\Models\Program;
 use App\Models\Semester;
 use App\Models\UserLogin;
 use App\Notifications\UnApprovedStudents;
+use App\Traits\Reusable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +31,7 @@ use Illuminate\Validation\ValidationException;
 
 class DegreeStudentController extends Controller
 {
+    use Reusable;
     /**
      * Display a listing of the resource.
      *
@@ -102,6 +105,9 @@ class DegreeStudentController extends Controller
             $emergency_address=Address::create($request->emergency_address);
 
             $data=$request->all();
+     //name reversing problems here
+            $data['last_name']=$request->middle_name;
+            $data['middle_name']=$request->last_name;
 
             $data['birth_address_id']=$birth_address->id;
             $data['residential_address_id']=$residential_address->id;
@@ -534,6 +540,14 @@ class DegreeStudentController extends Controller
 
         DB::beginTransaction();
         try {
+            $student=DegreeStudent::find($id);
+          $seme_check=$student->semesters()->wherePivot('semester_id',$request->old_semester_id)->first();
+           if ($seme_check) {
+               if ($seme_check->pivot->status == 'waiting') {
+                return response()->json(['error' =>'This Semester can\'t be updated'],200);
+
+               }
+           }
 
             if (request('old_year_no') == request('year_no')) {
                 if (request('old_semester_id') == request('semester_id')) {
@@ -541,7 +555,7 @@ class DegreeStudentController extends Controller
 
                  }
             }
-            $student=DegreeStudent::find($id);
+
             $academic_year=AcademicYear::find($request->academic_year_id);
 
             $cpf_id=FeeType::where('name','CP Fee')->first()->id;
@@ -625,20 +639,68 @@ class DegreeStudentController extends Controller
 
     public function giveCourseResult($id){
         $student=DegreeStudent::find($id);
-            // return request()->courses;
-        foreach (request()->courses as $course) {
-               // return $course['total_mark'];
-             $student->courses()->updateExistingPivot($course['id'],[
-                 'total_mark'=>$course['total_mark'],
-                //  'grade_point'=>$this->courseGradePoint($course->cp,$course->total_mark),
+         $sem_id=request('semester_id');
+         $semester=Semester::find($sem_id);
+         $course=Course::find(request('id'));
 
-             ]);
+          if ($semester->is_closed) {
+            return response()->json('Result Entry on closed semester is not allowed!!  ',400);
+         }
+         $ff=$student->semesters()->wherePivot('semester_id' ,$sem_id)->first();
+               if ($ff) {
+                  if (!$ff->pivot->legible) {
+                   return response()->json('Illigble !!! Fee Isue  ',400);
+                  }
+               }
+             $is_allowed_now=  DB::table('dynamic_system_settings')->first('degree_teacher_result_entry_time');
+             if (! $is_allowed_now) {
+               return response()->json('Illigble !!! Not Result Entry Time  ',400);
+             }
 
-        }
+
+
+               $letter_grade=$this->calculateLetterGrade(request()->total_mark);
+               $grade_point=$this->courseGradePoint($course->cp,$letter_grade);
+               $student->courses()->updateExistingPivot(request('id'),[
+
+                   'from_5'=>request('from_5'),
+                   'from_5s'=>request('from_5s'),
+                   'from_25'=>request('from_25'),
+                   'from_25s'=>request('from_25s'),
+                   'from_40'=>request('from_40'),
+                   'total_mark'=>request('total_mark'),
+                   'letter_grade'=> $letter_grade,
+                   'grade_point'=> $grade_point
+
+                ]);
+                $all=$this->calculateGPA($student,$sem_id);
+                $new_gpa=$all[0];
+                $semester_grade_point=$all[1];
+
+                 if ($new_gpa == 0.0 || $new_gpa == 0) {
+                       $student->semesters()->updateExistingPivot($sem_id,[
+                           'semester_GPA'=>0.0,
+                       ]);
+                   }else {
+                       $student->semesters()->updateExistingPivot($sem_id,[
+                           'semester_GPA'=>$new_gpa,
+                           'semester_grade_point'=> $semester_grade_point
+
+                       ]);
+                   }
+
+                   $sem_couses_count=$student->courses()->wherePivot('semester_id',$sem_id)
+                                          ->wherePivot('letter_grade','')->count();
+
+                   if ($sem_couses_count == 0) {
+                       $student->semesters()->updateExistingPivot($sem_id,[
+                           'status'=>'finished',
+                       ]);
+                   }
+
         return response()->json(['successfull set'],200);
     }
     public function getDegreeStudentsByDepartment(){
-
 
             $dep_head=Employee::where('email',request()->user()->user_name)->first();
             $department=$dep_head->manage;
@@ -650,16 +712,12 @@ class DegreeStudentController extends Controller
 
         public function getArrangedStudents(){
 
-
-           //$academic_year_id=null;
-        //    return request()->academic_year_id;
             if (request('academic_year_id')) {
                 $academic_year_id=request('academic_year_id');
             }else{
                 $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
             }
 
-            // $semester_no=request('semester_no') ?:1;
             $year_no=request('year_no') ?:1;
                $semesters=[];
                $all=[];
@@ -679,7 +737,7 @@ class DegreeStudentController extends Controller
                     $no=null;
                     $students=[];
                     foreach ($semesters1 as $semester) {
-                            $degree_students=$semester->degree_students()
+                            $degree_students=$semester->degree_students()->orderByDesc('created_at')
                             // ->when(request('search_query'),function($query){
                             //     $query->where('student_id',request('search_query'));
 

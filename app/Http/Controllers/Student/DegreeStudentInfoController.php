@@ -13,8 +13,6 @@ use App\Models\DegreeDepartment;
 use App\Models\DegreeStudent;
 use Illuminate\Http\Request;
 
-use function PHPUnit\Framework\returnSelf;
-
 class DegreeStudentInfoController extends Controller
 {
     public function myTuition(Request $request,$id){
@@ -69,8 +67,15 @@ class DegreeStudentInfoController extends Controller
 
     public function myCourse(Request $request,$id){
         $student=DegreeStudent::find($id);
+
+        $semester=$student->semesters()->wherePivot('status','!=','waiting')->first();
+
+        if (!$semester) {
+            return response()->json([],200);
+        }
         $department=DegreeDepartment::find($student->degree_department_id);
         $courses=$department->courses()->where('courses.program_id',$student->program_id)->get();
+        // $courses=$department->courses()->where('courses.program_id',$student->program_id)->get();
         return response()->json(CourseResource::collection($courses),200);
 
     }
@@ -86,18 +91,21 @@ class DegreeStudentInfoController extends Controller
 
     public function myGrade(Request $request,$id){
         $student=DegreeStudent::find($id);
-        $studentCourses=$student->courses()
-                                        //    ->where('program_id',request()->program_id)
-                                        //     ->where('year_no',request()->year_no)
-                                        //     ->where('semester_no',request()->semester_no)
-                                            ->get();
-        $semester=$student->semesters()->where('program_id',request()->program_id)
-                                                  ->where('year_no',request()->year_no)
-                                                  ->where('semester_no',request()->semester_no)->first();
-          $courses=[];
+
+
+        $studentCourses=$student->courses()->get();
+        $semesters=$student->semesters()->wherePivot('status','!=','waiting')->get();
+
+
+        $courses=[];
+
+        foreach ($semesters as $semester) {
 
          foreach ($studentCourses as $studentCourse) {
-             $course=[];
+
+          if ($semester->id == $studentCourse->pivot->semester_id) {
+
+            $course=[];
           $letter_grade=$studentCourse->pivot->grade_point;
           $grade_point=$this->courseGradePoint($studentCourse->cp,$letter_grade);
           $course['code']=$studentCourse->code;
@@ -111,7 +119,9 @@ class DegreeStudentInfoController extends Controller
 
          $courses[]=$course;
 
+        }
        }
+    }
        return response()->json($courses,200);
     }
 
@@ -123,24 +133,27 @@ class DegreeStudentInfoController extends Controller
         $semesters=[];
         $temp=[];
         foreach ($student->semesters as $semester) {
-            $temp[]=$semester->id;
-            $seme['id']=$semester->id;
-            $seme['year']=$semester->academic_year ? $semester->academic_year->year:null;
-            $seme['start_date']=$semester->start_date;
-            $seme['end_date']=$semester->end_date;
-            $seme['status']=$semester->pivot->status;
-            $seme['year_no']=$semester->pivot->year_no;
-            $seme['semester_no']=$semester->pivot->semester_no;
-            $seme['GPA']=$semester->pivot->semester_GPA;
-            if($semester->pivot->semester_GPA == 0 || $semester->pivot->semester_GPA == 0.0){
-                $seme['CGPA']=0;
 
-            }else{
-                $seme['CGPA']=$this->calculateCGPA($student,$temp);
+            if ($semester->pivot->status != 'waiting') {
 
+                $temp[]=$semester->id;
+                $seme['id']=$semester->id;
+                $seme['year']=$semester->academic_year ? $semester->academic_year->year:null;
+                $seme['start_date']=$semester->start_date;
+                $seme['end_date']=$semester->end_date;
+                $seme['status']=$semester->pivot->status;
+                $seme['year_no']=$semester->pivot->year_no;
+                $seme['semester_no']=$semester->pivot->semester_no;
+                $seme['GPA']=$semester->pivot->semester_GPA;
+                if($semester->pivot->semester_GPA == 0 || $semester->pivot->semester_GPA == 0.0){
+                    $seme['CGPA']=0;
+
+                }else{
+                    $seme['CGPA']=$this->calculateCGPA($student,$temp);
+
+                }
+                $semesters[]=$seme;
             }
-            $semesters[]=$seme;
-
         }
         // return response()->json(SemestersResource::collection($student->semesters),200);
         return response()->json($semesters,200);

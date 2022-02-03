@@ -41,7 +41,7 @@ class DegreeDepartmentController extends Controller
         $c= DegreeDepartment::where('name',$request->name)->first();
         $c1= DegreeDepartment::where('short_name',$request->short_name)->first();
         if ($c || $c1) {
-            return response()->json('The department name or short name',202);
+            return response()->json('The department name or short name  ',202);
         }
          $dp= DegreeDepartment::create(['name'=>$request->name,'short_name'=>$request->short_name]);
 
@@ -122,7 +122,15 @@ class DegreeDepartmentController extends Controller
      */
     public function destroy(DegreeDepartment $degreeDepartment)
     {
-        $degreeDepartment->delete();
+        if ($degreeDepartment->degree_students()->count() == 0) {
+            $degreeDepartment->programs()->detach();
+            $degreeDepartment->delete();
+
+            return  response()->json('Successfully deleted',200);
+        }else {
+            return  response()->json('impossible delete Department that have student',200);
+        }
+
     }
 
     public function assignDepartmentHead(Request $request){

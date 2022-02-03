@@ -24,7 +24,7 @@ class CourseResource extends JsonResource
             'cp'=>$this->cp,
             'department'=>$this->department ? $this->department:null ,
             'year_no'=>$this->year_no,
-            'program'=>$this->program ? $this->program->name:null,
+            'program'=>$this->program ? $this->program:null,
             'instractor'=>$this->teacher->first() ? $this->teacher->first()->name:null,
 
         ];

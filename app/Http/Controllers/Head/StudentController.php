@@ -93,7 +93,6 @@ class StudentController extends Controller
                     $all[]=$semesters;
                 }
 
-
         }
     return response()->json($all,200);
   }
@@ -134,7 +133,8 @@ class StudentController extends Controller
                                          ->where('current_semester_no',$section->semester_no)
                                          ->whereHas('semesters',function(Builder $q) use($section){
                                              $q->where('semester_id',$section->semester_id)
-                                               ->where('status','approved');
+                                               ->where('status','approved')
+                                               ;
                                          })
 
                                          ->whereDoesntHave('degree_sections', function (Builder $query) use($department,$section) {

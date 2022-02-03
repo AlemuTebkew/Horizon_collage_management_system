@@ -28,11 +28,11 @@ class DegreeSectionController extends Controller
         if (request()->has('academic_year_id')) {
             $academic_year_id=request('academic_year_id');
         }else{
-        $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
+          $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
 
-        return DegreeSectionResource::collection(DegreeSection::with('degree_department','semester')
-              ->where('academic_year_id',$academic_year_id)->get());
+        return response()->json(DegreeSectionResource::collection(DegreeSection::with('degree_department','semester')
+              ->where('academic_year_id',$academic_year_id)->get()) ,200);
     }
 
     /**
@@ -63,7 +63,7 @@ class DegreeSectionController extends Controller
                              ->first();
       if (!$s) {
         $ds= DegreeSection::create($data);
-        return response()->json(new DegreeSectionResource($ds->load('degree_department','semester')),200) ;
+        return response()->json(new DegreeSectionResource($ds->load('degree_department','semester')),201) ;
       }else {
           return response()->json(['error_message'=>'Section Already Added'],400);
       }

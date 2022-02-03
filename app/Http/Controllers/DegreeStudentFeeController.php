@@ -29,16 +29,26 @@ class DegreeStudentFeeController extends Controller
         }else{
             $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
-        $per_page=request()->has('per_page') ? request('per_page') : 2;
+        $per_page=request()->has('per_page') ? request('per_page') : 10;
 
         $academic_year=AcademicYear::find($academic_year_id);
 
        $degreeStudents=DegreeStudent::whereHas('month_payments',function( $query) use($academic_year_id){
             $query->where('degree_student_month.academic_year_id',$academic_year_id);
 
+
        })->with(['month_payments'=>function( $query) use($academic_year_id){
        $query->where('degree_student_month.academic_year_id',$academic_year_id);
+
      }]) ->where('is_graduated',0)->where('fully_scholarship',0)
+      ->when(request('search_id'),function($query){
+
+        $query->where('student_id','LIKE','%'.request('search_id').'%')
+            ->orWhere('first_name','LIKE','%'.request('search_id').'%')
+            ->orWhere('middle_name','LIKE','%'.request('search_id').'%')
+            ->orWhere('last_name','LIKE','%'.request('search_id').'%');
+      })
+    //   ->orderBy('degree_student_month.paid_date')
 
       ->paginate($per_page);
 
@@ -78,16 +88,9 @@ class DegreeStudentFeeController extends Controller
                             //     $month_pad =null;
                             //     break;
                             // }
-
-
                          }
-
                         //  $pads[$month_payment->name]=$month_pad;
-
                         }
-
-
-
             // }
             $student['total']=$total;
             $student['pads']=$pads;
@@ -112,7 +115,7 @@ class DegreeStudentFeeController extends Controller
         }else{
             $academic_year_id=AcademicYear::where('is_current',1)->first()->id;
         }
-        $per_page=request()->has('per_page') ? request('per_page') : 4;
+        $per_page=request()->has('per_page') ? request('per_page') : 10;
 
         $academic_year=AcademicYear::find($academic_year_id);
 
@@ -182,13 +185,10 @@ class DegreeStudentFeeController extends Controller
           return response()->json($paginated_data ,200);
     }
 
-
     public function filterUnPaidStudentsByMonth()
     {
         $all=[];
         $student=[];
-
-
         //getting all students
         $academic_year_id=null;
         if (request()->filled('academic_year_id')) {
@@ -212,7 +212,7 @@ class DegreeStudentFeeController extends Controller
       ->paginate($per_page);
 
 
-      $a= $degreeStudents->toArray();
+      $a= clone $degreeStudents->toArray();
 
       $paginated_data['current_page']= $a['current_page'];
       $paginated_data['to']= $a['to'];
@@ -291,6 +291,7 @@ class DegreeStudentFeeController extends Controller
             $student['student_id']=$degreeStudent->student_id;
             $student['full_name']=$degreeStudent->full_name;
             $student['department']=$degreeStudent->degree_department->name;
+            $student['sex']=$degreeStudent->sex;
             $student['program']=$degreeStudent->program->name;
             $student['year_no']=$degreeStudent->current_year_no;
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Registrar;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AddedLevelResource;
 use App\Http\Resources\Module\ModuleResource;
+use App\Http\Resources\SemesterResource;
 use App\Http\Resources\StudentLevelResource;
 use App\Http\Resources\TvetResult\ModuleResultResource;
 use App\Models\AcademicYear;
@@ -11,12 +12,14 @@ use App\Models\Address;
 use App\Models\Employee;
 use App\Models\FeeType;
 use App\Models\Level;
+use App\Models\Module;
 use App\Models\Month;
 use App\Models\Program;
 use App\Models\TvetDepartment;
 use App\Models\TvetStudent;
 use App\Models\UserLogin;
 use App\Notifications\UnApprovedStudents;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -45,9 +48,9 @@ class TvetStudentController extends Controller
     public function store(Request $request)
     {
 
-        DB::beginTransaction();
+        // DB::beginTransaction();
 
-        try {
+        // try {
 
         $request->validate([
             'first_name'=>'required',
@@ -78,6 +81,8 @@ class TvetStudentController extends Controller
         $emergency_address=Address::create($request->emergency_address);
 
         $data=$request->all();
+        $data['last_name']=$request->middle_name;
+        $data['middle_name']=$request->last_name;
         $data['birth_address_id']=$birth_address->id;
         $data['residential_address_id']=$residential_address->id;
         $data['emergency_address_id']=$emergency_address->id;
@@ -129,16 +134,16 @@ class TvetStudentController extends Controller
 
 
         return response()->json($this->responseData($student,$level->level_no),201);
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        //  return $e;
-        if ($e instanceof ValidationException) {
+    // } catch (\Throwable $e) {
+    //     DB::rollBack();
+    //     //  return $e;
+    //     if ($e instanceof ValidationException) {
 
-            return response()->json(['error'=>'Already Registerd'],200);
+    //         return response()->json(['error'=>'Already Registerd'],200);
 
-        }
-        return response()->json(['can t create student'.$e],501);
-    }
+    //     }
+    //     return response()->json(['can t create student'.$e],501);
+    // }
 
     }
 
@@ -471,7 +476,53 @@ class TvetStudentController extends Controller
 
       public function getStudentLevels($tvetStudent_id){
         $tvetStudent= TvetStudent::find($tvetStudent_id);
-        return new StudentLevelResource($tvetStudent->load('levels'));
+
+        $student['id']=$tvetStudent->id;
+        $student['name']=$tvetStudent->fullName;
+        $student['student_id']=$tvetStudent->student_id;
+        $student['sex']=$tvetStudent->sex;
+        $student['department']=$tvetStudent->tvet_department
+            ->makeHidden('created_at','updated_at','department_head_id','sector');
+        $student['current_level_no']=$tvetStudent->current_level_no;
+        foreach ($tvetStudent->levels as $level) {
+
+            $one_level['id']=$level->id;
+            $one_level['year']=AcademicYear::find($level->pivot->academic_year_id)->year;
+            $one_level['academic_year_id']=$level->pivot->academic_year_id;
+            $one_level['status']=$level->pivot->status;
+            $one_level['level_no']=$level->level_no;
+            $one_level['is_allowed_now']=DB::table('dynamic_system_settings')->first()->tvet_registrar_result_entry_time;
+                            //check for student tuition fee
+            if ($level->pivot->legible) {
+                $one_level['legible']=$level->pivot->legible;
+            }else {
+                $m_name=(new Carbon())->monthName;
+                $un_paid=  $tvetStudent->month_payments()->wherePivot('academic_year_id',$level->pivot->academic_year_id)
+                                        ->wherePivot('receipt_no',null)
+                                        ->where('months.name',$m_name)->first();
+
+                if (!$un_paid) {
+                    $tvetStudent->levels()->updateExistingPivot($level->id,
+                    [
+                        'legible'=>1,
+
+                    ]);
+
+                    $one_level['legible']=1;
+
+                }else {
+                    $tvetStudent->levels()->updateExistingPivot($level->id,
+                    [
+                        'legible'=>0,
+
+                    ]);
+                    $one_level['legible']=0;
+                }
+            }
+            $student['levels'][]=$one_level;
+        }
+     return $student;
+    // return new StudentLevelResource($tvetStudent->load('levels'));
     }
 
     public function getStudentLevelModules($id){
@@ -485,15 +536,35 @@ class TvetStudentController extends Controller
     }
 
     public function giveModuleResult($id){
-        $student=TvetStudent::find(request($id));
+        $student=TvetStudent::find($id);
+        $module=Module::find(request('id'));
 
-        foreach (request()->modules as $module) {
-             $student->modules()->updateExistingPivot($module['id'],[
-                 'total_mark'=>$module['total_mark'],
+        $ff=$student->levels()->wherePivot('level_id' ,request('level_id'))->first();
+
+        if ($ff) {
+           if (!$ff->pivot->legible) {
+
+            return response()->json('Illigble !!! Fee Isue  ',400);
+
+           }
+        }
+
+        $is_allowed_now=  DB::table('dynamic_system_settings')->first('tvet_teacher_result_entry_time');
+
+        if (! $is_allowed_now) {
+          return response()->json('Illigble !!! Not Result Entry Time  ',400);
+
+        }
+
+             $student->modules()->updateExistingPivot(request('id'),[
+                'from_20'=>request('from_20'),
+                'from_30'=>request('from_30'),
+                'from_50'=>request('from_50'),
+                'total_mark'=>request('total_mark'),
 
              ]);
 
-        }
+
     }
     public function getArrangedStudents(){
 

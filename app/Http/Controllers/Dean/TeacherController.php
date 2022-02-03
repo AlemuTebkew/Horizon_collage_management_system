@@ -33,7 +33,7 @@ class TeacherController extends Controller
             'first_name'=>'required',
             'last_name'=>'required',
             'email'=>'required|unique:teachers',
-            'phone_no'=>'required|unique:employees',
+            'phone_no'=>'required|unique:teachers',
             'type'=>'required',
             'qualification'=>'required',
             'gpa'=>'required',

@@ -55,14 +55,14 @@ class RegistrarDashboardController extends Controller
                                  whereHas('levels',function($query) use($academic_year_id){
             $query->where('tvet_student_level.academic_year_id',$academic_year_id);
             //  ->where('academic_year_id',$academic_year_id);
-            })->with('tvet_department')
+            })->with('tvet_department:id,name')
             ->where('is_graduated',0)
               ->where('fully_scholarship',1)->take(7)->get();
 
         $dashboard_data['degree_scholarship_students']=DegreeStudent::select('student_id','first_name','last_name','degree_department_id')->
              whereHas('semesters',function($query) use($current_academic_year){
                    $query->where('degree_student_semester.academic_year_id',$current_academic_year->id);
-            })->with('degree_department')
+            })->with('degree_department:id,name')
             ->where('is_graduated',0)
              ->where('fully_scholarship',1)->take(7)->get();
 
@@ -74,14 +74,16 @@ class RegistrarDashboardController extends Controller
         ->where('degree_student_month.receipt_no',null)
         ->where('months.name',Carbon::now()->monthName);
 
-            })->take(7)->get();
+            })->where('fully_scholarship',0)
+            ->take(7)->get();
 
             $tvetStudents=TvetStudent::select('student_id','first_name','last_name')->whereHas('month_payments',function( $query) use($academic_year_id){
                 $query->where('tvet_student_month.academic_year_id',$academic_year_id)
                 ->whereNull('tvet_student_month.receipt_no')
                 ->where('months.name',Carbon::now()->monthName);
 
-            })->take(7)->get();
+            })->where('fully_scholarship',0)
+            ->take(7)->get();
 
             $dashboard_data['unpaid_degree_students']= $degreeStudents;
             $dashboard_data['unpaid_tvet_students']= $tvetStudents;

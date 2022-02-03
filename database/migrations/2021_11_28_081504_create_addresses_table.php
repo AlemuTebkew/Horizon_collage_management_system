@@ -15,13 +15,13 @@ class CreateAddressesTable extends Migration
     {
         Schema::create('addresses', function (Blueprint $table) {
             $table->id();
-            $table->string('country')->comment('for non ethiopian')->nullable();
-            $table->string('region')->nullable();
-            $table->string('zone')->nullable();
-            $table->string('subcity')->nullable();
-            $table->string('kebele')->nullable();
-            $table->string('house_no')->nullable();
-            $table->string('town')->nullable();
+            $table->string('country',15)->comment('for non ethiopian')->nullable();
+            $table->string('region',15)->nullable();
+            $table->string('zone',15)->nullable();
+            $table->string('subcity',15)->nullable();
+            $table->string('kebele',15)->nullable();
+            $table->string('house_no',15)->nullable();
+            $table->string('town',15)->nullable();
             $table->timestamps();
         });
     }

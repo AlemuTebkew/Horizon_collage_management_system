@@ -33,12 +33,12 @@ class CreateDegreeStudentsTable extends Migration
             $table->double('EGSSE_result')->nullable();
             $table->double('EHEEE_result')->nullable();
 
-            $table->foreignId('birth_address_id')->constrained('addresses','id')->cascadeOnDelete()->cascadeOnUpdate();//place_of_birth_address
-            $table->foreignId('residential_address_id')->constrained('addresses','id')->cascadeOnDelete()->cascadeOnUpdate();//current_residential_address
-            $table->foreignId('emergency_address_id')->constrained('addresses','id')->cascadeOnDelete()->cascadeOnUpdate();//emergency_contact_address
+            $table->foreignId('birth_address_id')->constrained('addresses','id')->nullOnDelete();//place_of_birth_address
+            $table->foreignId('residential_address_id')->constrained('addresses','id')->nullOnDelete();//current_residential_address
+            $table->foreignId('emergency_address_id')->constrained('addresses','id')->nullOnDelete();//emergency_contact_address
 
-            $table->foreignId('degree_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('program_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('degree_department_id')->constrained()->nullOnDelete();
+            $table->foreignId('program_id')->constrained()->nullOnDelete();
             //
             $table->string('financial_source',50)->nullable();
             $table->integer('current_semester_no');

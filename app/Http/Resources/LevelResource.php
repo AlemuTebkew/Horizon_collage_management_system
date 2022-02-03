@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\AcademicYear;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 class LevelResource extends JsonResource
 {
@@ -21,6 +22,8 @@ class LevelResource extends JsonResource
             'academic_year_id'=>$this->pivot->academic_year_id ? $this->pivot->academic_year_id:null,
             'status'=>$this->pivot->status,
             'level_no'=>$this->level_no,
+            'legible'=> $this->pivot->legible, //check for student payment fee
+            'is_allowed_now'=>  DB::table('dynamic_system_settings')->first()->tvet_registrar_result_entry_time
         ];
     }
 }

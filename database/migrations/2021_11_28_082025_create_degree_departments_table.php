@@ -19,9 +19,7 @@ class CreateDegreeDepartmentsTable extends Migration
             $table->string('short_name')->unique();
             //Any additional column modifiers must be called before the constrained method:
             $table->foreignId('department_head_id')->nullable()
-            ->constrained('employees','id')
-            ->cascadeOnDelete()
-            ->cascadeOnUpdate();
+            ->constrained('employees','id')->nullOnDelete();
             $table->timestamps();
         });
     }

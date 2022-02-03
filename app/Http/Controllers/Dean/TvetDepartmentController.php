@@ -96,7 +96,15 @@ class TvetDepartmentController extends Controller
      */
     public function destroy(TvetDepartment $tvetDepartment)
     {
-        $tvetDepartment->delete();
+        if ($tvetDepartment->tvet_students()->count() == 0) {
+            $tvetDepartment->programs()->detach();
+            $tvetDepartment->delete();
+
+            return  response()->json('Successfully deleted',200);
+        }else {
+            return  response()->json('impossible delete Department that have student',202);
+        }
+
     }
 
 

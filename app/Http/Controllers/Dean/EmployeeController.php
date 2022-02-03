@@ -38,8 +38,8 @@ class EmployeeController extends Controller
         $request->validate([
             'first_name'=>'required',
             'last_name'=>'required',
-            'email'=>'required|unique:employees',
-            'phone_no'=>'required|unique:employees',
+            'email'=>'required|unique:employees|unique:teachers',
+            'phone_no'=>'required|unique:employees|unique:teachers',
             'role'=>'required',
 
         ]);
@@ -128,13 +128,26 @@ class EmployeeController extends Controller
 
         DB::beginTransaction();
         try {
+
+            if ($employee->managet) {
+                $department=$employee->managet;
+
+                $department->manager()->dissociate($employee->id)->save();
+              //  $employee->managet()->desociate();
+            }
+
+            if ($employee->manage) {
+                $department=$employee->manage;
+                $department->manager()->dissociate($employee->id)->save();
+            }
+
             UserLogin::where('user_name',$employee->email)->first()->delete();
             $employee->delete();
             DB::commit();
             return response()->json('Successfully deleted',200);
-            } catch (\Throwable $th) {
+            } catch (\Exception $th) {
                 DB::rollBack();
-                return response()->json('error while saving teacher',501);
+                return response()->json($th,501);
         }
 
     }

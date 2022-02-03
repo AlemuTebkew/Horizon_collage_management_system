@@ -36,22 +36,25 @@ class SectionController extends Controller
     foreach ($dsecs as $dsec) {
       $section=[];
 
-      $section['id']=$dsec->id;
-      $section['name']=$dsec->name;
-      $section['department']=$dsec->degree_department->name;
-      $section['program']=$dsec->program->name;
-      $section['year']=$dsec->year_no;
-      $section['course_title']=Course::find($dsec->pivot->course_id)->title;
-      $section['course_id']=Course::find($dsec->pivot->course_id)->id;
-      $section['no_of_students']=$dsec->degree_students->count();
-      $section['type']='degree';
+      $seme=Semester::find($dsec->semester_id);
+     if (! $seme->is_closed) {
+        $section['id']=$dsec->id;
+        $section['name']=$dsec->name;
+        $section['department']=$dsec->degree_department->name;
+        $section['program']=$dsec->program->name;
+        $section['year']=$dsec->year_no;
+        $section['course_title']=Course::find($dsec->pivot->course_id)->title;
+        $section['course_id']=Course::find($dsec->pivot->course_id)->id;
+        $section['no_of_students']=$dsec->degree_students->count();
+        $section['type']='degree';
 
-      $sections[]=$section;
+        $sections[]=$section;
+     }
+
     }
 
     foreach ($tsecs as $tsec) {
         $section=[];
-
         $section['id']=$tsec->id;
         $section['name']=$dsec->name;
         $section['department']=$tsec->tvet_department->name;
@@ -83,11 +86,13 @@ class SectionController extends Controller
 
             $semester=$st->semesters()->wherePivot('semester_id',$ds->semester_id)->first();
 
-
+            //check result entry time
+            $is_allowed_now=  DB::table('dynamic_system_settings')->first()->degree_teacher_result_entry_time;
 
             $st_course=$st->courses()->wherePivot('course_id',request('course_id'))->first()->pivot;
             $student['id']=$st->id;
-            $student['legible']=$semester->pivot->legible;
+            $student['legible']=$semester->pivot->legible; //check for student payment fee
+            $student['is_allowed_now']=$is_allowed_now;
             $student['student_id']=$st->student_id;
             $student['first_name']=$st->first_name;
             $student['last_name']=$st->last_name;
@@ -111,6 +116,7 @@ class SectionController extends Controller
             foreach ($ts->tvet_students as $st) {
 
 
+                //check for student tuition fee
                 $m_name=(new Carbon())->monthName;
                 $un_paid=  $st->month_payments()->wherePivot('academic_year_id',$ts->academic_year_id)
                                        ->wherePivot('receipt_no',null)
@@ -135,8 +141,12 @@ class SectionController extends Controller
                           $student['legible']=0;
                       }
 
-               $st_module=$st->modules()->where('module_id',request('course_id'))->first()->pivot;
+                      //check result entry time
+                $is_allowed_now=  DB::table('dynamic_system_settings')->first()->tvet_teacher_result_entry_time;
+
+                $st_module=$st->modules()->where('module_id',request('course_id'))->first()->pivot;
                 $student['id']=$st->id;
+                $student['is_allowed_now']=$is_allowed_now;
                 $student['student_id']=$st->student_id;
                 $student['first_name']=$st->first_name;
                 $student['last_name']=$st->last_name;
@@ -166,6 +176,25 @@ class SectionController extends Controller
             $sem_id=DegreeSection::find(request('section_id'))->semester_id;
             $cp=Course::find(request('course_id'))->cp;
             $student=DegreeStudent::find($student_id);
+            $semester=Semester::find($sem_id);
+
+            if ($semester->is_closed) {
+                return response()->json('Result Entry on closed semester is not allowed!!  ',400);
+             }
+            $ff=$student->semesters()->wherePivot('semester_id' ,$sem_id)->first();
+            if ($ff) {
+               if (!$ff->pivot->legible) {
+                return response()->json('Illigble !!! Fee Isue  ',400);
+               }
+            }
+
+          $is_allowed_now=  DB::table('dynamic_system_settings')
+                   ->first('degree_teacher_result_entry_time');
+          if (! $is_allowed_now) {
+            return response()->json('Illigble !!! Not Result Entry Time  ',400);
+
+          }
+
             $letter_grade=$this->calculateLetterGrade(request()->total_mark);
             $grade_point=$this->courseGradePoint($cp,$letter_grade);
             $student->courses()->updateExistingPivot(request('course_id'),[
@@ -198,11 +227,38 @@ class SectionController extends Controller
                     ]);
                 }
 
+                $sem_couses_count=$student->courses()->wherePivot('semester_id',$sem_id)
+                                       ->wherePivot('grade_point','')->count();
+
+                if ($sem_couses_count == 0) {
+                    $student->semesters()->updateExistingPivot($sem_id,[
+                        'status'=>'finished',
+                    ]);
+                }
              DB::commit();
              return response()->json($letter_grade,200);
 
         }else if(request('type') == 'tvet'){
             $student=TvetStudent::find($student_id);
+            $level_id=DegreeSection::find(request('section_id'))->level_id;
+
+
+            $ff=$student->levels()->wherePivot('level_id' ,$level_id)->first();
+
+            if ($ff) {
+               if (!$ff->pivot->legible) {
+
+                return response()->json('Illigble !!! Fee Isue  ',400);
+
+               }
+            }
+
+            $is_allowed_now=  DB::table('dynamic_system_settings')->first('tvet_teacher_result_entry_time');
+
+            if (! $is_allowed_now) {
+              return response()->json('Illigble !!! Not Result Entry Time  ',400);
+
+            }
 
             $student->modules()->updateExistingPivot(request('course_id'),[
                 'from_20'=>request('from_20'),

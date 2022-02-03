@@ -21,8 +21,11 @@ class ModuleResultResource extends JsonResource
             'training_hour'=>$this->training_hour,
             'department'=>$this->department ? $this->department->makeHidden('created_at','department_head_id','updated_at'):null ,
             'level'=>$this->level ? $this->level->level_no:null,
+            'from_20'=> $this->pivot->from_20 ?? null,
+            'from_30'=> $this->pivot->from_30 ?? null,
+            'from_50'=> $this->pivot->from_50 ?? null,
             'total_mark'=> $this->pivot->total_mark ?? null,
-
+            'is_changed'=>0,
         ];;
     }
 }

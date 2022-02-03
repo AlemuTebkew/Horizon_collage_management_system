@@ -42,6 +42,7 @@ use App\Http\Controllers\Teacher\SectionController;
 use App\Http\Controllers\TvetStudentFeeController;
 use App\Http\Controllers\Cashier\CashierDashboardController;
 use App\Http\Controllers\Dean\AcademicYearDetail;
+use App\Http\Controllers\Dean\SettingController;
 use App\Http\Controllers\Head\CourseController as HeadCourseController;
 use App\Http\Controllers\Head\HeadDashboardController;
 use App\Http\Controllers\Head\StudentController as HeadStudentController;
@@ -128,6 +129,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         Route::put('/update_semester',[AcademicYearDetail::class,'updateSemester']);
         Route::put('/update_semester_month',[AcademicYearDetail::class,'updateSemesterMonth']);
         Route::put('/update_semester_activity',[AcademicYearDetail::class,'updateSemesterActivities']);
+
+        //System setting related
+        Route::put('/change_academic_year_status/{id}',[SettingController::class,'changeAcademicYearStatus']);
+        Route::put('/change_semester_status/{id}',[SettingController::class,'changeSemesterStatus']);
+        Route::put('/change_degree_teacher_time',[SettingController::class,'changeDegreeTeacherResultEntryTime']);
+        Route::put('/change_tvet_teacher_time',[SettingController::class,'changeTvetTeacherResultEntryTime']);
+        Route::put('/change_degree_registrar_time',[SettingController::class,'changeDegreeRegistrarResultEntryTime']);
+        Route::put('/change_tvet_registrar_time',[SettingController::class,'changeTvetRegistrarResultEntryTime']);
+        Route::get('/get_setting_data',[SettingController::class,'getSettingData']);
 
         //----------------End Dean Functionality-------------------//
 
@@ -242,6 +252,7 @@ Route::get('/degree_yearly_arranged_students',[DegreeStudentController::class,'g
 Route::get('/tvet_yearly_arranged_students',[TvetStudentController::class,'getArrangedStudents']);
 Route::post('/degree_approve',[StudentApprovalController::class,'approveDegreeStudent']);
 Route::post('/change_result_entry_state/{id}',[StudentApprovalController::class,'makeDegreeStudentLegibleForResult']);
+Route::post('/change_result_entry_state_tvet/{id}',[StudentApprovalController::class,'makeTvetStudentLegibleForResult']);
 
 Route::post('/tvet_approve',[StudentApprovalController::class,'approveTvetStudent']);
 Route::get('/notifications/{id}',[EmployeeController::class,'get_notifications']);

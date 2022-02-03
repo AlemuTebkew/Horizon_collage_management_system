@@ -19,8 +19,8 @@ class CreateModulesTable extends Migration
             $table->string('title');
             // $table->string('type'); //we thought not in module
             $table->integer('training_hour');
-            $table->foreignId('tvet_department_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->foreignId('level_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('tvet_department_id')->constrained()->nullOnDelete();
+            $table->foreignId('level_id')->constrained()->nullOnDelete();
             $table->timestamps();
         });
     }
