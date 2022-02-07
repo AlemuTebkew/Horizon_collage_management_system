@@ -128,7 +128,7 @@ class DegreeDepartmentController extends Controller
 
             return  response()->json('Successfully deleted',200);
         }else {
-            return  response()->json('impossible delete Department that have student',200);
+            return  response()->json('impossible delete Department that have student',202);
         }
 
     }

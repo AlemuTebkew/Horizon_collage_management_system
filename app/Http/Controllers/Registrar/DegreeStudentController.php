@@ -464,6 +464,7 @@ class DegreeStudentController extends Controller
                 DB::commit();
                 return response()->json('succesfully deleted',200);
             }else{
+                return response()->json('not possible to deleted',500);
 
             }
         } catch (\Exception $e) {

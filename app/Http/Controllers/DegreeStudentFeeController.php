@@ -212,7 +212,7 @@ class DegreeStudentFeeController extends Controller
       ->paginate($per_page);
 
 
-      $a= clone $degreeStudents->toArray();
+      $a=  $degreeStudents->toArray();
 
       $paginated_data['current_page']= $a['current_page'];
       $paginated_data['to']= $a['to'];

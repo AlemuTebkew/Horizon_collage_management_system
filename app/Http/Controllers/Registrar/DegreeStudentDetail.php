@@ -18,6 +18,12 @@ class DegreeStudentDetail extends Controller
     public function getStudentInfoToEdit($id){
 
         $student=DegreeStudent::findOrFail($id);
+       $is_approved= $student->semesters()->wherePivot('status','approved')->first();
+        if ($is_approved) {
+           $student->status='approved';
+        }else {
+            $student->status='waiting';
+        }
         return response()->json($student->load(['birth_address','emergency_address','residential_address','degree_department','program']),200);
     }
 

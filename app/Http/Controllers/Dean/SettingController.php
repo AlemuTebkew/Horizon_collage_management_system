@@ -54,6 +54,15 @@ class SettingController extends Controller
     public function changeAcademicYearStatus($acc_id){
 
        $acc_year= AcademicYear::find($acc_id);
+
+       if(request('status')){
+            foreach ($acc_year->semesters as $semester) {
+                if (!$semester->is_closed) {
+                    return response()->json('The Is Opend Semester Close First!!!! Bro',202);
+                }
+            }
+       }
+
        $acc_year->is_closed=request('status');
        $acc_year->save();
 
@@ -64,6 +73,8 @@ class SettingController extends Controller
 
         $seme= Semester::find($seme_id);
         $seme->is_closed=request('status');
+
+    
         $seme->save();
         return response()->json($seme->is_closed,200);
 

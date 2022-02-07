@@ -109,7 +109,7 @@ class TvetStudentFeeController extends Controller
 
          $tvetStudents=TvetStudent::whereHas('month_payments',function( $query) use($academic_year_id){
             $query->where('tvet_student_month.academic_year_id',$academic_year_id)
-            ->where('tvet_student_month.receipt_no',null)
+            ->whereNotNull('tvet_student_month.receipt_no')
             ->where('tvet_student_month.month_id',request('month_query'));
 
 
@@ -119,7 +119,7 @@ class TvetStudentFeeController extends Controller
           }])->where('is_graduated',0)->where('fully_scholarship',0)
            ->paginate($per_page);
 
-           $a= clone $tvetStudents->toArray();
+           $a=  $tvetStudents->toArray();
 
            $paginated_data['current_page']= $a['current_page'];
            $paginated_data['to']= $a['to'];

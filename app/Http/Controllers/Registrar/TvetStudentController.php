@@ -348,13 +348,22 @@ class TvetStudentController extends Controller
         DB::beginTransaction();
 
         try {
-            $tvetStudent->birth_address()->delete();
-            $tvetStudent->contact_address()->delete();
-            $tvetStudent->residential_address()->delete();
-            $tvetStudent->delete();
+            $level=  $tvetStudent->levels()->wherePivot('level_id',request('level_id'))->first();
+            if ( ($tvetStudent->current_level_no == 1)  && ($level->pivot->status == 'waiting' )) {
 
-            DB::commit();
-            return response()->json(['succesfully deleted']);
+                $tvetStudent->month_payments()->detach();
+                $tvetStudent->levels()->where('levels.id',request('level_id'))->detach();
+                $tvetStudent->modules()->detach();
+                $tvetStudent->tvet_sections()->detach();
+                UserLogin::where('user_name',$tvetStudent->student_id)->first()->delete();
+                $tvetStudent->delete();
+
+                DB::commit();
+                return response()->json('succesfully deleted',200);
+            }else{
+                return response()->json('not possible to deleted',500);
+
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['not succesfully deleted'.$e],500);

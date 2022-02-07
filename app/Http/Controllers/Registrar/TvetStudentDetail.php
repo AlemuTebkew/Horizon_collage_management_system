@@ -16,7 +16,13 @@ class TvetStudentDetail extends Controller
 {
     public function getStudentInfoToEdit($id){
 
-        $student=TvetStudent::withTrashed()->findOrFail($id);
+        $student=TvetStudent::findOrFail($id);
+        $is_approved= $student->levels()->wherePivot('status','approved')->first();
+        if ($is_approved) {
+           $student->status='approved';
+        }else {
+            $student->status='waiting';
+        }
         return response()->json($student->load(['birth_address','emergency_address','residential_address','tvet_department','program']),200);
     }
 
