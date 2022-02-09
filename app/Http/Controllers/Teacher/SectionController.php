@@ -114,13 +114,17 @@ class SectionController extends Controller
 
             // $teacher_module=$teacher->modules()->wherePivot('tvet_section_id',$section_id)->first();
             foreach ($ts->tvet_students as $st) {
+                $level=$st->levels()->wherePivot('level_id' ,$ts->level_id)->first();
 
+                if ($level->pivot->legible) {
+                    $student['legible']=$level->pivot->legible;
+                }else {
 
                 //check for student tuition fee
                 $m_name=(new Carbon())->monthName;
                 $un_paid=  $st->month_payments()->wherePivot('academic_year_id',$ts->academic_year_id)
                                        ->wherePivot('receipt_no',null)
-                                        ->whereIn('months.name',$m_name)->first();
+                                        ->where('months.name',$m_name)->first();
 
 
                       if (!$un_paid) {
@@ -140,7 +144,7 @@ class SectionController extends Controller
                           ]);
                           $student['legible']=0;
                       }
-
+                    }
                       //check result entry time
                 $is_allowed_now=  DB::table('dynamic_system_settings')->first()->tvet_teacher_result_entry_time;
 
@@ -189,7 +193,7 @@ class SectionController extends Controller
             }
 
           $is_allowed_now=  DB::table('dynamic_system_settings')
-                   ->first('degree_teacher_result_entry_time');
+                   ->first()->degree_teacher_result_entry_time;
           if (! $is_allowed_now) {
             return response()->json('Illigble !!! Not Result Entry Time  ',400);
 
@@ -240,7 +244,7 @@ class SectionController extends Controller
 
         }else if(request('type') == 'tvet'){
             $student=TvetStudent::find($student_id);
-            $level_id=DegreeSection::find(request('section_id'))->level_id;
+         return   $level_id=DegreeSection::find(request('section_id'))->level_id;
 
 
             $ff=$student->levels()->wherePivot('level_id' ,$level_id)->first();
@@ -253,7 +257,7 @@ class SectionController extends Controller
                }
             }
 
-            $is_allowed_now=  DB::table('dynamic_system_settings')->first('tvet_teacher_result_entry_time');
+            $is_allowed_now=  DB::table('dynamic_system_settings')->first()->tvet_teacher_result_entry_time;
 
             if (! $is_allowed_now) {
               return response()->json('Illigble !!! Not Result Entry Time  ',400);
@@ -264,7 +268,7 @@ class SectionController extends Controller
                 'from_20'=>request('from_20'),
                 'from_30'=>request('from_30'),
                 'from_50'=>request('from_50'),
-                'total_mark'=>request('total_mark'),
+                'total_mark'=>request('result'),
                 // 'grade_point'=>$this->calculateGrade(request()->total_mark),
 
              ]);
@@ -278,7 +282,7 @@ class SectionController extends Controller
 
     } catch (\Throwable $th) {
         DB::rollBack();
-        return response()->json('not succssfull ',404);
+        return response()->json('not succssfull '.$th,404);
 
     }
 

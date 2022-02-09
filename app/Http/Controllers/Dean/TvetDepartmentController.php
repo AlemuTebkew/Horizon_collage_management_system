@@ -8,6 +8,7 @@ use App\Models\Level;
 use App\Models\Program;
 use App\Models\TvetDepartment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TvetDepartmentController extends Controller
 {
@@ -34,28 +35,40 @@ class TvetDepartmentController extends Controller
             'short_name'=>'required|unique:tvet_departments',
 
         ]);
-      $td= TvetDepartment::create(['name'=>$request->name,'sector'=>$request->sector,'short_name'=>$request->short_name]);
-      $programs=['regular','extension'];
-      foreach ($programs as $program) {
-        $id=Program::where(function($q1) use ($program){
-                     $q1->where('name', strtoupper($program))
-                     ->orWhere('name', strtolower($program));
-                 })
-                     ->where(function($q){
-                         $q->where('type','tvet')
-                         ->orWhere('type','Tvet');
-                     })->first()->id;
-         $td->programs()->attach($id);
-        }
 
-       foreach ($request->levels as $level) {
-           $l=new Level();
-           $l->level_no=$level['level_no'];
-           $l->occupation_name=$level['occupation_name'];
-           $l->tvet_department_id=$td->id;
-           $l->save();
-       }
-       return new TvetDepartmentResource($td->load('programs','manager'));
+     try {
+
+        DB::beginTransaction();
+        if ($request->levels->count() > 0) {
+         $td= TvetDepartment::create(['name'=>$request->name,'sector'=>$request->sector,'short_name'=>$request->short_name]);
+         $programs=['regular','extension'];
+         foreach ($programs as $program) {
+           $id=Program::where(function($q1) use ($program){
+                        $q1->where('name', strtoupper($program))
+                        ->orWhere('name', strtolower($program));
+                    })
+                        ->where(function($q){
+                            $q->where('type','tvet')
+                            ->orWhere('type','Tvet');
+                        })->first()->id;
+            $td->programs()->attach($id);
+           }
+
+          foreach ($request->levels as $level) {
+              $l=new Level();
+              $l->level_no=$level['level_no'];
+              $l->occupation_name=$level['occupation_name'];
+              $l->tvet_department_id=$td->id;
+              $l->save();
+          }
+
+          DB::commit();
+          return new TvetDepartmentResource($td->load('programs','manager'));
+
+        }
+     } catch (\Throwable $th) {
+        DB::rollBack();
+     }
 
     }
 
@@ -81,12 +94,36 @@ class TvetDepartmentController extends Controller
     {
         $request->validate([
             'name'=>'required',
-            'sector'=>'required',
+            'short_name'=>'required',
 
         ]);
-       $tvetDepartment->update($request->all());
-      return $tvetDepartment;
-    }
+
+        try {
+
+            DB::beginTransaction();
+
+            $tvetDepartment->update(['name'=>$request->name,'sector'=>$request->sector,'short_name'=>$request->short_name]);
+
+            if(! $tvetDepartment->levels->isEmpty()){
+                $tvetDepartment->levels()->delete();
+            }
+
+               foreach ($request->levels as $level) {
+                $l=new Level();
+                $l->level_no=$level['level_no'];
+                $l->occupation_name=$level['occupation_name'];
+                $l->tvet_department_id=$tvetDepartment->id;
+                $l->save();
+            }
+            DB::commit();
+            return new TvetDepartmentResource($tvetDepartment->load('programs','manager'));
+
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+        }
+
+        }
 
     /**
      * Remove the specified resource from storage.

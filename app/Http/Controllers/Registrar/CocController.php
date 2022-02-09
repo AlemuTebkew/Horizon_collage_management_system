@@ -71,9 +71,6 @@ class CocController extends Controller
             'end_date'=>'required',
             'exam_week'=>'required',
             'academic_year_id'=>'required',
-
-
-
         ]);
         $coc->update($request->all());
         return response()->json($coc,200);

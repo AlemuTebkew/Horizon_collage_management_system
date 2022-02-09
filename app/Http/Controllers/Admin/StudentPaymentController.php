@@ -27,6 +27,7 @@ class StudentPaymentController extends Controller{
             // $year=1970;
         }
 
+        // return $academic_year_id;
       $degree_payment_query=DB::table('degree_student_month')
                               ->whereNotNull('receipt_no')
                               ->where('academic_year_id',$academic_year_id)

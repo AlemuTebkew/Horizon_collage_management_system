@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dean;
 
 use App\Http\Controllers\Controller;
 use App\Models\Employee;
+use App\Models\Teacher;
 use App\Models\User;
 use App\Models\UserLogin;
 use Illuminate\Http\Request;
@@ -38,8 +39,6 @@ class EmployeeController extends Controller
         $request->validate([
             'first_name'=>'required',
             'last_name'=>'required',
-            'email'=>'required|unique:employees|unique:teachers',
-            'phone_no'=>'required|unique:employees|unique:teachers',
             'role'=>'required',
 
         ]);
@@ -47,26 +46,42 @@ class EmployeeController extends Controller
         DB::beginTransaction();
         try{
 
-        $login=new UserLogin();
-        $login->user_name=$request->email;
-        $login->password=Hash::make($request->last_name.'1234');
-        $login->user_type='employee';
-        $login->save();
 
-        $em=new Employee();
-        $em->first_name=$request->first_name;
-        $em->last_name=$request->last_name;
-        $em->email=$request->email;
-        $em->phone_no=$request->phone_no;
-        $em->role=$request->role;
-        $em->save();
-     // $employee= Employee::create($request->all());
 
-      DB::commit();
-      return response()->json($em,201);
-  } catch (\Throwable $th) {
-      DB::rollBack();
-     return response()->json('error while creating',501);
+            $c= Employee::where('email',$request->email)->first();
+            $c1= Teacher::where('email',$request->email)->first();
+
+            $c2= Employee::where('phone_no',$request->phone_no)->first();
+            $c3= Teacher::where('phone_no',$request->phone_no)->first();
+
+            if ($c || $c1) {
+                return response()->json('The Email Already Exist  ',200);
+            }
+
+            if ($c2 || $c3) {
+                return response()->json('The Phone Number Already Exist  ',200);
+            }
+
+            $login=new UserLogin();
+            $login->user_name=$request->email;
+            $login->password=Hash::make($request->last_name.'1234');
+            $login->user_type='employee';
+            $login->save();
+
+            $em=new Employee();
+            $em->first_name=$request->first_name;
+            $em->last_name=$request->last_name;
+            $em->email=$request->email;
+            $em->phone_no=$request->phone_no;
+            $em->role=$request->role;
+            $em->save();
+            // $employee= Employee::create($request->all());
+
+            DB::commit();
+            return response()->json($em,201);
+        } catch (\Throwable $th) {
+         DB::rollBack();
+        return response()->json('error while creating',501);
     }
  }
 
@@ -101,6 +116,21 @@ class EmployeeController extends Controller
                 'role'=>'required',
 
             ]);
+
+            $c= Employee::where('email',$request->email)->where('email','!=',$employee->email)->first();
+            $c1= Teacher::where('email',$request->email)->first();
+
+            $c2= Employee::where('phone_no',$request->phone_no)->where('phone_no','!=',$employee->phone_no)->first();
+            $c3= Teacher::where('phone_no',$request->phone_no)->first();
+
+            if ($c || $c1) {
+                return response()->json('The Email Already Exist  ',202);
+            }
+
+            if ($c2 || $c3) {
+                return response()->json('The Phone Number Already Exist  ',202);
+            }
+
             $user_login=UserLogin::where('user_name',$employee->email)->first();
             $user_login->user_name=$request->email;
             $user_login->password=Hash::make($request->last_name.'1234') ;

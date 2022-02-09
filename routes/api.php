@@ -96,11 +96,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         //----------------------Admin Related-------------------
 
         Route::get('/admin_paid_students',[StudentPaymentController::class,'getPaidStudents']);
-
         Route::post('/admin_delete_payment/{id}',[StudentPaymentController::class,'deletePayment']);
         Route::get('/admin_o_dashboard',[AdminDashboardController::class,'otherWay']);
         Route::get('/admin_dashboard2',[AdminDashboardController::class,'getDashboardData2']);
         Route::get('/get_deans',[EmployeeController::class,'getDeans']);
+        Route::get('/admin_dashboard',[AdminDashboardController::class,'getDashboardData']);
+        Route::get('/admin_daily_paid',[StudentPaymentController::class,'getDailyPaidAmount']);
+
+
         //----------------------End Admin------=
 
     });
@@ -355,8 +358,6 @@ Route::post('/teacher_set_result/{id}',[SectionController::class,'setResult']);
     /////--------------online student registration
     Route::post('/tvet_online_registration',[TvetStudentController::class,'store']);
     Route::post('/degree_online_registration',[DegreeStudentController::class,'store']);
-    Route::get('/admin_dashboard',[AdminDashboardController::class,'getDashboardData']);
-    Route::get('/admin_daily_paid',[StudentPaymentController::class,'getDailyPaidAmount']);
 
 
 Route::fallback(function(){
