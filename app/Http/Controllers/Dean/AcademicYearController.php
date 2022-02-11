@@ -287,10 +287,11 @@ class AcademicYearController extends Controller
     public function getAcademicCalenderActivities(){
         $academic_year=null;
         if (request('academic_year_id')) {
-            $academic_year=AcademicYear::find(request('academic_year_id'));
+           $academic_year=AcademicYear::with('semesters.degree_calender_activities')->find(request('academic_year_id'));
 
         }else {
-            $academic_year=AcademicYear::where('is_current',1)->first();
+
+            $academic_year=AcademicYear::with('semesters.degree_calender_activities')->where('is_current',1)->first();
         }
 
         $reg_id=Program::where('name','regular')->where('type','degree')->first()->id;
@@ -299,9 +300,9 @@ class AcademicYearController extends Controller
         foreach($academic_year->semesters as $semester){
 
             if($semester->program_id == $reg_id){
-                $regular[]=$semester->load('degree_calender_activities');
+                $regular[]=$semester;
             }else if($semester->program_id == $ext_id){
-                $ext[]=$semester->load('degree_calender_activities');
+                $ext[]=$semester;
 
             }
 
