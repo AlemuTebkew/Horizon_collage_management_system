@@ -2106,9 +2106,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
-/* harmony import */ var _vuelidate_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @vuelidate/core */ "./node_modules/@vuelidate/core/dist/index.esm.js");
-/* harmony import */ var _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @vuelidate/validators */ "./node_modules/@vuelidate/validators/dist/index.esm.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _resources_baseUrl__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../resources/baseUrl */ "./resources/js/resources/baseUrl.js");
+/* harmony import */ var bootstrap__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.esm.js");
+/* harmony import */ var _vuelidate_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @vuelidate/core */ "./node_modules/@vuelidate/core/dist/index.esm.js");
+/* harmony import */ var _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @vuelidate/validators */ "./node_modules/@vuelidate/validators/dist/index.esm.js");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -2118,10 +2127,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
-      v$: (0,_vuelidate_core__WEBPACK_IMPORTED_MODULE_1__["default"])(),
+      v$: (0,_vuelidate_core__WEBPACK_IMPORTED_MODULE_3__["default"])(),
       basemodal: null,
       deleteBaseModal: null,
       deleteCashierTemp: '',
@@ -2145,27 +2155,27 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     return {
       cashier: {
         first_name: {
-          required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.helpers.withMessage('first name can not be empty', _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.required)
+          required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.helpers.withMessage('first name can not be empty', _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.required)
         },
         last_name: {
-          required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.helpers.withMessage('last name can not be empty', _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.required)
+          required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.helpers.withMessage('last name can not be empty', _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.required)
         },
         phone_no: {
-          required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.helpers.withMessage('phone number can not be empty', _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.required),
-          numeric: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.numeric,
-          min: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.helpers.withMessage('phone number should be at least 10 digits long', (0,_vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.minLength)(10)),
-          max: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.helpers.withMessage('phone number should not be greter than 13 digits long', (0,_vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.maxLength)(13))
+          required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.helpers.withMessage('phone number can not be empty', _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.required),
+          numeric: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.numeric,
+          min: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.helpers.withMessage('phone number should be at least 10 digits long', (0,_vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.minLength)(10)),
+          max: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.helpers.withMessage('phone number should not be greter than 13 digits long', (0,_vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.maxLength)(13))
         },
         email: {
-          required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.helpers.withMessage('email can not be empty', _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.required),
-          email: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_2__.email
+          required: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.helpers.withMessage('email can not be empty', _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.required),
+          email: _vuelidate_validators__WEBPACK_IMPORTED_MODULE_4__.email
         }
       }
     };
   },
   mounted: function mounted() {
-    this.basemodal = new bootstrap__WEBPACK_IMPORTED_MODULE_0__.Modal(document.getElementById('baseModal'));
-    this.deleteBaseModal = new bootstrap__WEBPACK_IMPORTED_MODULE_0__.Modal(document.getElementById('deleteBaseModal'));
+    this.basemodal = new bootstrap__WEBPACK_IMPORTED_MODULE_2__.Modal(document.getElementById('baseModal'));
+    this.deleteBaseModal = new bootstrap__WEBPACK_IMPORTED_MODULE_2__.Modal(document.getElementById('deleteBaseModal'));
   },
   computed: {
     cashiers: function cashiers() {
@@ -2176,6 +2186,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     clearAddModal: function clearAddModal() {
       this.cashier = {};
       this.resultNotifier = '';
+      this.v$.$reset();
     },
     showDeleteModal: function showDeleteModal(cashier) {
       this.deleteCashierTemp = _objectSpread({}, cashier);
@@ -2193,31 +2204,69 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     registerCashier: function registerCashier() {
       var _this = this;
 
-      this.v$.$validate();
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var response, previousRegistrar;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                console.log('added cashier data', _this.cashier);
 
-      if (!this.v$.$error) {
-        this.isLoading = true;
-        this.$store.dispatch('dean/addCashier', JSON.stringify(this.cashier)).then(function (response) {
-          if (response.status === 201) {
-            _this.isFaild = false;
-            _this.isSuccessed = true;
-            _this.resultNotifier = 'You have registered one Cashier succesfully';
+                _this.v$.$validate();
 
-            _this.basemodal.hide();
+                if (_this.v$.$error) {
+                  _context.next = 19;
+                  break;
+                }
 
-            _this.v$.$reset();
+                _this.isLoading = true;
+                _context.prev = 4;
+                _context.next = 7;
+                return _resources_baseUrl__WEBPACK_IMPORTED_MODULE_1__["default"].post('api/employees', _this.cashier);
 
-            _this.resultNotifier = '';
-            _this.isLoading = false;
-          } else {
-            console.log('form faild validation ');
+              case 7:
+                response = _context.sent;
+
+                if (response.status === 201) {
+                  _this.isFaild = false;
+                  _this.isSuccessed = true;
+
+                  _this.basemodal.hide();
+
+                  _this.v$.$reset();
+
+                  previousRegistrar = _this.$store.getters['dean/registrars'];
+                  previousRegistrar.push(response.data);
+
+                  _this.$store.commit('dean/setRegistrar', previousRegistrar);
+                } else if (response.status === 200) {
+                  _this.isFaild = true;
+                  _this.isSuccessed = false;
+                  _this.resultNotifier = 'This person is already registered';
+                }
+
+                _context.next = 16;
+                break;
+
+              case 11:
+                _context.prev = 11;
+                _context.t0 = _context["catch"](4);
+                _this.isSuccessed = false;
+                _this.isFaild = true;
+                _this.resultNotifier = 'some thing went wrong';
+
+              case 16:
+                _context.prev = 16;
+                _this.isLoading = false;
+                return _context.finish(16);
+
+              case 19:
+              case "end":
+                return _context.stop();
+            }
           }
-        })["catch"](function (e) {
-          _this.isSuccessed = false;
-          _this.isFaild = true;
-          _this.resultNotifier = e.error;
-        });
-      }
+        }, _callee, null, [[4, 11, 16, 19]]);
+      }))();
     },
     editCashier: function editCashier(cashier) {
       this.basemodal.show();
@@ -2603,13 +2652,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _AddCashier_vue_vue_type_template_id_42dbcae1__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./AddCashier.vue?vue&type=template&id=42dbcae1 */ "./resources/js/views/employee/dean/AddCashier.vue?vue&type=template&id=42dbcae1");
 /* harmony import */ var _AddCashier_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./AddCashier.vue?vue&type=script&lang=js */ "./resources/js/views/employee/dean/AddCashier.vue?vue&type=script&lang=js");
-/* harmony import */ var C_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+/* harmony import */ var D_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
 
 
 
 
 ;
-const __exports__ = /*#__PURE__*/(0,C_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_AddCashier_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_AddCashier_vue_vue_type_template_id_42dbcae1__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/views/employee/dean/AddCashier.vue"]])
+const __exports__ = /*#__PURE__*/(0,D_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_AddCashier_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_AddCashier_vue_vue_type_template_id_42dbcae1__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/views/employee/dean/AddCashier.vue"]])
 /* hot reload */
 if (false) {}
 

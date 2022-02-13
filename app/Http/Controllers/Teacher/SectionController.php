@@ -244,7 +244,7 @@ class SectionController extends Controller
 
         }else if(request('type') == 'tvet'){
             $student=TvetStudent::find($student_id);
-         return   $level_id=DegreeSection::find(request('section_id'))->level_id;
+            $level_id=DegreeSection::find(request('section_id'))->level_id;
 
 
             $ff=$student->levels()->wherePivot('level_id' ,$level_id)->first();
@@ -269,9 +269,23 @@ class SectionController extends Controller
                 'from_30'=>request('from_30'),
                 'from_50'=>request('from_50'),
                 'total_mark'=>request('result'),
-                // 'grade_point'=>$this->calculateGrade(request()->total_mark),
 
              ]);
+
+            
+             $sem_couses_count=$student->modules()
+             ->wherePivot('level_id',$level_id)
+             ->where(function($q){
+                 $q->where('from_20','')
+                 ->orWhere('from_30','')
+                 ->orWhere('from_50','');
+             })->count();
+                        
+            if ($sem_couses_count == 0) {
+            $student->levels()->updateExistingPivot($level_id,[
+            'status'=>'finished',
+            ]);
+            }
              DB::commit();
              return response()->json('Result Set succssfully  ',200);
 

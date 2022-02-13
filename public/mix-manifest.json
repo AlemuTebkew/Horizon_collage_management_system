@@ -85,9 +85,6 @@
     "/js/AdminDashboard.js": "/js/AdminDashboard.js",
     "/js/ThePayment.js": "/js/ThePayment.js",
     "/js/TheDean.js": "/js/TheDean.js",
-    "/js/degree.js": "/js/degree.js",
-    "/js/TvetFile.js": "/js/TvetFile.js",
-    "/js/FileDetail.js": "/js/FileDetail.js",
     "/js/IncomePerDay.js": "/js/IncomePerDay.js",
     "/css/app.css": "/css/app.css"
 }

@@ -436,34 +436,34 @@ class TvetStudentController extends Controller
 
          }else {
 
-        $level=Level::find($request->level_id);
-        $student= TvetStudent::find($id);
-        $academic_year=AcademicYear::find($request->academic_year_id);
+            $level=Level::find($request->level_id);
+            $student= TvetStudent::find($id);
+            $academic_year=AcademicYear::find($request->academic_year_id);
 
-        $is_registerd=$student->levels()->wherePivot('level_id',$level->id)->first();
-      if(!$is_registerd || $is_registerd==null || empty($is_registerd )){
-        $student->levels()->attach($request->level_id,
-        [
-            'academic_year_id'=>$request->academic_year_id,
-            'status'=>'waiting'
-        ]);
-        $student->current_level_no=$level->level_no;
-        $student->save();
-       }else {
-        return response()->json(['error' =>'Student Already Registerd '],200);
-       }
-     //  $old_level=Level::find($request->old_level_id);
+            $is_registerd=$student->levels()->wherePivot('level_id',$level->id)->first();
+            if(!$is_registerd || $is_registerd==null || empty($is_registerd )){
+                $student->levels()->attach($request->level_id,
+                [
+                    'academic_year_id'=>$request->academic_year_id,
+                    'status'=>'waiting'
+                ]);
+                $student->current_level_no=$level->level_no;
+                $student->save();
+        }else {
+            return response()->json(['error' =>'Student Already Registerd '],200);
+        }
+        //  $old_level=Level::find($request->old_level_id);
 
-      $succ= DB::table('notifications')->whereJsonContains('data',['student_id'=>$id])
-                              ->whereJsonContains('data',['level_id'=>$request->old_level_id])->delete();
+        $succ= DB::table('notifications')->whereJsonContains('data',['student_id'=>$id])
+                                ->whereJsonContains('data',['level_id'=>$request->old_level_id])->delete();
 
-     $student->levels()->wherePivot('level_id',$request->old_level_id)->detach();
-     $student->modules()->wherePivot('level_id',$request->old_level_id)->detach();
+        $student->levels()->wherePivot('level_id',$request->old_level_id)->detach();
+        $student->modules()->wherePivot('level_id',$request->old_level_id)->detach();
 
-       $this->registerStudentForModules($student,$level);
-       $this->attachWithMonth($student,$academic_year);
+        $this->registerStudentForModules($student,$level);
+        $this->attachWithMonth($student,$academic_year);
 
-       //sending notification to registrar for approval of student
+        //sending notification to registrar for approval of student
 
         $users=Employee::where('role','registrar')->get();
         $info['student_id']=$student->id;
@@ -473,8 +473,8 @@ class TvetStudentController extends Controller
 
         DB::commit();
         return response()->json(new AddedLevelResource($student->levels()
-                                     ->wherePivot('level_id',$level->id)->first()),201);
-        //  return response()->json(new AddedLevelResource($student),201);
+                                    ->wherePivot('level_id',$level->id)->first()),201);
+            //  return response()->json(new AddedLevelResource($student),201);
 
     }
     } catch (\Exception $e) {
@@ -573,6 +573,20 @@ class TvetStudentController extends Controller
 
              ]);
 
+             $level_id=request('level_id');
+             $sem_couses_count=$student->modules()
+             ->wherePivot('level_id',$level_id)
+             ->where(function($q){
+                 $q->where('from_20','')
+                 ->orWhere('from_30','')
+                 ->orWhere('from_50','');
+             })->count();
+                       
+            if ($sem_couses_count == 0) {
+            $student->levels()->updateExistingPivot($level_id,[
+            'status'=>'finished',
+            ]);
+            }
 
     }
     public function getArrangedStudents(){

@@ -30,7 +30,15 @@ class TvetStudentFeeController extends Controller
         $per_page=request()->has('per_page') ? request('per_page') : 2;
 
          $tvetStudents=TvetStudent::whereHas('month_payments',function( $query) use($academic_year_id){
-            $query->where('tvet_student_month.academic_year_id',$academic_year_id);
+            $query->where('academic_year_id',$academic_year_id)
+             ->when(request('paid'),function($query){
+                $query->whereNotNull('receipt_no')
+                     ->where('month_id',request('paid'));
+              }) 
+              ->when(request('unpaid'),function($query){
+                $query->where('receipt_no',null)
+                      ->where('month_id',request('unpaid'));
+              });
           })->with(['month_payments'=>function($query) use ($academic_year_id){
             $query->where('tvet_student_month.academic_year_id',$academic_year_id);
 

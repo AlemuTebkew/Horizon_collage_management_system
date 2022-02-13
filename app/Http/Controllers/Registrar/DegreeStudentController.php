@@ -634,7 +634,7 @@ class DegreeStudentController extends Controller
         $department=DegreeDepartment::find($student->degree_department_id);
         $courses=$student->courses()
                             ->wherePivot('semester_id',request('semester_id'))
-                           ->get();
+                            ->get();
         return response()->json( CourseResultResource::collection($courses->load('department','program')),200);
     }
 

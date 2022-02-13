@@ -143,7 +143,7 @@
   <td>{{course.code}}</td>
   <td>{{course.cp}}</td>
   <td>{{course.total_mark}}</td>
-  <td>{{course.grade_point}}</td>
+  <td>{{course.letter_grade}}</td>
   </tr>
   </tbody>
     </table>

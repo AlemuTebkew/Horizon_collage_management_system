@@ -18,13 +18,13 @@ class CreateDegreeStudentSemesterCoursesTable extends Migration
             $table->foreignId('degree_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('semester_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->double('from_5')->default(0);
-            $table->double('from_5s')->default(0);
-            $table->double('from_25')->default(0);
-            $table->double('from_25s')->default(0);
-            $table->double('from_40')->default(0);
-            $table->double('total_mark')->default(0);
-            $table->double('grade_point')->default(0);
+            $table->double('from_5')->nullable();
+            $table->double('from_5s')->nullable();
+            $table->double('from_25')->nullable();
+            $table->double('from_25s')->nullable();
+            $table->double('from_40')->nullable();
+            $table->double('total_mark')->nullable();
+            $table->double('grade_point')->nullable();
             $table->string('letter_grade')->nullable();
             $table->text('remark')->nullable();
 

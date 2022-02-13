@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\DB;
 
 class AddedSemesterResource extends JsonResource
 {
@@ -22,7 +23,10 @@ class AddedSemesterResource extends JsonResource
             'status'=>$this->pivot->status,
             'year_no'=>$this->pivot->year_no,
             'semester_no'=>$this->pivot->semester_no,
-            'GPA'=>$this->pivot->semester_GPA??null
+            'GPA'=>$this->pivot->semester_GPA??null,
+            'legible'=> $this->pivot->legible, //check for student payment fee
+            'is_allowed_now'=>  DB::table('dynamic_system_settings')->first()->degree_registrar_result_entry_time
+
         ];
 }
 }

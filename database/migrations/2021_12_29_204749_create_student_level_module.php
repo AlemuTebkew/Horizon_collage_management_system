@@ -18,10 +18,10 @@ class CreateStudentLevelModule extends Migration
             $table->foreignId('tvet_student_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('module_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('level_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
-            $table->double('from_20')->default(0);
-            $table->double('from_30')->default(0);
-            $table->double('from_50')->default(0);
-            $table->double('total_mark')->default(0.0);
+            $table->double('from_20')->nullable();
+            $table->double('from_30')->nullable();
+            $table->double('from_50')->nullable();
+            $table->double('total_mark')->nullable();
             $table->timestamps();
         });
     }

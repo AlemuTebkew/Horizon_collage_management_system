@@ -2143,7 +2143,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ['id'],
+  props: ['id', 'courseId'],
   data: function data() {
     return {
       v$: (0,_vuelidate_core__WEBPACK_IMPORTED_MODULE_2__["default"])(),
@@ -2160,12 +2160,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       addBaseModal: null,
       actionButtonType: '',
       isSaving: false,
-      searchValue: ''
+      searchValue: '',
+      isPrinting: false,
+      printTimeout: null
     };
   },
   computed: _objectSpread(_objectSpread({
     section: function section() {
-      return this.$store.getters['teacher/sectionById'](this.id);
+      return this.$store.getters['teacher/sectionById'](this.id, this.courseId);
     }
   }, (0,vuex__WEBPACK_IMPORTED_MODULE_4__.mapGetters)(['user'])), {}, {
     filteredStudents: function filteredStudents() {
@@ -2184,10 +2186,23 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   }),
   methods: {
     exportStudentResult: function exportStudentResult() {
-      this.$htmlToPaper('toPrint');
+      var _this2 = this;
+
+      this.isPrinting = true;
+      this.printTimeout = setTimeout(function () {
+        _this2.$htmlToPaper('toPrint', null, function () {
+          _this2.isPrinting = false;
+        });
+      }, 0);
     },
     showAddDialog: function showAddDialog(result) {
-      if (result.legible === 0) {
+      if (!result.is_allowed_now) {
+        this.$store.commit('setAlertMessages', {
+          text: 'Not allowed  to enter result now',
+          type: 'danger'
+        });
+        return;
+      } else if (!result.legible) {
         this.$store.commit('setAlertMessages', {
           text: 'Student don\'t complete tution fee!',
           type: 'danger'
@@ -2205,7 +2220,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.v$.$reset();
     },
     save: function save() {
-      var _this2 = this;
+      var _this3 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
         var response, index;
@@ -2213,76 +2228,83 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _this2.v$.$validate();
+                _this3.requestStatus.message = '';
 
-                if (_this2.v$.$error) {
-                  _context.next = 25;
+                _this3.v$.$validate();
+
+                if (_this3.v$.$error) {
+                  _context.next = 27;
                   break;
                 }
 
-                _this2.isSaving = true;
-                _context.prev = 3;
-                _context.next = 6;
-                return _resources_baseUrl__WEBPACK_IMPORTED_MODULE_3__["default"].post('api/teacher_set_result/' + _this2.result.id, {
-                  type: _this2.section.type,
-                  course_id: _this2.section.course_id,
-                  total_mark: Number(_this2.result.from_20) + Number(_this2.result.from_5) + Number(_this2.result.from_5s) + Number(_this2.result.from_30) + Number(_this2.result.from_50),
-                  from_20: _this2.result.from_20,
-                  from_30: _this2.result.from_30,
-                  from_50: _this2.result.from_50
+                _this3.isSaving = true;
+                _context.prev = 4;
+                _context.next = 7;
+                return _resources_baseUrl__WEBPACK_IMPORTED_MODULE_3__["default"].post('api/teacher_set_result/' + _this3.result.id, {
+                  type: _this3.section.type,
+                  section_id: _this3.section.id,
+                  course_id: _this3.section.course_id,
+                  result: Number(_this3.result.from_20) + Number(_this3.result.from_30) + Number(_this3.result.from_50),
+                  from_20: _this3.result.from_20,
+                  from_30: _this3.result.from_30,
+                  from_50: _this3.result.from_50
                 });
 
-              case 6:
+              case 7:
                 response = _context.sent;
-                _this2.result.result = Number(_this2.result.from_20) + Number(_this2.result.from_5) + Number(_this2.result.from_5s) + Number(_this2.result.from_30) + Number(_this2.result.from_50);
+                _this3.result.result = Number(_this3.result.from_20) + Number(_this3.result.from_30) + Number(_this3.result.from_50);
 
                 if (!(response.status === 200)) {
-                  _context.next = 14;
+                  _context.next = 16;
                   break;
                 }
 
-                index = _this2.students.findIndex(function (student) {
-                  return student.id === _this2.result.id;
+                index = _this3.students.findIndex(function (student) {
+                  return student.id === _this3.result.id;
                 });
-                _this2.students[index] = _this2.result;
-                _this2.requestStatus.isNotSucceed = false, _this2.requestStatus.message = "Result is submitted successfully";
-                _context.next = 15;
+                _this3.students[index] = _this3.result;
+
+                _this3.clearModal();
+
+                _this3.addBaseModal.hide();
+
+                _context.next = 17;
                 break;
 
-              case 14:
+              case 16:
                 throw '';
 
-              case 15:
-                _context.next = 20;
-                break;
-
               case 17:
-                _context.prev = 17;
-                _context.t0 = _context["catch"](3);
-                _this2.requestStatus.isNotSucceed = true, _this2.requestStatus.message = "Faild to submit result";
-
-              case 20:
-                _context.prev = 20;
-                _this2.isSaving = false;
-                return _context.finish(20);
-
-              case 23:
-                _context.next = 26;
+                _context.next = 22;
                 break;
+
+              case 19:
+                _context.prev = 19;
+                _context.t0 = _context["catch"](4);
+                _this3.requestStatus.isNotSucceed = true, _this3.requestStatus.message = "Faild to submit result";
+
+              case 22:
+                _context.prev = 22;
+                _this3.isSaving = false;
+                return _context.finish(22);
 
               case 25:
+                _context.next = 28;
+                break;
+
+              case 27:
                 console.log('form validation faild');
 
-              case 26:
+              case 28:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[3, 17, 20, 23]]);
+        }, _callee, null, [[4, 19, 22, 25]]);
       }))();
     },
     fetchStudentsResult: function fetchStudentsResult(id, payload) {
-      var _this3 = this;
+      var _this4 = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
         var response;
@@ -2290,7 +2312,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                _this3.$store.commit('setIsItemLoading', true);
+                _this4.$store.commit('setIsItemLoading', true);
 
                 _context2.prev = 1;
                 _context2.next = 4;
@@ -2300,39 +2322,40 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 response = _context2.sent;
 
                 if (!(response.status === 200)) {
-                  _context2.next = 9;
+                  _context2.next = 10;
                   break;
                 }
 
-                _this3.students = response.data;
-                _context2.next = 10;
+                _this4.students = response.data;
+                console.log('tvet students result...', _this4.students);
+                _context2.next = 11;
                 break;
-
-              case 9:
-                throw 'Failed to fetch event';
 
               case 10:
-                _context2.next = 15;
+                throw 'Failed to fetch event';
+
+              case 11:
+                _context2.next = 16;
                 break;
 
-              case 12:
-                _context2.prev = 12;
+              case 13:
+                _context2.prev = 13;
                 _context2.t0 = _context2["catch"](1);
                 console.log(_context2.t0.response);
 
-              case 15:
-                _context2.prev = 15;
+              case 16:
+                _context2.prev = 16;
 
-                _this3.$store.commit('setIsItemLoading', false);
+                _this4.$store.commit('setIsItemLoading', false);
 
-                return _context2.finish(15);
+                return _context2.finish(16);
 
-              case 18:
+              case 19:
               case "end":
                 return _context2.stop();
             }
           }
-        }, _callee2, null, [[1, 12, 15, 18]]);
+        }, _callee2, null, [[1, 13, 16, 19]]);
       }))();
     }
   },
@@ -2366,20 +2389,23 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   created: function created() {
     var _this$section, _this$section2;
 
-    this.fetchStudentsResult(this.id, {
+    this.fetchStudentsResult((_this$section = this.section) === null || _this$section === void 0 ? void 0 : _this$section.id, {
       teacher_id: this.user.id,
-      type: (_this$section = this.section) === null || _this$section === void 0 ? void 0 : _this$section.type,
-      course_id: (_this$section2 = this.section) === null || _this$section2 === void 0 ? void 0 : _this$section2.course_id
+      type: (_this$section2 = this.section) === null || _this$section2 === void 0 ? void 0 : _this$section2.type,
+      course_id: this.courseId
     });
+  },
+  beforeUnmount: function beforeUnmount() {
+    clearTimeout(this.printTimeout);
   },
   watch: {
     section: function section(newValue) {
-      var _this$section3;
+      var _this$newValue;
 
-      this.fetchStudentsResult(this.id, {
+      this.fetchStudentsResult((_this$newValue = this.newValue) === null || _this$newValue === void 0 ? void 0 : _this$newValue.id, {
         teacher_id: this.user.id,
         type: newValue.type,
-        course_id: (_this$section3 = this.section) === null || _this$section3 === void 0 ? void 0 : _this$section3.course_id
+        course_id: this.courseId
       });
     }
   }
@@ -2445,17 +2471,50 @@ var _hoisted_12 = {
   "class": "mt-2"
 };
 
-var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("thead", null, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("tr", null, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "NO"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "Student ID"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "Full Name"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "Sex"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "20%"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "30%"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "50%"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "100%"), /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, [/*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
-  "class": "sr-only"
-})])])], -1
+var _hoisted_13 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "NO", -1
 /* HOISTED */
 );
 
-var _hoisted_14 = {
+var _hoisted_14 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "Student ID", -1
+/* HOISTED */
+);
+
+var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "Full Name", -1
+/* HOISTED */
+);
+
+var _hoisted_16 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "Sex", -1
+/* HOISTED */
+);
+
+var _hoisted_17 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "20%", -1
+/* HOISTED */
+);
+
+var _hoisted_18 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "30%", -1
+/* HOISTED */
+);
+
+var _hoisted_19 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "50%", -1
+/* HOISTED */
+);
+
+var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, "100%", -1
+/* HOISTED */
+);
+
+var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+  "class": "sr-onl"
+}, "Action", -1
+/* HOISTED */
+);
+
+var _hoisted_22 = [_hoisted_21];
+var _hoisted_23 = {
   "class": "dropdown"
 };
 
-var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
+var _hoisted_24 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("a", {
   "class": "btn py-0",
   href: "#",
   role: "button",
@@ -2468,35 +2527,35 @@ var _hoisted_15 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElement
 /* HOISTED */
 );
 
-var _hoisted_16 = {
+var _hoisted_25 = {
   "class": "dropdown-menu bordre rounded shadow-sm py-0",
   "aria-labelledby": "dropdownMenuLink"
 };
-var _hoisted_17 = ["onClick"];
-var _hoisted_18 = {
+var _hoisted_26 = ["onClick"];
+var _hoisted_27 = {
   key: 0,
   "class": "text-center"
 };
-var _hoisted_19 = {
+var _hoisted_28 = {
   key: 1,
   "class": "text-center"
 };
 
-var _hoisted_20 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+var _hoisted_29 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
   "for": "#from_20",
   "class": "form-label"
 }, "From 20%", -1
 /* HOISTED */
 );
 
-var _hoisted_21 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+var _hoisted_30 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
   "for": "#from_30",
   "class": "form-label"
-}, "From 20%", -1
+}, "From 30%", -1
 /* HOISTED */
 );
 
-var _hoisted_22 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
+var _hoisted_31 = /*#__PURE__*/(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("label", {
   "for": "#from_50",
   "class": "form-label"
 }, "From 50%", -1
@@ -2514,7 +2573,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     "class": "px-3 mx-4 mt-3"
   }, {
     "default": (0,vue__WEBPACK_IMPORTED_MODULE_0__.withCtx)(function () {
-      var _$options$section, _$options$section2, _$options$section2$pr, _$options$section3;
+      var _$options$section, _$options$section2, _$options$section2$pr, _$options$section3, _$options$section4;
 
       return [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
         onClick: _cache[0] || (_cache[0] = function ($event) {
@@ -2538,12 +2597,14 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         onClick: _cache[2] || (_cache[2] = function () {
           return $options.exportStudentResult && $options.exportStudentResult.apply($options, arguments);
         })
-      }, _hoisted_9)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(((_$options$section = $options.section) === null || _$options$section === void 0 ? void 0 : _$options$section.department) + ' ' + ((_$options$section2 = $options.section) === null || _$options$section2 === void 0 ? void 0 : (_$options$section2$pr = _$options$section2.program) === null || _$options$section2$pr === void 0 ? void 0 : _$options$section2$pr.toLowerCase()) + ' section ' + ((_$options$section3 = $options.section) === null || _$options$section3 === void 0 ? void 0 : _$options$section3.name) + ' student result'), 1
+      }, _hoisted_9)]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_10, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_11, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(((_$options$section = $options.section) === null || _$options$section === void 0 ? void 0 : _$options$section.department) + ' ' + ((_$options$section2 = $options.section) === null || _$options$section2 === void 0 ? void 0 : (_$options$section2$pr = _$options$section2.program) === null || _$options$section2$pr === void 0 ? void 0 : _$options$section2$pr.toLowerCase()) + ' section ' + ((_$options$section3 = $options.section) === null || _$options$section3 === void 0 ? void 0 : _$options$section3.name) + ' students ' + ((_$options$section4 = $options.section) === null || _$options$section4 === void 0 ? void 0 : _$options$section4.course_title) + ' result'), 1
       /* TEXT */
-      ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("table", _hoisted_12, [_hoisted_13, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("tbody", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.filteredStudents, function (student, index) {
+      ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("table", _hoisted_12, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("thead", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("tr", null, [_hoisted_13, _hoisted_14, _hoisted_15, _hoisted_16, _hoisted_17, _hoisted_18, _hoisted_19, _hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("th", null, _hoisted_22, 512
+      /* NEED_PATCH */
+      ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, !$data.isPrinting]])])]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("tbody", null, [((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(true), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.renderList)($options.filteredStudents, function (student, index) {
         return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("tr", {
           key: student === null || student === void 0 ? void 0 : student.id
-        }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" {{student}} "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("td", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(index + 1), 1
+        }, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("td", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(index + 1), 1
         /* TEXT */
         ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("td", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(student.student_id), 1
         /* TEXT */
@@ -2559,7 +2620,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         /* TEXT */
         ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("td", null, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toDisplayString)(student.result), 1
         /* TEXT */
-        ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("td", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_14, [_hoisted_15, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_16, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
+        ), (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("td", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("div", _hoisted_23, [_hoisted_24, (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("ul", _hoisted_25, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("li", null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("span", {
           role: "button",
           onClick: function onClick($event) {
             return $options.showAddDialog(student);
@@ -2567,10 +2628,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
           "class": "dropdown-item px-4 py-2"
         }, "Set Result", 8
         /* PROPS */
-        , _hoisted_17)])])])])]);
+        , _hoisted_26)])])])], 512
+        /* NEED_PATCH */
+        ), [[vue__WEBPACK_IMPORTED_MODULE_0__.vShow, !$data.isPrinting]])]);
       }), 128
       /* KEYED_FRAGMENT */
-      ))])]), !$data.students.length ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_18, "There is no added student")) : !$options.filteredStudents.length ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_19, "There is no search result")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])];
+      ))])]), !$data.students.length ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_27, "There is no added student")) : !$options.filteredStudents.length ? ((0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementBlock)("div", _hoisted_28, "There is no search result")) : (0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)("v-if", true)])];
     }),
     _: 1
     /* STABLE */
@@ -2589,7 +2652,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["mb-3", {
           warining: $data.v$.result.from_20.$error
         }])
-      }, [_hoisted_20, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+      }, [_hoisted_29, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
         "class": "form-control",
         "onUpdate:modelValue": _cache[3] || (_cache[3] = function ($event) {
           return $data.result.from_20 = $event;
@@ -2621,7 +2684,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["mb-3", {
           warining: $data.v$.result.from_30.$error
         }])
-      }, [_hoisted_21, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+      }, [_hoisted_30, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
         "class": "form-control",
         "onUpdate:modelValue": _cache[5] || (_cache[5] = function ($event) {
           return $data.result.from_30 = $event;
@@ -2653,7 +2716,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
         "class": (0,vue__WEBPACK_IMPORTED_MODULE_0__.normalizeClass)(["mb-3", {
           warining: $data.v$.result.from_50.$error
         }])
-      }, [_hoisted_22, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
+      }, [_hoisted_31, (0,vue__WEBPACK_IMPORTED_MODULE_0__.withDirectives)((0,vue__WEBPACK_IMPORTED_MODULE_0__.createElementVNode)("input", {
         "class": "form-control",
         "onUpdate:modelValue": _cache[7] || (_cache[7] = function ($event) {
           return $data.result.from_50 = $event;
@@ -2714,13 +2777,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _TeacherTvetStudent_vue_vue_type_template_id_72af2372__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./TeacherTvetStudent.vue?vue&type=template&id=72af2372 */ "./resources/js/views/employee/teacher/TeacherTvetStudent.vue?vue&type=template&id=72af2372");
 /* harmony import */ var _TeacherTvetStudent_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./TeacherTvetStudent.vue?vue&type=script&lang=js */ "./resources/js/views/employee/teacher/TeacherTvetStudent.vue?vue&type=script&lang=js");
-/* harmony import */ var C_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+/* harmony import */ var D_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
 
 
 
 
 ;
-const __exports__ = /*#__PURE__*/(0,C_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_TeacherTvetStudent_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_TeacherTvetStudent_vue_vue_type_template_id_72af2372__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/views/employee/teacher/TeacherTvetStudent.vue"]])
+const __exports__ = /*#__PURE__*/(0,D_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_TeacherTvetStudent_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_TeacherTvetStudent_vue_vue_type_template_id_72af2372__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/views/employee/teacher/TeacherTvetStudent.vue"]])
 /* hot reload */
 if (false) {}
 

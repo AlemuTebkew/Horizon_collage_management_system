@@ -2149,7 +2149,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       actionButtonType: '',
       isNotSucceed: '',
       responseMessage: '',
-      // selectedDepartment:null,
       //for search and filter
       searchValue: '',
       departmentForFilter: 'all',
@@ -2199,9 +2198,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       var dep;
       this.tvetDepartments.forEach(function (department) {
-        var _this$modul$departmen;
-
-        if (department.id == ((_this$modul$departmen = _this.modul.department) === null || _this$modul$departmen === void 0 ? void 0 : _this$modul$departmen.id)) {
+        if (department.id == _this.modul.tvet_department_id) {
           dep = department;
         }
       });
@@ -2896,13 +2893,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _ModuleCurriculum_vue_vue_type_template_id_4f0e6c06__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ModuleCurriculum.vue?vue&type=template&id=4f0e6c06 */ "./resources/js/views/employee/dean/ModuleCurriculum.vue?vue&type=template&id=4f0e6c06");
 /* harmony import */ var _ModuleCurriculum_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ModuleCurriculum.vue?vue&type=script&lang=js */ "./resources/js/views/employee/dean/ModuleCurriculum.vue?vue&type=script&lang=js");
-/* harmony import */ var C_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+/* harmony import */ var D_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
 
 
 
 
 ;
-const __exports__ = /*#__PURE__*/(0,C_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_ModuleCurriculum_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_ModuleCurriculum_vue_vue_type_template_id_4f0e6c06__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/views/employee/dean/ModuleCurriculum.vue"]])
+const __exports__ = /*#__PURE__*/(0,D_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_ModuleCurriculum_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_ModuleCurriculum_vue_vue_type_template_id_4f0e6c06__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/views/employee/dean/ModuleCurriculum.vue"]])
 /* hot reload */
 if (false) {}
 

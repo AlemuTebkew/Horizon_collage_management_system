@@ -18,8 +18,6 @@ class DegreeStudentFeeController extends Controller
     {
         $all=[];
         $student=[];
-
-
         //getting all students
 
         $paginated_data=[];
@@ -34,20 +32,31 @@ class DegreeStudentFeeController extends Controller
         $academic_year=AcademicYear::find($academic_year_id);
 
        $degreeStudents=DegreeStudent::whereHas('month_payments',function( $query) use($academic_year_id){
-            $query->where('degree_student_month.academic_year_id',$academic_year_id);
+            $query->where('academic_year_id',$academic_year_id)
 
+            ->when(request('paid'),function($query){
+                $query->whereNotNull('receipt_no')
+                     ->where('month_id',request('paid'));
+              }) 
+              ->when(request('unpaid'),function($query){
+                $query->where('receipt_no',null)
+                      ->where('month_id',request('unpaid'));
+              });
 
-       })->with(['month_payments'=>function( $query) use($academic_year_id){
-       $query->where('degree_student_month.academic_year_id',$academic_year_id);
-
-     }]) ->where('is_graduated',0)->where('fully_scholarship',0)
-      ->when(request('search_id'),function($query){
+       })->where('is_graduated',0)->where('fully_scholarship',0)
+    ->when(request('search_id'),function($query){
 
         $query->where('student_id','LIKE','%'.request('search_id').'%')
             ->orWhere('first_name','LIKE','%'.request('search_id').'%')
             ->orWhere('middle_name','LIKE','%'.request('search_id').'%')
             ->orWhere('last_name','LIKE','%'.request('search_id').'%');
-      })
+     
+        })
+
+       ->with(['month_payments'=>function( $query) use($academic_year_id){
+        $query->where('degree_student_month.academic_year_id',$academic_year_id);
+ 
+      }])
     //   ->orderBy('degree_student_month.paid_date')
 
       ->paginate($per_page);

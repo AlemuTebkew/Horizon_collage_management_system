@@ -24,6 +24,7 @@ class LevelResource extends JsonResource
             'level_no'=>$this->level_no,
             'legible'=> $this->pivot->legible, //check for student payment fee
             'is_allowed_now'=>  DB::table('dynamic_system_settings')->first()->tvet_registrar_result_entry_time
+       
         ];
     }
 }

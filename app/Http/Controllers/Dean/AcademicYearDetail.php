@@ -25,6 +25,8 @@ class AcademicYearDetail extends Controller
         $reg_id=Program::where('name','Regular')->where('type','degree')->first()->id;
         $ext_id=Program::where('name','Extension')->where('type','degree')->first()->id;
 
+        $regular=[];
+        $ext=[];
         foreach($academic_year->semesters as $semester){
 
             if($semester->program_id == $reg_id){
@@ -107,11 +109,11 @@ class AcademicYearDetail extends Controller
 
                 // $new_s= Semester::find($semester['semester_id']);
                   DB::table('degree_calender_activities')
-                  ->where('semester_id', $semester['semester_id'])->delete();
+                         ->where('semester_id', $semester['semester_id'])->delete();
                   $activities=$semester['activities'];
                   foreach ($activities as $activity) {
                      DB::table('degree_calender_activities')
-                     ->insert($activity);
+                         ->insert($activity);
                   }
 
              }
@@ -119,17 +121,24 @@ class AcademicYearDetail extends Controller
                  //creating tvet calender
 
               $st= DB::table('tvet_calender_activities')
-                 ->where('academic_year_id',$request->academic_year_id)
-                 ->delete();
+                        ->where('academic_year_id',$request->academic_year_id)
+                        ->delete();
 
                  foreach ($request->tvet_activities as $activity) {
+                    
+                    // unset($activity->id);
+                 
                     DB::table('tvet_calender_activities')
-                    ->insert($activity);
+                    ->insert([
+                        'activity'=>$activity['activity'],
+                        'date'=>$activity['date'],
+                        'academic_year_id'=>$activity['academic_year_id'],
+                    ]);
                   }
 
              return response()->json('successfully updated',200);
         } catch (\Throwable $th) {
-            return response()->json('not updated',500);
+            return response()->json($th.'not updated',500);
 
         }
 

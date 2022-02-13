@@ -25,8 +25,8 @@ class CourseResultResource extends JsonResource
 
             'year_no'=>$this->year_no,
             'from_5'=>$this->pivot ? $this->pivot->from_5:null,
-            'from_5s'=>$this->pivot ? $this->pivot->from_5s:null,
-            'from_25'=>$this->pivot ? $this->pivot->from_25:null,
+            'from_5s'=>$this->pivot ? $this->pivot->from_5s:'',
+            'from_25'=>$this->pivot ? $this->pivot->from_25:'dddd',
             'from_25s'=>$this->pivot ? $this->pivot->from_25s:null,
             'from_40'=>$this->pivot ? $this->pivot->from_40:null,
             'total_mark'=>$this->pivot ? $this->pivot->total_mark:null,

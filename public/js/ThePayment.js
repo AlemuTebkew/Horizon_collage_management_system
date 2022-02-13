@@ -71,7 +71,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 response = _context.sent;
 
                 if (!(response.status === 200)) {
-                  _context.next = 12;
+                  _context.next = 13;
                   break;
                 }
 
@@ -79,34 +79,35 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
                 _this.current_page = response.data.current_page;
                 _this.per_page = response.data.per_page;
                 _this.last_page = response.data.last_page;
-                _context.next = 13;
+                console.log('admin payment ', response.data);
+                _context.next = 14;
                 break;
-
-              case 12:
-                throw 'Failed to fetch news';
 
               case 13:
-                _context.next = 18;
+                throw 'Failed to fetch news';
+
+              case 14:
+                _context.next = 19;
                 break;
 
-              case 15:
-                _context.prev = 15;
+              case 16:
+                _context.prev = 16;
                 _context.t0 = _context["catch"](1);
                 console.log(_context.t0.response);
 
-              case 18:
-                _context.prev = 18;
+              case 19:
+                _context.prev = 19;
 
                 _this.$store.commit('setIsItemLoading', false);
 
-                return _context.finish(18);
+                return _context.finish(19);
 
-              case 21:
+              case 22:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, null, [[1, 15, 18, 21]]);
+        }, _callee, null, [[1, 16, 19, 22]]);
       }))();
     },
     showDeleteModal: function showDeleteModal(index) {
@@ -482,13 +483,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _ThePayment_vue_vue_type_template_id_6f6f1d87__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ThePayment.vue?vue&type=template&id=6f6f1d87 */ "./resources/js/views/employee/admin/ThePayment.vue?vue&type=template&id=6f6f1d87");
 /* harmony import */ var _ThePayment_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ThePayment.vue?vue&type=script&lang=js */ "./resources/js/views/employee/admin/ThePayment.vue?vue&type=script&lang=js");
-/* harmony import */ var C_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
+/* harmony import */ var D_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./node_modules/vue-loader/dist/exportHelper.js */ "./node_modules/vue-loader/dist/exportHelper.js");
 
 
 
 
 ;
-const __exports__ = /*#__PURE__*/(0,C_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_ThePayment_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_ThePayment_vue_vue_type_template_id_6f6f1d87__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/views/employee/admin/ThePayment.vue"]])
+const __exports__ = /*#__PURE__*/(0,D_xampp_htdocs_Horizon_collage_management_system_node_modules_vue_loader_dist_exportHelper_js__WEBPACK_IMPORTED_MODULE_2__["default"])(_ThePayment_vue_vue_type_script_lang_js__WEBPACK_IMPORTED_MODULE_1__["default"], [['render',_ThePayment_vue_vue_type_template_id_6f6f1d87__WEBPACK_IMPORTED_MODULE_0__.render],['__file',"resources/js/views/employee/admin/ThePayment.vue"]])
 /* hot reload */
 if (false) {}
 

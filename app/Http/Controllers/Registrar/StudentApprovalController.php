@@ -38,7 +38,7 @@ class StudentApprovalController extends Controller
         if ($student) {
 
         $student->levels()->updateExistingPivot(request('level_id'),['status'=>'approved']);
-      $succ= DB::table('notifications')->whereJsonContains('data',['student_id'=>request('student_id')])
+        $succ= DB::table('notifications')->whereJsonContains('data',['student_id'=>request('student_id')])
                                    ->whereJsonContains('data',['level_id'=>request('level_id')])->delete();
             if ($succ == 0) {
             return response()->json(['status'=>'error'],404);
@@ -64,7 +64,7 @@ class StudentApprovalController extends Controller
         $student=TvetStudent::find($id);
         $student->levels()->updateExistingPivot(request('level_id'),
         [
-            'legible'=>1,
+            'legible'=>request('legible'),
 
         ]);
     }
