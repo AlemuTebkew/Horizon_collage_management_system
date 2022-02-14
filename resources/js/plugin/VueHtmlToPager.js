@@ -21,7 +21,7 @@ function addStyles(win, styles) {
           defaultReplace = true,
           defaultStyles = [
             'https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css',
-            `/printing.css`,
+            `public/css/app.css`,
           ];
         let {
           name = defaultName,

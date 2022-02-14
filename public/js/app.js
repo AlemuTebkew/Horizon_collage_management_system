@@ -23663,7 +23663,7 @@ var VueHtmlToPaper = {
       var defaultName = "_blank",
           defaultSpecs = ["fullscreen=yes", "titlebar=yes", "scrollbars=yes"],
           defaultReplace = true,
-          defaultStyles = ['https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css', "/printing.css"];
+          defaultStyles = ['https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css', "public/css/app.css"];
       var _options$name = options.name,
           name = _options$name === void 0 ? defaultName : _options$name,
           _options$specs = options.specs,
